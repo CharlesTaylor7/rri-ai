@@ -1,4 +1,9 @@
-import { hatchSize, crossHatchSize } from '@/constants'
+import { hatchSize, crossHatchSize, hatchLocation, cellLength } from '@/constants'
+
+const s = cellLength;
+const h = s / 2;
+const crossS = h - crossHatchSize;
+const crossE = h + crossHatchSize;
 
 export default function RailwayT(props) {
     return (
@@ -6,20 +11,21 @@ export default function RailwayT(props) {
 
             {// long horizontal stroke
             }
-            <line x1="0" x2="80" y1="40" y2="40"/>
+            <line x1={0} x2={s} y1={h} y2={h}/>
 
             {// vertical stroke above cross hatch
             }
-            <line x1="40" x2="40" y1="0" y2="40"/>
+            <line x1={h} x2={h} y1={0} y2={h}/>
             {// cross hatch -->
             }
-            <line x1="35" x2="45" y1="35" y2="45"/>
-            <line x1="35" x2="45" y1="45" y2="35"/>
+            <line x1={crossS} x2={crossE} y1={crossS} y2={crossE}/>
+            <line x1={crossS} x2={crossE} y1={crossE} y2={crossS}/>
+
             {// 3 hatches above the cross hatch
                 Array.from({length: 3}, (_, i) => (
                     <line
-                        x1={40 - hatchSize} x2={40 + hatchSize}
-                        y1={(i+1)*10} y2={(i+1)*10}
+                        x1={h - hatchSize} x2={h + hatchSize}
+                        y1={hatchLocation(i)} y2={hatchLocation(i)}
                     />
                 ))
             }
@@ -29,8 +35,8 @@ export default function RailwayT(props) {
                     i == 3
                     ? null
                     :(<line
-                        y1={40 - hatchSize} y2={40 + hatchSize}
-                        x1={(i+1)*10} x2={(i+1)*10}
+                        y1={h - hatchSize} y2={h + hatchSize}
+                        x1={hatchLocation(i)} x2={hatchLocation(i)}
                     />)
                 )
             }
