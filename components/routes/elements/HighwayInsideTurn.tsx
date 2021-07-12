@@ -5,10 +5,15 @@ const h = cellLength / 2;
 const w = highwayWidth / 2;
 
 export default function HighwayInsideTurn(props) {
+    const { rotate, ...rest } = props
     return (
         <polyline
             points={`0,${h-w} ${h-2*w},${h-w} ${h-w},${h-2*w} ${h-w},0`}
-            {...props}
+            transform={`rotate(${rotate*90},${h},${h}`}
+            {...rest}
         />
     )
+}
+HighwayInsideTurn.defaultProps = {
+    rotate: 0
 }

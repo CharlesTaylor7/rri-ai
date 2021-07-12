@@ -13,7 +13,7 @@ export default function StationStraight(props) {
         <g {...props}>
             <HalfRailway />
             <Station />
-            <HalfHighway transform={`rotate(180,${h},${h})`} />
+            <HalfHighway rotate="2" />
         </g>
     )
 }

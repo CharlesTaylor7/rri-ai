@@ -3,8 +3,9 @@ import { hatchSize, hatchLocation, cellLength } from '@/constants'
 const h = cellLength / 2;
 
 export default function HalfRailway(props) {
+    const { rotate, ...rest } = props
     return (
-        <g {...props}>
+        <g transform={`rotate(${rotate*90},${h},${h})`} {...rest} >
             {// railway line
             }
             <line y1={0} y2={h} x1={h} x2={h} />
@@ -20,4 +21,7 @@ export default function HalfRailway(props) {
             }
         </g>
     )
+}
+HalfRailway.defaultProps = {
+    rotate: 0
 }
