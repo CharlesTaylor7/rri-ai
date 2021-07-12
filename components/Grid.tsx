@@ -15,7 +15,7 @@ function Grid({ map = { 23: {code: 2} }}) {
 function Cell({ route }) {
     return (
         <div className={styles.cell} >
-            <img src={routeSvgs[route.code]} />
+            <img src={routeSvgs[route?.code]} />
         </div>
     )
 }
