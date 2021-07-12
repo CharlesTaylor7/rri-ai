@@ -39,7 +39,7 @@ const DrawnRoute = ({ route }: {route: RouteInfo}) => (
         href={`#route-${route.code}`}
         transform={`
             translate(${route.x},${route.y}),
-            rotate(${route.rotation * 90}, 0.5, 0.5),
+            rotate(${route.rotate * 90}, 0.5, 0.5),
             scale(0.0125)
         `}
     />

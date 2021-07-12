@@ -11,3 +11,16 @@ export type RouteInfo = {
     x: number,
     y: number,
 }
+
+// highway, railway,
+type Connection = 'h' | 'r'
+    // river or lake
+    //| 'v' | 'l';
+
+interface Route {
+    north?: Connection;
+    east?: Connection;
+    south?: Connection;
+    west?: Connection;
+    station?: bool;
+}
