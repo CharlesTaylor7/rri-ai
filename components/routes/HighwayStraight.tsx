@@ -1,7 +1,6 @@
 import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from '@/constants'
 import defaultProps from './defaultProps'
 
-
 const s = cellLength;
 const h = s / 2;
 const w = hatchSize

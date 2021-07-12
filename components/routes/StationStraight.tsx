@@ -1,2 +1,20 @@
+import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from '@/constants'
+import Station from './elements/Station'
+import HalfRailway from './elements/HalfRailway'
+import HalfHighway from './elements/HalfHighway'
+import defaultProps from './defaultProps'
 
-export default () => (null)
+const s = cellLength;
+const h = s / 2;
+const w = hatchSize
+
+export default function StationStraight(props) {
+    return (
+        <g {...props}>
+            <HalfRailway />
+            <Station />
+            <HalfHighway transform={`rotate(180,${h},${h})`} />
+        </g>
+    )
+}
+StationStraight.defaultProps = defaultProps

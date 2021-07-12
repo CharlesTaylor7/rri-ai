@@ -1,4 +1,5 @@
 import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from '@/constants'
+import HighwayInsideTurn from './elements/HighwayInsideTurn'
 import defaultProps from './defaultProps'
 
 const s = cellLength;
@@ -12,11 +13,8 @@ export default function HighwayTurn(props) {
         <g {...props}>
             {// left curved path
             }
-            <polyline points={`0,${h-w} ${h-2*w},${h-w} ${h-w},${h-2*w} ${h-w},0`} />
-
-            {// right curved path
-            }
-            <polyline points={`${h+w},0 ${h+w},${h-2*w} ${h+2*w},${h-w} ${s},${h-w}`} />
+            <HighwayInsideTurn />
+            <HighwayInsideTurn transform={`rotate(90,${h},${h})`} />
 
             {// horizontal line
             }

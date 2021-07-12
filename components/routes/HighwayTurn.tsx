@@ -1,4 +1,5 @@
 import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from '@/constants'
+import HighwayInsideTurn from './elements/HighwayInsideTurn'
 import defaultProps from './defaultProps'
 
 const s = cellLength;
@@ -9,10 +10,8 @@ const w = hatchSize
 // TODO: use bezier curve / parabola to get a more rounded edge
 export default function HighwayTurn(props) {
     return (
-        <g {...props} strokeLinejoin="round" fill="none">
-            {// inside curved line
-            }
-            <polyline points={`0,${h-w} ${h-2*w},${h-w} ${h-w},${h-2*w} ${h-w},0`} />
+        <g {...props}>
+            <HighwayInsideTurn />
 
             {// outside curved line
             }
