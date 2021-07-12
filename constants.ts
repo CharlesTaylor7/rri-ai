@@ -1,0 +1,17 @@
+export const routeSvgs = [
+    'railway-turn.svg',
+    'railway-t.svg',
+    'railway-straight.svg',
+    'highway-turn.svg',
+    'highway-t.svg',
+    'highway-straight.svg',
+    'overpass.svg',
+    'station-straight.svg',
+    'station-turn.svg',
+    'highway-t-station.svg',
+    'railway-t-station.svg',
+    'highway-four.svg',
+    'railway-four.svg',
+    'turn-station.svg',
+    'straight-station.svg',
+]
