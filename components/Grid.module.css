@@ -1,0 +1,13 @@
+.grid {
+    display: grid;
+    gap: 0;
+    grid-auto-rows: auto;
+    grid-template-columns: repeat(7, auto);
+}
+
+.cell {
+    width: 80px;
+    height: 80px;
+    border: 1px solid black;
+    padding: none;
+}
