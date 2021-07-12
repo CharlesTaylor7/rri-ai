@@ -24,17 +24,20 @@ export default function RailwayT(props) {
             {// 3 hatches above the cross hatch
                 Array.from({length: 3}, (_, i) => (
                     <line
+                        key={i}
                         x1={h - hatchSize} x2={h + hatchSize}
                         y1={hatchLocation(i)} y2={hatchLocation(i)}
                     />
                 ))
             }
+
             {// 6 hatches on either side of the cross hatch
                 Array.from({length: 7}, (_, i) =>
                     // skip the middle hatch
                     i == 3
                     ? null
                     :(<line
+                        key={i}
                         y1={h - hatchSize} y2={h + hatchSize}
                         x1={hatchLocation(i)} x2={hatchLocation(i)}
                     />)

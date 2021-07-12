@@ -1,4 +1,5 @@
 import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from '@/constants'
+import defaultProps from './defaultProps'
 
 const s = cellLength;
 const h = s / 2;
@@ -22,3 +23,4 @@ export default function HighwayTurn(props) {
         </g>
     )
 }
+HighwayTurn.defaultProps = defaultProps

@@ -37,7 +37,6 @@ export default function Grid(props) {
 const DrawnRoute = ({ route }: {route: RouteInfo}) => (
     <use
         href={`#route-${route.code}`}
-        stroke='black'
         transform={`
             translate(${route.x},${route.y}),
             rotate(${route.rotation * 90}, 0.5, 0.5),
