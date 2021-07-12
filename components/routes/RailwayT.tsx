@@ -9,11 +9,11 @@ export default function RailwayT(props) {
     return (
         <g {...props} stroke="black">
 
-            {// long horizontal stroke
+            {// horizontal rail line
             }
             <line x1={0} x2={s} y1={h} y2={h}/>
 
-            {// vertical stroke above cross hatch
+            {// vertical line above cross hatch
             }
             <line x1={h} x2={h} y1={0} y2={h}/>
             {// cross hatch -->
