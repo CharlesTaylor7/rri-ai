@@ -1,13 +1,17 @@
+.gridRow {
+    padding-top: 5%;
+    display: flex;
+    justify-content: center;
+}
+
 .grid {
-    display: grid;
-    gap: 0;
-    grid-auto-rows: auto;
-    grid-template-columns: repeat(7, auto);
+    height: 700px;
+    width: 700px;
+}
+
+.gridLine {
+    stroke: black;
 }
 
 .cell {
-    width: 80px;
-    height: 80px;
-    border: 1px solid black;
-    padding: none;
 }
