@@ -6,6 +6,6 @@ export const state = {}
 export function newGame(): GameId {
     const gameId = uuid()
     state[gameId] = { routesDrawn: [] }
-    console.log(state)
+    console.log('newGame', state)
     return gameId
 }

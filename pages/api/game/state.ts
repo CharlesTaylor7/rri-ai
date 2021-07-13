@@ -10,5 +10,8 @@ export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) {
-    res.status(200).json(state[gameId])
+    //console.log(req)
+    //console.log(state)
+    // res.status(200).json(state[gameId])
+    res.status(200).json({ routesDrawn: [] })
 }
