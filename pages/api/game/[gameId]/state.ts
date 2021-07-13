@@ -1,15 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { dice, roll } from 'server/dice'
+import type { RouteInfo } from '@/types'
+import { state } from '@/server/state'
 
 type Data = {
-    routeCodes: Array<number>
+    routesDrawn: Array<RouteInfo>
 }
 
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) {
-    res.status(200).json({
-        routeCodes: dice.map(die => roll(die))
-    })
+    res.status(200).json(state[gameId])
 }

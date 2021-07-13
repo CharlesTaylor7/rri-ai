@@ -1,46 +1,32 @@
 import { useCallback, useState } from 'react'
-import Head from 'next/head'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 import Image from 'next/image'
-import Grid from '@/components/Grid.tsx'
+import Page from '@/components/Page'
+import Grid from '@/components/Grid'
 import { RouteInfo } from '@/types'
 
+
 export default function Home(props) {
-    const [routesDrawn, setRoutesDrawn] = useState(props.routesDrawn)
+    const router = useRouter()
     return (
-        <>
-            <Head>
-                <title>Railroad Inc. AI</title>
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
-            <main>
-                <Grid routesDrawn={routesDrawn}/>
-                <button
-                    onClick={async () => {
-                        const { routeCodes } = await fetch('/api/roll').then(res => res.json())
-                        const routeInfo = routeCodes.map(
-                            (code, i) => ({ code, x: i, y: 0, rotate: i})
-                        )
-                        setRoutesDrawn(routeInfo)
-                    }}
-                    style={{
-                        fontSize: '50px'
-                    }}
-                >
-                    Roll!
-                </button>
-            </main>
-        </>
+        <Page>
+            <button
+                onClick={async () => {
+                    const { gameId } = await fetch('/api/newGame').then(res => res.json())
+                    router.push(`/games/${gameId}`)
+                }}
+            >
+                New Game
+            </button>
+        </Page>
     )
 }
 
-type StaticProps = {
-    props: {
-        routesDrawn: Array<RouteInfo>,
-    },
+type HomeProps = {
 }
 
-export const getStaticProps = (): StaticProps => ({
+export const getStaticProps = (): HomeProps => ({
     props: {
-        routesDrawn: [],
     }
 })

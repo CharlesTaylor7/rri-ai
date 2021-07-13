@@ -21,6 +21,4 @@ const basicDie = Array.from({ length: 6 }, (_, i) => i)
 const specialDie = Array.from({ length: 6 }, (_, i) => 6 + i % 3)
 export const dice = [basicDie, basicDie, basicDie, specialDie]
 
-export function roll(die) {
-    return [Math.floor(Math.random() * 6)]
-}
+export const roll = (die) => die[Math.floor(Math.random() * 6)]
