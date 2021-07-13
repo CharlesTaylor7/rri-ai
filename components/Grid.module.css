@@ -7,11 +7,5 @@
 .grid {
     height: 700px;
     width: 700px;
-}
-
-.gridLine {
     stroke: black;
-}
-
-.cell {
 }
