@@ -10,8 +10,9 @@ export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) {
-    //console.log(req)
-    //console.log(state)
-    // res.status(200).json(state[gameId])
-    res.status(200).json({ routesDrawn: [] })
+    const gameState = state[req.query.id]
+    if (gameState === undefined) {
+        res.status(404).json()
+    }
+    res.status(200).json(gameState)
 }

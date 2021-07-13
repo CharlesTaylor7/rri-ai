@@ -7,7 +7,7 @@ import { RouteInfo } from '@/types'
 export default function Game(props) {
     const [routesDrawn, setRoutesDrawn] = useState(props.routesDrawn)
     return (
-        <Page>
+        <Page error={props.error}>
             <Grid routesDrawn={routesDrawn}/>
             <button
                 onClick={async () => {
@@ -26,6 +26,9 @@ export default function Game(props) {
         </Page>
     )
 }
+Game.defaultProps = {
+    routesDrawn: [],
+}
 
 type GameProps = {
     props: {
@@ -35,6 +38,12 @@ type GameProps = {
 
 export async function getServerSideProps(context) {
     const { params: { gameId } } = context
-    const props = await fetch(`http://localhost:3000/api/game/${gameId}/state`).then(res => res.json())
-    return ({ props })
+    const response = await fetch(`http://localhost:3000/api/game/state/?id=${gameId}`)
+    if (response.status != 200) {
+        const error = { statusCode: response.status, title: 'Game does not exist' }
+        return { props: error }
+    }
+
+    const gameState = await response.json()
+    return ({ props: gameState })
 }
