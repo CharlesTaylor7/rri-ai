@@ -10,5 +10,7 @@ export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) {
-    res.status(200).json({gameId: newGame()})
+    const gameId = newGame()
+    console.log(gameId)
+    res.status(200).json({gameId})
 }

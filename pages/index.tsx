@@ -13,7 +13,7 @@ export default function Home(props) {
         <Page>
             <button
                 onClick={async () => {
-                    const { gameId } = await fetch('/api/newGame').then(res => res.json())
+                    const { gameId } = await fetch('/api/game/new').then(res => res.json())
                     router.push(`/games/${gameId}`)
                 }}
             >

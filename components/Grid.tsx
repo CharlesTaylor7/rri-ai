@@ -3,23 +3,8 @@ import { RouteInfo } from '@/types'
 import RouteDefinitions from '@/components/RouteDefinitions'
 import HalfHighway from '@/components/routes/elements/HalfHighway'
 import HalfRailway from '@/components/routes/elements/HalfRailway'
-import defaultRouteProps from '@/components/routes/defaultProps'
 import { cellLength } from '@/constants'
 
-
-function Exit({ kind, translateX, translateY, rotate }) {
-    return (
-        <g
-            transform={`
-                translate(${translateX}, ${translateY}),
-                rotate(${rotate*90}, 0.5, 0.5),
-                scale(${1 / cellLength})
-            `}
-        >
-            { kind == 'railway' ? <HalfRailway /> : <HalfHighway /> }
-        </g>
-    )
-}
 
 export default function Grid(props) {
     return (
@@ -65,13 +50,30 @@ export default function Grid(props) {
                 )}
             </g>
             <RouteDefinitions />
-            // dynamic grid contents
-            {props.routesDrawn.map((route, i) => (<DrawnRoute key={i} route={route} />))}
+            <g id="drawn-routes">
+                {props.routesDrawn.map((route, i) => (<DrawnRoute key={i} route={route} />))}
+            </g>
 
         </svg>
         </div>
     )
 }
+
+
+function Exit({ kind, translateX, translateY, rotate }) {
+    return (
+        <g
+            transform={`
+                translate(${translateX}, ${translateY}),
+                rotate(${rotate*90}, 0.5, 0.5),
+                scale(${1 / cellLength})
+            `}
+        >
+            { kind == 'railway' ? <HalfRailway /> : <HalfHighway /> }
+        </g>
+    )
+}
+
 
 const DrawnRoute = ({ route }: {route: RouteInfo}) => (
     <use
@@ -84,4 +86,3 @@ const DrawnRoute = ({ route }: {route: RouteInfo}) => (
         `}
     />
 )
-
