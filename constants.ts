@@ -9,4 +9,3 @@ export const hatchLocation = (i) => (2*i + 1) * cellLength / 14;
 // highways
 export const highwayWidth = 10;
 export const hwyDashPattern = "5,7"
-
