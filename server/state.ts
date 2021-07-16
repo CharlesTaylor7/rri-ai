@@ -1,6 +1,7 @@
 import type { NextApiResponse } from 'next'
 import type { RouteInfo } from '@/types'
 import { v4 as uuid } from 'uuid'
+import { dice, roll, routes } from '@/server/dice'
 
 type GameId = string
 
@@ -39,6 +40,18 @@ function getInitialState() {
     })
 }
 
+const rotate = (route, i) => {
+    // copy the route
+    route = {...route}
+    while (i-->0) {
+        const west = route.west
+        route.west = route.south
+        route.south = route.east
+        route.east = route.north
+        route.north = west
+    }
+    return route
+}
 
 const oppositeDir = (direction) => {
     switch (direction) {
@@ -60,32 +73,41 @@ const toShift = (direction) => {
     }
 }
 
+function toConnectionKey({ x, y, direction }) {
+    return `${x}-${y}-${direction[0]}`
+}
+
 const oppositeConnection = ({x, y, direction}) => {
     const {x: dx,y: dy } = toShift(direction)
-    return ({ x: x+dx, y: y+dy, direction: oppositeDir(direction)})
+    return toConnectionKey({ x: x+dx, y: y+dy, direction: oppositeDir(direction)})
 }
+
+export class RouteValidationError extends Error { }
 
 export function drawRoute(gameState: object, routeInfo: RouteInfo) {
     const { x, y } = routeInfo
+    console.log(routeInfo)
     const route = rotate(routes[routeInfo.code], routeInfo.rotate)
 
     // first we do a dry run of the edits to state for the given route
     // validate and then apply the state changes
     const edits = []
     for (let direction of ['north', 'east', 'south', 'west']) {
-        const connection = `${x}-${y}-${direction[0]}`
+        const connection = toConnectionKey({x, y, direction})
         const networkPiece = gameState.openRoutes[connection]
 
         console.log('existing piece', networkPiece)
         console.log('new piece', route[direction])
 
         if (networkPiece !== route[direction]) {
-            throw new Error('cannot connect railway directly to highway')
+            throw new RouteValidationError('cannot connect railway directly to highway')
         }
         if (networkPiece === undefined) {
             // add the opposite connection to the map
-            const { x, y, direction } = oppositeConnection({x, y, direction})
-            const connection = `${x}-${y}-${direction[0]}`
+            const connection = oppositeConnection({x, y, direction})
+            if (gameState.openRoutes[connection]) {
+                throw new RouteValidationError('cannot draw over another route')
+            }
             edits.push({ connection, piece: route[direction] })
         } else {
             // clear the current connection from the map
@@ -95,7 +117,7 @@ export function drawRoute(gameState: object, routeInfo: RouteInfo) {
 
     console.log('edits', edits)
     if (!edits.any(e => e.delete)) {
-        throw new Error('piece doesn\'t connect to any existing network')
+        throw new RouteValidationError('piece doesn\'t connect to any existing network')
     }
 
     // update game state
@@ -109,36 +131,19 @@ export function drawRoute(gameState: object, routeInfo: RouteInfo) {
     }
 }
 
-class EventSource {
-    constructor() {
-        this.handles = {}
-    }
-
-    newHandle(id: GameId, res: NextApiResponse) {
-        res.writeHead(200, {
-              Connection: 'keep-alive',
-              'Content-Type': 'text/event-stream',
-        })
-        if (this.handles[id] === undefined) {
-            this.handles[id] = []
+export function drawInFirstValidPosition(gameState: object, code: number): RouteInfo {
+    for (let x = 0; x < 7; x++) {
+        for (let y = 0; y < 7; y++) {
+            for (let rotate = 0; rotate < 4; rotate++) {
+                const routeInfo = {code, rotate, x, y}
+                try {
+                    drawRoute(gameState, routeInfo)
+                    return routeInfo;
+                } catch(e) {
+                    // continue if the exception type matches, otherwise reraise it
+                    if (!(e instanceof RouteValidationError)) throw e
+                }
+            }
         }
-        this.handles[id].push(res)
-    }
-
-    send(id: GameId, event) {
-        const message = JSON.stringify(event) + '\n'
-        for (let handle of this.handles[id]) {
-            handle.write(message)
-            handle.flush()
-        }
-    }
-
-    close(id: GameId) {
-        for (let handle of this.handles[id]) {
-            handle.end()
-        }
-        delete this.handles[id]
     }
 }
-
-//export const eventSource = new EventSource()

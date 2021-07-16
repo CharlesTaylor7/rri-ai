@@ -51,7 +51,7 @@ export default function Grid(props) {
             </g>
             <RouteDefinitions />
             <g id="drawn-routes">
-                {props.routesDrawn.map((route, i) => (<DrawnRoute key={i} route={route} />))}
+                {props.routes.map((route, i) => (<DrawnRoute key={i} route={route} />))}
             </g>
 
         </svg>

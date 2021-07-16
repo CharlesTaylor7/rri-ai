@@ -16,19 +16,6 @@ export const routes = [
     { north: 'h', east: 'r', south: 'h', west: 'r', station: true},
 ]
 
-export const rotate = (route, i) => {
-    // copy the route
-    route = {...route}
-    while (i-->0) {
-        const west = route.west
-        route.west = route.south
-        route.south = route.east
-        route.east = route.north
-        route.north = west
-    }
-    return route
-}
-
 
 const basicDie = Array.from({ length: 6 }, (_, i) => i)
 const specialDie = Array.from({ length: 6 }, (_, i) => 6 + i % 3)

@@ -1,0 +1,11 @@
+.homePage {
+    display: flex;
+    justify-content: center;
+}
+
+.newGameButton {
+    font-size: 50px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}

@@ -7,44 +7,53 @@ import { RouteInfo } from '@/types'
 import { state } from '@/server/state'
 
 
-
 export default function Game(props) {
-    const [routesDrawn, setRoutesDrawn] = useState(props.routesDrawn)
-    const [nextRoutes, setNextRoutes] = useState([])
+    const [routes, setRoutes] = useState(props.routes)
     const [diceCodes, setDiceCodes] = useState([])
 
     const rollCallback = useCallback(async () => {
         const url = `/api/game/roll/?id=${props.id}`
         const { diceCodes, nextRoutes } = await fetch(url).then(res => res.json())
         setDiceCodes(diceCodes)
-        setNextRoutes(nextRoutes)
+        setRoutes(rs => ({
+            pending: nextRoutes,
+            current: rs.current
+        }))
     })
 
-    const showMoveCallback = useCallback(async () => {
-        setRoutesDrawn([...routesDrawn, ...nextRoutes])
-        setNextRoutes([])
+    const showMoveCallback = useCallback(() => {
+        setRoutes(routes => ({
+            current: [...routes.current, ...routes.pending],
+            pending: []
+        }))
     })
     return (
         <Page error={props.error}>
-            <Grid routesDrawn={routesDrawn} />
+            <Grid routes={routes.current} />
             <Dice diceCodes={diceCodes} />
             <button
                 style={{position: 'fixed', top: '20px', right: '10%', fontSize: '50px'}}
-                onClick={nextRoutes.length > 0 ? showMoveCallback : rollCallback}
+                onClick={routes.pending.length > 0 ? showMoveCallback : rollCallback}
             >
-                {nextRoutes.length > 0 ? 'Show Move' : 'Roll!!!!'}
+                {routes.pending.length > 0 ? 'Show Move' : 'Roll!!!!'}
             </button>
         </Page>
     )
 }
 Game.defaultProps = {
-    routesDrawn: [],
+    routes: {
+        current: [],
+        pending: [],
+    }
 }
 
 type GameProps = {
     props: {
-        routesDrawn: Array<RouteInfo>,
-    },
+            routes: {
+            current: Array<RouteInfo>,
+            pending: Array<RouteInfo>,
+        },
+    }
 }
 
 export async function getServerSideProps(context) {
@@ -54,11 +63,15 @@ export async function getServerSideProps(context) {
         const error = { statusCode: 404, title: 'Game does not exist' }
         return { props: { error } }
     }
+    console.log(gameState)
 
     return ({
         props: {
             id: gameId,
-            ...gameState,
+            routes: {
+                current: gameState.routesDrawn,
+                pending: []
+            }
         },
     })
 }

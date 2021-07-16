@@ -1,10 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { dice, roll, routes, rotate } from '@/server/dice'
-import { state, drawRoute } from '@/server/state'
+import type { RouteInfo } from '@/types'
+import { state, drawInFirstValidPosition} from '@/server/state'
+import { dice, roll } from '@/server/dice'
 
 type Data = {
-    routeCodes: Array<number>
+    diceCodes: Array<number>,
+    nextRoutes: Array<RouteInfo>
 }
+
+
 export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
@@ -17,12 +21,9 @@ export default function handler(
 
     // get results
     const diceCodes = dice.map(die => roll(die))
-    const nextRoutes = diceCodes.map((code, i) => ({code, rotate: i, x: i, y: 0}))
-    for (let route of nextRoutes) {
-        try {
-            drawRoute(gameState, route)
-        }
-    }
+    const nextRoutes = diceCodes
+        .map(code => drawInFirstValidPosition(gameState, code))
+        .filter(route => route)
 
     res.status(200).json({
         diceCodes,

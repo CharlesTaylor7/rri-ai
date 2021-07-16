@@ -8,20 +8,21 @@ export default function Page(props) {
     const router = useRouter()
     useEffect(() => {
         // redirect to home page after 1 second
-        if (error) setTimeout(() => router.push('/'), 1000)
+        if (error) setTimeout(() => router.push('/'), 400)
     }, [])
 
     if (error) {
         return ( <Error {...error} />)
     }
+    const {children, ...rest} = props
     return (
         <>
         <Head>
             <title>Railroad Inc. AI</title>
             <link rel="icon" href="/favicon.ico" />
         </Head>
-        <main>
-            {props.children}
+        <main {...rest}>
+            {children}
         </main>
         </>
     )
