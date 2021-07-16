@@ -66,10 +66,12 @@ const oppositeConnection = ({x, y, direction}) => {
 }
 
 export function drawRoute(gameState: object, routeInfo: RouteInfo) {
-    // update game state
-    gameState.routesDrawn.push(routeInfo)
-    const route = rotate(routes[routeInfo.code], routeInfo.rotate)
     const { x, y } = routeInfo
+    const route = rotate(routes[routeInfo.code], routeInfo.rotate)
+
+    // first we do a dry run of the edits to state for the given route
+    // validate and then apply the state changes
+    const edits = []
     for (let direction of ['north', 'east', 'south', 'west']) {
         const connection = `${x}-${y}-${direction[0]}`
         const networkPiece = gameState.openRoutes[connection]
@@ -83,10 +85,26 @@ export function drawRoute(gameState: object, routeInfo: RouteInfo) {
         if (networkPiece === undefined) {
             // add the opposite connection to the map
             const { x, y, direction } = oppositeConnection({x, y, direction})
-            gameState.openRoutes[`${x}-${y}-${direction[0]}`] = route[direction]
+            const connection = `${x}-${y}-${direction[0]}`
+            edits.push({ connection, piece: route[direction] })
         } else {
             // clear the current connection from the map
-            delete gameState.openRoutes[connection]
+            edits.push({ connection, delete: true })
+        }
+    }
+
+    console.log('edits', edits)
+    if (!edits.any(e => e.delete)) {
+        throw new Error('piece doesn\'t connect to any existing network')
+    }
+
+    // update game state
+    gameState.routesDrawn.push(routeInfo)
+    for (let edit of edits) {
+        if (edit.delete) {
+            delete gameState.openRoutes[edit.connection]
+        } else {
+            gameState.openRoutes[edit.connection] = edit.piece
         }
     }
 }

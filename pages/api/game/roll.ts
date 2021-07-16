@@ -19,7 +19,9 @@ export default function handler(
     const diceCodes = dice.map(die => roll(die))
     const nextRoutes = diceCodes.map((code, i) => ({code, rotate: i, x: i, y: 0}))
     for (let route of nextRoutes) {
-        drawRoute(gameState, route)
+        try {
+            drawRoute(gameState, route)
+        }
     }
 
     res.status(200).json({
