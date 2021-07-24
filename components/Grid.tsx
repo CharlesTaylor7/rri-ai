@@ -8,7 +8,6 @@ import { cellLength } from '@/constants'
 
 export default function Grid(props) {
     return (
-        <div className={styles.gridRow}>
         <svg className={styles.grid} viewBox="-0.5 -0.5 8 8" strokeWidth="0.01" >
             <g id="exits" strokeWidth="1">
                 {// North
@@ -55,7 +54,6 @@ export default function Grid(props) {
             </g>
 
         </svg>
-        </div>
     )
 }
 

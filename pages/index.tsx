@@ -16,7 +16,7 @@ export default function Home(props) {
                 className={styles.newGameButton}
                 onClick={async () => {
                     const { gameId } = await fetch('/api/game/new').then(res => res.json())
-                    router.push(`/games/${gameId}`)
+                    router.push(`/game/${gameId}`)
                 }}
             >
                 New Game

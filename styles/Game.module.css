@@ -1,0 +1,23 @@
+.gameRow {
+    display: flex;
+    height: 100vh;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.rightPanel {
+    display: grid;
+    grid-template-columns: auto auto; 
+    height: 100%;
+}
+
+.diceButton {
+    font-size: 50px;
+    height: 70px;
+    grid-column: span 2
+}
+
+.die {
+    height: 100px;
+    width: 100px;
+}

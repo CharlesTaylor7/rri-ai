@@ -5,6 +5,7 @@ import Grid from '@/components/Grid'
 import Dice from '@/components/Dice'
 import { RouteInfo } from '@/types'
 import { state } from '@/server/state'
+import styles from '@/styles/Game.module.css'
 
 
 export default function Game(props) {
@@ -17,7 +18,7 @@ export default function Game(props) {
         setDiceCodes(diceCodes)
         setRoutes(rs => ({
             pending: nextRoutes,
-            current: rs.current
+            current: rs.current,
         }))
     })
 
@@ -27,16 +28,27 @@ export default function Game(props) {
             pending: []
         }))
     })
+
+    const onClick = routes.pending.length > 0 
+        ? showMoveCallback 
+        : rollCallback
+
     return (
         <Page error={props.error}>
-            <Grid routes={routes.current} />
-            <Dice diceCodes={diceCodes} />
-            <button
-                style={{position: 'fixed', top: '20px', right: '10%', fontSize: '50px'}}
-                onClick={routes.pending.length > 0 ? showMoveCallback : rollCallback}
-            >
-                {routes.pending.length > 0 ? 'Show Move' : 'Roll!!!!'}
-            </button>
+           <div className={styles.gameRow}>
+                <div className={styles.gridColumn}>
+                    <Grid routes={routes.current} />
+                </div>
+                <div className={styles.rightPanel}>
+                    <button
+                        className={styles.diceButton}
+                        onClick={onClick}
+                    >   
+                       {routes.pending.length > 0 ? 'Show Move' : 'Roll!!!!'}
+                    </button>
+                    <Dice diceCodes={diceCodes} />
+                </div>
+            </div>
         </Page>
     )
 }
@@ -63,15 +75,14 @@ export async function getServerSideProps(context) {
         const error = { statusCode: 404, title: 'Game does not exist' }
         return { props: { error } }
     }
-    console.log(gameState)
 
     return ({
         props: {
             id: gameId,
             routes: {
                 current: gameState.routesDrawn,
-                pending: []
-            }
+                pending: [],
+            },
         },
     })
 }
