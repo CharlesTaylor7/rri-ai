@@ -1,52 +1,23 @@
-import { useCallback, useState, useEffect } from 'react'
-import Page from '@/components/Page'
+import { useCallback, useState, useEffect, useContext, useReducer } from 'react'
+import Page from '@/components/core/Page'
 import Image from 'next/image'
-import Grid from '@/components/Grid'
-import Dice from '@/components/Dice'
+import Grid from '@/components/game/Grid'
+import Dice from '@/components/game/Dice'
+import DiceButton from '@/components/game/DiceButton'
 import { RouteInfo } from '@/types'
 import { state } from '@/server/state'
 import styles from '@/styles/Game.module.css'
+import GameStore from '@/stores/game.ts'
 
 
 export default function Game(props) {
-    const [routes, setRoutes] = useState(props.routes)
-    const [diceCodes, setDiceCodes] = useState([])
-
-    const rollCallback = useCallback(async () => {
-        const url = `/api/game/roll/?id=${props.id}`
-        const { diceCodes, nextRoutes } = await fetch(url).then(res => res.json())
-        setDiceCodes(diceCodes)
-        setRoutes(rs => ({
-            pending: nextRoutes,
-            current: rs.current,
-        }))
-    })
-
-    const showMoveCallback = useCallback(() => {
-        setRoutes(routes => ({
-            current: [...routes.current, ...routes.pending],
-            pending: []
-        }))
-    })
-
-    const onClick = routes.pending.length > 0 
-        ? showMoveCallback 
-        : rollCallback
-
     return (
-        <Page error={props.error}>
+        <Page error={props.error} store={GameStore}>
            <div className={styles.gameRow}>
-                <div className={styles.gridColumn}>
-                    <Grid routes={routes.current} />
-                </div>
+                <Grid />
                 <div className={styles.rightPanel}>
-                    <button
-                        className={styles.diceButton}
-                        onClick={onClick}
-                    >   
-                       {routes.pending.length > 0 ? 'Show Move' : 'Roll!!!!'}
-                    </button>
-                    <Dice diceCodes={diceCodes} />
+                    <DiceButton />
+                    <Dice />
                 </div>
             </div>
         </Page>

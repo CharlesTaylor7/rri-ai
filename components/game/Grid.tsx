@@ -1,4 +1,4 @@
-import styles from './Grid.module.css'
+import styles from '@/styles/Game.module.css'
 import { RouteInfo } from '@/types'
 import RouteDefinitions from '@/components/RouteDefinitions'
 import HalfHighway from '@/components/routes/elements/HalfHighway'
@@ -57,7 +57,6 @@ export default function Grid(props) {
     )
 }
 
-
 function Exit({ kind, translateX, translateY, rotate }) {
     return (
         <g
@@ -71,6 +70,7 @@ function Exit({ kind, translateX, translateY, rotate }) {
         </g>
     )
 }
+
 
 
 const DrawnRoute = ({ route }: {route: RouteInfo}) => (

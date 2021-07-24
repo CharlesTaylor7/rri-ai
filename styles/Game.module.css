@@ -5,6 +5,12 @@
     align-items: center;
 }
 
+.grid {
+    height: 700px;
+    width: 700px;
+    stroke: black;
+}
+
 .rightPanel {
     display: grid;
     grid-template-columns: auto auto; 
@@ -12,7 +18,7 @@
 }
 
 .diceButton {
-    font-size: 50px;
+    font-size: 30px;
     height: 70px;
     grid-column: span 2
 }

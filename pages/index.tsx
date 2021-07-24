@@ -2,10 +2,9 @@ import { useCallback, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Image from 'next/image'
-import Page from '@/components/Page'
-import Grid from '@/components/Grid'
+import Page from '@/components/core/Page'
 import { RouteInfo } from '@/types'
-import styles from './Home.module.css'
+import styles from '@/styles/Home.module.css'
 
 
 export default function Home(props) {
@@ -24,11 +23,3 @@ export default function Home(props) {
         </Page>
     )
 }
-
-type HomeProps = {
-}
-
-export const getStaticProps = (): HomeProps => ({
-    props: {
-    }
-})
