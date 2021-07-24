@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Error from 'next/error'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
+import useComponentWillMount from '@/hooks/useComponentWillMount'
 
 
 export default function Page(props) {
@@ -15,13 +16,23 @@ export default function Page(props) {
     if (error) {
         return ( <Error {...error} />)
     }
-    const {children, initialState, ...rest} = props
+
+    const {children, store, initialState, ...rest} = props
 
     // if there is a store for this page, then wrap around the children
     const contents = store
-        ? (<store.Provider>{children}</store.Provider>)
-        : (<>{children}</>)
-
+        ? (
+            <store.Provider>
+                <LoadState state={initialState} useStore={store.useStore}>
+                    {children}
+                </LoadState>
+            </store.Provider>
+        )
+        : (
+            <>
+                {children}
+            </>
+        )
     return (
         <>
             <Head>
@@ -33,4 +44,11 @@ export default function Page(props) {
             </main>
         </>
     )
+}
+
+
+function LoadState({ useStore, initialState, children }) {
+    const { dispatch } = useStore();
+    useComponentWillMount(() => dispatch({ type: 'load_state', state: initialState }))
+    return (<>{children}</>)
 }

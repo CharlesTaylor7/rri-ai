@@ -7,12 +7,12 @@ import DiceButton from '@/components/game/DiceButton'
 import { RouteInfo } from '@/types'
 import { state } from '@/server/state'
 import styles from '@/styles/Game.module.css'
-import GameStore from '@/stores/game.ts'
+import GameStore from '@/store/game.ts'
 
 
 export default function Game(props) {
     return (
-        <Page error={props.error} store={GameStore}>
+        <Page error={props.error} store={GameStore} initialState={props}>
            <div className={styles.gameRow}>
                 <Grid />
                 <div className={styles.rightPanel}>

@@ -1,9 +1,12 @@
 import { useContext, useCallback } from 'react'
-import Store from '@/stores/game'
+import Store from '@/store/game'
 import styles from '@/styles/Game.module.css'
+import { useStore } from '@/store/game'
 
 
-function DiceButton({ text, onClick }) {
+
+export default function DiceButton() {
+    const { text, onClick } = useProps()
     return (
         <button className={styles.diceButton} onClick={onClick}>
             {text}
@@ -11,7 +14,7 @@ function DiceButton({ text, onClick }) {
     )
 }
 
-function mapStateToProps(state) {
+function useProps() {
     const {
         dispatch,
         state: {
@@ -19,7 +22,7 @@ function mapStateToProps(state) {
                 pending: routesPending,
             }
         }
-    }
+    } = useStore()
 
     const onClick = useCallback(
         () => dispatch(routesPending ? 'show_move' : 'roll_dice'),
@@ -30,5 +33,3 @@ function mapStateToProps(state) {
 
     return { text, onClick }
 }
-
-export default connect(mapStateToProps)(DiceButton)

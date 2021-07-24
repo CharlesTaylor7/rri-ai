@@ -1,3 +1,3 @@
 export default {
-    load_state: (loadedState) => ({...state, ...loadedState})
+    'load_state': ({ state: toLoad }) => ({ state }) => ({...state, ...toLoad})
 }

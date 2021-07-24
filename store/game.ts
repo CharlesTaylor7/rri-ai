@@ -1,5 +1,6 @@
 import { createContext } from 'react'
-import createStore from '@/stores/utils'
+import createStore from '@/store'
+import coreActions from '@/store/core/actions'
 
 
 export type GameState = {
@@ -18,17 +19,17 @@ const initialState = {
     diceCodes: []
 }
 
-const reducerMap = {
-    'show_move': (state) => ({
+const gameActions = {
+    'show_move': () => (state) => ({
         ...state,
         routes: {
             current: [...routes.current, ...routes.pending],
             pending: [],
         }
     }),
-    'roll_dice': (state) => {
+    'roll_dice': () => (state) => {
         return state
-    }
+    },
     //     const url = `/api/game/roll/?id=${props.id}`
     //     const { diceCodes, nextRoutes } = await fetch(url).then(res => res.json())
     //     setDiceCodes(diceCodes)
@@ -36,6 +37,7 @@ const reducerMap = {
     //         pending: nextRoutes,
     //         current: rs.current,
     //     }))
+    ...coreActions,
 }
 
-export default createStore(initialState, reducerMap);
+export default createStore(initialState, gameActions);

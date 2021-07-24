@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 
 
-export default (callback) => {
+export default function (callback) {
     // initialize the ref
     const willMountRef = useRef(true)
 
