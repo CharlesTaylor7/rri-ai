@@ -11,7 +11,7 @@ export type GameState = {
     diceCodes: Array<number>,
 }
 
-const initialState = {
+const defaultState = {
     routes: {
         current: [],
         pending: [],
@@ -20,14 +20,14 @@ const initialState = {
 }
 
 const gameActions = {
-    'show_move': () => (state) => ({
+    'show_move': (state) => ({
         ...state,
         routes: {
             current: [...routes.current, ...routes.pending],
             pending: [],
         }
     }),
-    'roll_dice': () => (state) => {
+    'roll_dice': (state) => {
         return state
     },
     //     const url = `/api/game/roll/?id=${props.id}`
@@ -40,4 +40,4 @@ const gameActions = {
     ...coreActions,
 }
 
-export default createStore(initialState, gameActions);
+export default createStore(defaultState, gameActions)

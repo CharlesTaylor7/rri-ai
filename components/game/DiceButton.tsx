@@ -1,8 +1,6 @@
 import { useContext, useCallback } from 'react'
-import Store from '@/store/game'
-import styles from '@/styles/Game.module.css'
 import { useStore } from '@/store/game'
-
+import styles from '@/styles/Game.module.css'
 
 
 export default function DiceButton() {

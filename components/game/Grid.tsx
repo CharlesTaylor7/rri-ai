@@ -4,9 +4,13 @@ import RouteDefinitions from '@/components/RouteDefinitions'
 import HalfHighway from '@/components/routes/elements/HalfHighway'
 import HalfRailway from '@/components/routes/elements/HalfRailway'
 import { cellLength } from '@/constants'
+import { useStore } from '@/store'
+import GameContext from '@/store/game'
 
 
 export default function Grid(props) {
+    const { state: { routes } } = useStore(GameContext)
+
     return (
         <svg className={styles.grid} viewBox="-0.5 -0.5 8 8" strokeWidth="0.01" >
             <g id="exits" strokeWidth="1">

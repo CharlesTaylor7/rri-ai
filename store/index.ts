@@ -1,60 +1,63 @@
-import { createContext, createElement, useCallback, useReducer } from 'react'
+import { useMemo } from 'react'
+import { createStore, applyMiddleware } from 'redux'
+import { composeWithDevTools } from 'redux-devtools-extension'
 
-// A store is global state for some part of the application
-// It exposes the current state, and the dispatch method for updating that state
-export type Store<S, A> = {
-    state: S,
-    dispatch: (action: A) => void,
+
+const initialState = {
+      lastUpdate: 0,
+      light: false,
+      count: 0,
 }
 
-
-// A reducer is a transformation of the state S by an action A
-export type Reducer<S, A> = (S, A) => S
-export interface Action {
-    type: string;
+const reducer = (state = initialState, action) => {
+    switch (action.type) {
+        case 'show_move':
+            return {
+                        ...state,
+                        lastUpdate: action.lastUpdate,
+                        light: !!action.light,
+                      }
+        case 'roll_dice':
+            return {
+                        ...state,
+                        count: state.count + 1,
+                      }
+          default:
+            return state
+        }
 }
 
-export interface ActionMap<S, A extends Action> {
-    [actionType: string]: (A) => (S) => S;
+function initStore(preloadedState = initialState) {
+    return createStore(
+        reducer,
+        preloadedState,
+        composeWithDevTools(applyMiddleware())
+    )
 }
 
+let store
+export const initializeStore = (preloadedState) => {
+    let _store = store ?? initStore(preloadedState)
 
-/**
- * Create your own redux-lite store from just an initial state and a reducer function
- * The root component of the store should be wrapped by <Provider />
- * The other components should import useStore
- * `const { state, dispatch } = useStore()
- */
-export default function createStore<S, A>(
-    initialState: S,
-    reducerMap: ReducerMap<S, A>
-): Store<S, A> {
-
-    // context with the state, subscriber components reference this
-    const Context = createContext(initialState)
-
-    // provider for the root component
-    const Provider = ({ children }) => {
-        const reducer = useCallback((state, action) => reducerMap[action.type](action)(state));
-        const [ state, dispatch ] = useReducer(reducer, initialState)
-
-        const store = { state, dispatch }
-        return createElement(
-            Context.Provider,
-            { value: store },
-            ...children
-        )
+    // After navigating to a page with an initial Redux state, merge that state
+    // with the current state in the store, and create a new store
+    if (preloadedState && store) {
+        _store = initStore({
+            ...store.getState(),
+            ...preloadedState,
+        })
+        // Reset the current store
+        store = undefined
     }
 
-    const useStore = () => useContext(Context)
+    // For SSG and SSR always create a new store
+    if (typeof window === 'undefined') return _store
+    // Create the store once in the client
+    if (!store) store = _store
 
-    return { useStore, Provider }
+    return _store
 }
 
-export function connect(useProps, component) {
-    // props from parent take higher precedence than the hook
-    return (props) => {
-        const hookProps = useProps();
-        return createElement(component, { ...hookProps, ...props })
-    }
+export function useStore(initialState) {
+    return useMemo(() => initializeStore(initialState), [initialState])
 }

@@ -11,6 +11,5 @@ export default function handler(
     res: NextApiResponse<Data>
 ) {
     const gameId = newGame()
-    console.log(gameId)
     res.status(200).json({gameId})
 }
