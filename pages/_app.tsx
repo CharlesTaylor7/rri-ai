@@ -21,11 +21,8 @@ export default function App({ Component, pageProps }: AppProps) {
     if (error) {
         return ( <Error {...error} />)
     }
-    let component = <Component {...rest} />
-    if (storeConfig) {
-        const store = useStore(storeConfig)
-        component = <Provider store={store}>component</Provider>
-    }
+
+    const store = useStore(storeConfig)
 
     return (
         <>
@@ -34,7 +31,9 @@ export default function App({ Component, pageProps }: AppProps) {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main>
-                {component}
+                <Provider store={store}>
+                    <Component {...rest} />
+                </Provider>
             </main>
         </>
     )

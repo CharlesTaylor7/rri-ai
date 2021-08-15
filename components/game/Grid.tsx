@@ -4,8 +4,7 @@ import RouteDefinitions from 'rri-ai/components/RouteDefinitions'
 import HalfHighway from 'rri-ai/components/routes/elements/HalfHighway'
 import HalfRailway from 'rri-ai/components/routes/elements/HalfRailway'
 import { cellLength } from 'rri-ai/constants'
-import { useStore } from 'hooks/useStore'
-import GameContext from 'rri-ai/store/game'
+import { useGameStore } from 'rri-ai/store/game'
 
 
 export default function Grid(props) {

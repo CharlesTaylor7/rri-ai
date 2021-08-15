@@ -4,7 +4,10 @@ import type { Store, Action as GenericAction } from 'redux'
 
 export type Action = GenericAction<string>
 
-export function useStore<S, A extends Action>(storeConfig: ConfigureStoreOptions<S, A>): Store<S, A> {
+const defaultOptions: ConfigureStoreOptions<any, any> = { reducer: {} }
+
+export function useStore<S, A extends Action>(storeConfig: ConfigureStoreOptions<S, A> = defaultOptions): Store<S, A> {
+    console.log(storeConfig)
     return useMemo(() => initializeStore<S, A>(storeConfig), [storeConfig])
 }
 
