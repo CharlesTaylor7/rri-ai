@@ -1,4 +1,4 @@
-import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from '@/constants'
+import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
 import defaultProps from './defaultProps'
 
 
@@ -17,7 +17,7 @@ export default function Overpass(props) {
             }
             <line y1={0} y2={s} x1={h} x2={h} strokeDasharray={hwyDashPattern} />
 
-            {// 2 short rail lines 
+            {// 2 short rail lines
             }
             <line x1={0} x2={h-w} y1={h} y2={h}/>
             <line x1={h+w} x2={s} y1={h} y2={h}/>

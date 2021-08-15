@@ -1,4 +1,4 @@
-import { highwayWidth, cellLength, hwyDashPattern } from '@/constants'
+import { highwayWidth, cellLength, hwyDashPattern } from 'rri-ai/constants'
 
 const h = cellLength / 2;
 const w = highwayWidth / 2;

@@ -1,12 +1,8 @@
-import { createContext, useCallback, useState } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
-import Image from 'next/image'
-import { RouteInfo } from '@/types'
-import styles from '@/styles/Home.module.css'
+import styles from 'rri-ai/styles/Home.module.css'
 
 
-export default function Home(props) {
+export default function Home() {
     const router = useRouter()
     return (
         <button

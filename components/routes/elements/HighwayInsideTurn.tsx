@@ -1,4 +1,4 @@
-import { highwayWidth, hatchLocation, cellLength, hwyDashPattern } from '@/constants'
+import { highwayWidth, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
 import defaultProps from './defaultProps'
 
 const h = cellLength / 2;

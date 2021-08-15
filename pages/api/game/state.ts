@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { RouteInfo } from '@/types'
-import { state } from '@/server/state'
+import type { RouteInfo } from 'rri-ai/types'
+import { state } from 'rri-ai/server/state'
 
 type Data = {
     routesDrawn: Array<RouteInfo>

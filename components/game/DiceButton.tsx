@@ -1,6 +1,6 @@
 import { useContext, useCallback } from 'react'
-import { useStore } from '@/store/game'
-import styles from '@/styles/Game.module.css'
+import { useStore } from 'rri-ai/store/game'
+import styles from 'rri-ai/styles/Game.module.css'
 
 
 export default function DiceButton() {

@@ -1,11 +1,11 @@
-import styles from '@/styles/Game.module.css'
-import { RouteInfo } from '@/types'
-import RouteDefinitions from '@/components/RouteDefinitions'
-import HalfHighway from '@/components/routes/elements/HalfHighway'
-import HalfRailway from '@/components/routes/elements/HalfRailway'
-import { cellLength } from '@/constants'
-import { useStore } from '@/store'
-import GameContext from '@/store/game'
+import styles from 'rri-ai/styles/Game.module.css'
+import { RouteInfo } from 'rri-ai/types'
+import RouteDefinitions from 'rri-ai/components/RouteDefinitions'
+import HalfHighway from 'rri-ai/components/routes/elements/HalfHighway'
+import HalfRailway from 'rri-ai/components/routes/elements/HalfRailway'
+import { cellLength } from 'rri-ai/constants'
+import { useStore } from 'hooks/useStore'
+import GameContext from 'rri-ai/store/game'
 
 
 export default function Grid(props) {

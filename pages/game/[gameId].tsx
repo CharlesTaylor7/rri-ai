@@ -1,26 +1,24 @@
 import { useCallback, useState, useEffect, useContext, useReducer } from 'react'
-import Page from '@/components/core/Page'
+import Page from 'rri-ai/components/core/Page'
 import Image from 'next/image'
-import Grid from '@/components/game/Grid'
-import Dice from '@/components/game/Dice'
-import DiceButton from '@/components/game/DiceButton'
-import { RouteInfo } from '@/types'
-import { state } from '@/server/state'
-import styles from '@/styles/Game.module.css'
-import { initStore } from '@/store/game'
+import Grid from 'rri-ai/components/game/Grid'
+import Dice from 'rri-ai/components/game/Dice'
+import DiceButton from 'rri-ai/components/game/DiceButton'
+import { RouteInfo } from 'rri-ai/types'
+import { state } from 'rri-ai/server/state'
+import styles from 'rri-ai/styles/Game.module.css'
+import { initStore } from 'rri-ai/store/game'
 
 
 export default function Game(props) {
     return (
-        <Page error={props.error} store={initStore(props)} >
-           <div className={styles.gameRow}>
-                <Grid />
-                <div className={styles.rightPanel}>
-                    <DiceButton />
-                    <Dice />
-                </div>
+       <div className={styles.gameRow}>
+            <Grid />
+            <div className={styles.rightPanel}>
+                <DiceButton />
+                <Dice />
             </div>
-        </Page>
+        </div>
     )
 }
 Game.defaultProps = {

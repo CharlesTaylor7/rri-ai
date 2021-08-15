@@ -1,4 +1,4 @@
-import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from '@/constants'
+import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
 import defaultProps from './defaultProps'
 
 const s = cellLength;

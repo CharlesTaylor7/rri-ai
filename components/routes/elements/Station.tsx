@@ -1,4 +1,4 @@
-import { highwayWidth, cellLength } from '@/constants'
+import { highwayWidth, cellLength } from 'rri-ai/constants'
 
 const h = cellLength / 2
 const w = highwayWidth

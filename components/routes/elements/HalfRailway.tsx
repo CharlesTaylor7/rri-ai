@@ -1,4 +1,4 @@
-import { hatchSize, hatchLocation, cellLength } from '@/constants'
+import { hatchSize, hatchLocation, cellLength } from 'rri-ai/constants'
 
 const h = cellLength / 2;
 
