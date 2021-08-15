@@ -3,61 +3,58 @@ import { createStore, applyMiddleware } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension'
 
 
-const initialState = {
-      lastUpdate: 0,
-      light: false,
-      count: 0,
+type StoreConfig<S extends object> = {
+    tag: string,
+    initialState: S,
+    reducer: Reducer<S>,
 }
 
-const reducer = (state = initialState, action) => {
-    switch (action.type) {
-        case 'show_move':
-            return {
-                        ...state,
-                        lastUpdate: action.lastUpdate,
-                        light: !!action.light,
-                      }
-        case 'roll_dice':
-            return {
-                        ...state,
-                        count: state.count + 1,
-                      }
-          default:
-            return state
-        }
-}
+type Action = {type: string}
+type Reducer<S, A extends Action = Action> = (state: S, action: A) => S
 
-function initStore(preloadedState = initialState) {
+
+function initStore<S extends object>(config: StoreConfig<S>): Store<S> {
     return createStore(
-        reducer,
-        preloadedState,
+        config.reducer,
+        config.initialState,
         composeWithDevTools(applyMiddleware())
     )
 }
 
-let store
-export const initializeStore = (preloadedState) => {
-    let _store = store ?? initStore(preloadedState)
-
-    // After navigating to a page with an initial Redux state, merge that state
-    // with the current state in the store, and create a new store
-    if (preloadedState && store) {
-        _store = initStore({
-            ...store.getState(),
-            ...preloadedState,
-        })
-        // Reset the current store
-        store = undefined
-    }
-
-    // For SSG and SSR always create a new store
-    if (typeof window === 'undefined') return _store
-    // Create the store once in the client
-    if (!store) store = _store
-
-    return _store
+type Store<S extends object> = {
+    getState(): S,
 }
 
-export function useStore(initialState) {
-    return useMemo(() => initializeStore(initialState), [initialState])
+let stores: {
+    [tag: string]: Store<any>,
+} = {}
+
+function initializeStore<S extends object>(config: StoreConfig<S>) {
+    // For SSG and SSR always create a new store
+    if (typeof window === 'undefined') return initStore(config)
+
+    // fetch the existing store
+    let store = stores[config.tag]
+
+    // Merge with an existing store, or recreate fresh
+    store = store
+        ? initStore({
+            ...config,
+            initialState: {
+                ...config.initialState,
+                ...store.getState(),
+            }
+        })
+        : initStore(config)
+
+
+    // save the store
+    stores[config.tag] = store
+
+    return store
+}
+
+
+export function useStore<S extends object>(config: StoreConfig<S>): Store<S> {
+    return useMemo(() => initializeStore(config), [config])
 }

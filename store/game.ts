@@ -1,6 +1,6 @@
-import { createContext } from 'react'
-import createStore from '@/store'
+import { useStore } from '@/store'
 import coreActions from '@/store/core/actions'
+import {RouteInfo} from '@/types'
 
 
 export type GameState = {
@@ -20,14 +20,17 @@ const defaultState = {
 }
 
 const gameActions = {
-    'show_move': (state) => ({
+    'show_move': (state: GameState) => ({
         ...state,
         routes: {
-            current: [...routes.current, ...routes.pending],
+            current: [
+                ...state.routes.current,
+                ...state.routes.pending,
+            ],
             pending: [],
         }
     }),
-    'roll_dice': (state) => {
+    'roll_dice': (state: GameState) => {
         return state
     },
     //     const url = `/api/game/roll/?id=${props.id}`
@@ -40,4 +43,6 @@ const gameActions = {
     ...coreActions,
 }
 
-export default createStore(defaultState, gameActions)
+export default function useGameStore() {
+}
+createStore(defaultState, gameActions)
