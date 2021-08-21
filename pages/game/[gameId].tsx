@@ -8,6 +8,7 @@ import { RouteInfo } from 'rri-ai/types'
 import { state } from 'rri-ai/server/state'
 import styles from 'rri-ai/styles/Game.module.css'
 import { initStore } from 'rri-ai/store/game'
+import type { NextPageContext } from 'next'
 
 
 export default function Game(props) {
@@ -37,7 +38,7 @@ type GameProps = {
     }
 }
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps(context: NextPageContext) {
     const { params: { gameId } } = context
     const gameState = state[gameId]
     if (gameState === undefined) {

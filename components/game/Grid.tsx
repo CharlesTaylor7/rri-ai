@@ -1,5 +1,7 @@
+//@ts-nocheck
+import type { FunctionComponent } from 'react'
+import type { RouteInfo } from 'rri-ai/types'
 import styles from 'rri-ai/styles/Game.module.css'
-import { RouteInfo } from 'rri-ai/types'
 import RouteDefinitions from 'rri-ai/components/RouteDefinitions'
 import HalfHighway from 'rri-ai/components/routes/elements/HalfHighway'
 import HalfRailway from 'rri-ai/components/routes/elements/HalfRailway'
@@ -7,7 +9,7 @@ import { cellLength } from 'rri-ai/constants'
 import { useGameStore } from 'rri-ai/store/game'
 
 
-export default function Grid(props) {
+const Grid: FunctionComponent = () => {
     const { state: { routes } } = useStore(GameContext)
 
     return (
@@ -15,27 +17,27 @@ export default function Grid(props) {
             <g id="exits" strokeWidth="1">
                 {// North
                 }
-                <Exit translateX="1" translateY="-1" rotate="2" kind='highway' />
-                <Exit translateX="3" translateY="-1" rotate="2" kind='railway' />
-                <Exit translateX="5" translateY="-1" rotate="2" kind='highway' />
+                <Exit translateX="1" translateY="-1" rotate="2" kind="highway" />
+                <Exit translateX="3" translateY="-1" rotate="2" kind="railway" />
+                <Exit translateX="5" translateY="-1" rotate="2" kind="highway" />
 
                 {// South
                 }
-                <Exit translateX="1" translateY="7" rotate="0" kind='highway' />
-                <Exit translateX="3" translateY="7" rotate="0" kind='railway' />
-                <Exit translateX="5" translateY="7" rotate="0" kind='highway' />
+                <Exit translateX="1" translateY="7" rotate="0" kind="highway" />
+                <Exit translateX="3" translateY="7" rotate="0" kind="railway" />
+                <Exit translateX="5" translateY="7" rotate="0" kind="highway" />
 
                 {// East
                 }
-                <Exit translateX="7" translateY="1" rotate="3" kind='railway' />
-                <Exit translateX="7" translateY="3" rotate="3" kind='highway' />
-                <Exit translateX="7" translateY="5" rotate="3" kind='railway' />
+                <Exit translateX="7" translateY="1" rotate="3" kind="railway" />
+                <Exit translateX="7" translateY="3" rotate="3" kind="highway" />
+                <Exit translateX="7" translateY="5" rotate="3" kind="railway" />
 
                 {// West
                 }
-                <Exit translateX="-1" translateY="1" rotate="1" kind='railway' />
-                <Exit translateX="-1" translateY="3" rotate="1" kind='highway' />
-                <Exit translateX="-1" translateY="5" rotate="1" kind='railway' />
+                <Exit translateX="-1" translateY="1" rotate="1" kind="railway" />
+                <Exit translateX="-1" translateY="3" rotate="1" kind="highway" />
+                <Exit translateX="-1" translateY="5" rotate="1" kind="railway" />
             </g>
             <g id="grid-lines">
                 {Array.from({length: 8}, (_, i) => (
@@ -53,19 +55,28 @@ export default function Grid(props) {
             </g>
             <RouteDefinitions />
             <g id="drawn-routes">
-                {props.routes.map((route, i) => (<DrawnRoute key={i} route={route} />))}
+                {routes.map((route: RouteInfo, i: number) => (<DrawnRoute key={i} route={route} />))}
             </g>
 
         </svg>
     )
 }
+export default Grid;
 
-function Exit({ kind, translateX, translateY, rotate }) {
+export interface ExitProps {
+    kind: 'railway' | 'highway',
+    translateX: number,
+    translateY: number,
+    rotate: number,
+}
+
+const Exit: FunctionComponent<ExitProps> = ({ kind, translateX, translateY, rotate }) => {
+    console.log(props)
     return (
         <g
             transform={`
                 translate(${translateX}, ${translateY}),
-                rotate(${rotate*90}, 0.5, 0.5),
+                rotate(${rotate * 90}, 0.5, 0.5),
                 scale(${1 / cellLength})
             `}
         >
@@ -75,14 +86,16 @@ function Exit({ kind, translateX, translateY, rotate }) {
 }
 
 
-
-const DrawnRoute = ({ route }: {route: RouteInfo}) => (
+interface DrawnRouteProps {
+    route: RouteInfo,
+}
+const DrawnRoute: FunctionComponent<DrawnRouteProps> = ({ route }) => (
     <use
         href={`#route-${route.code}`}
         strokeWidth="1"
         transform={`
             translate(${route.x},${route.y}),
-            rotate(${route.rotate * 90}, 0.5, 0.5),
+            rotate(${route.rotation * 90}, 0.5, 0.5),
             scale(${1 / cellLength})
         `}
     />
