@@ -1,4 +1,8 @@
-export const routes = [
+import { Route } from 'types';
+
+export type Die = [number, number, number, number, number, number];
+
+export const routes: Array<Route> = [
     { north: 'r', west: 'r' },
     { north: 'r', east: 'r', west: 'r' },
     { north: 'r', south: 'r'},
@@ -17,8 +21,8 @@ export const routes = [
 ]
 
 
-const basicDie = Array.from({ length: 6 }, (_, i) => i)
-const specialDie = Array.from({ length: 6 }, (_, i) => 6 + i % 3)
-export const dice = [basicDie, basicDie, basicDie, specialDie]
+const basicDie: Die = [0, 1, 2, 3, 4, 5];
+const specialDie: Die = [6, 7, 8, 6, 7, 8]
 
-export const roll = (die) => die[Math.floor(Math.random() * 6)]
+export const dice = [basicDie, basicDie, basicDie, specialDie]
+export const roll = (die: Die) => die[Math.floor(Math.random() * 6)]

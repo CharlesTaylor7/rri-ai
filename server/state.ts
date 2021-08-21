@@ -4,13 +4,20 @@ import { v4 as uuid } from 'uuid'
 import { routes } from 'rri-ai/server/dice'
 
 type GameId = string;
-type state = {
-    [key: GameId]: GameState
+
+export interface GameState {
+    routesDrawn: Array<RouteInfo>,
+    openRoutes: OpenRoutes,
 }
 
-export const state = {}
+type state = {
+    // key: GameId
+    [key: string]: GameState
+}
+
+export const state: state = {}
 export function newGame(): GameId {
-    const gameId = uuid()
+    const gameId: GameId = uuid()
     state[gameId] = getInitialState()
     return gameId
 }
@@ -18,9 +25,11 @@ export function newGame(): GameId {
 // key is hyphen separated values:
 // x-y-direction (direction is one of 'n', 'e', 's', 'w'
 // value is the type of network piece: 'h' or 'r'
-type OpenRoutes = object
+type OpenRoutes = {
+    [connection: string]: Piece,
+}
 
-function getInitialState() {
+function getInitialState(): GameState {
     return ({
         routesDrawn: [],
         openRoutes: {
