@@ -15,6 +15,22 @@ type state = {
     [key: string]: GameState
 }
 
+export interface Shift {
+    x: number;
+    y: number;
+}
+
+export type Direction = 'north' | 'east' | 'south' | 'west';
+export interface Position {
+    x: number,
+    y: number,
+}
+
+export interface Location extends Position {
+    direction: Direction,
+}
+
+
 export const state: state = {}
 export function newGame(): GameId {
     const gameId: GameId = uuid()
@@ -76,10 +92,6 @@ const oppositeDir = (direction: Direction): Direction => {
     }
 }
 
-export interface Shift {
-    x: number;
-    y: number;
-}
 
 const toShift = (direction: Direction): Shift => {
     switch (direction) {
@@ -91,18 +103,11 @@ const toShift = (direction: Direction): Shift => {
     }
 }
 
-export type Direction = 'north' | 'east' | 'south' | 'west';
-
-export interface Location {
-    x: number,
-    y: number,
-    direction: Direction,
-}
-function toConnectionKey({ x, y, direction }) {
+function toConnectionKey({ x, y, direction }: Location) {
     return `${x}-${y}-${direction[0]}`
 }
 
-const oppositeConnection = ({x, y, direction}) => {
+const oppositeConnection = ({x, y, direction}: Location) => {
     const {x: dx,y: dy } = toShift(direction)
     return toConnectionKey({ x: x+dx, y: y+dy, direction: oppositeDir(direction)})
 }
@@ -111,11 +116,13 @@ export class RouteValidationError extends Error { }
 
 export interface Edit {
     connection: string,
-    piece: 'r' | 'h',
-    delete: boolean,
+    action: { type: 'add', piece: Piece } | { type: 'delete' }
 }
 
-export function drawRoute(gameState: object, routeInfo: RouteInfo) {
+const directions: Array<Direction> = ['north', 'east', 'south', 'west']
+
+
+export function drawRoute(gameState: GameState, routeInfo: RouteInfo) {
     const { x, y } = routeInfo
     console.log(routeInfo)
     const route = rotate(routes[routeInfo.code], routeInfo.rotation)
@@ -123,7 +130,7 @@ export function drawRoute(gameState: object, routeInfo: RouteInfo) {
     // first we do a dry run of the edits to state for the given route
     // validate and then apply the state changes
     const edits: Array<Edit> = []
-    for (let direction of ['north', 'east', 'south', 'west']) {
+    for (let direction of directions ) {
         const connection = toConnectionKey({x, y, direction})
         const networkPiece = gameState.openRoutes[connection]
 
@@ -139,30 +146,31 @@ export function drawRoute(gameState: object, routeInfo: RouteInfo) {
             if (gameState.openRoutes[connection]) {
                 throw new RouteValidationError('cannot draw over another route')
             }
-            edits.push({ connection, piece: route[direction] })
+            const piece: Piece = route[direction] as Piece
+            edits.push({ connection, action: { type: 'add', piece } })
         } else {
             // clear the current connection from the map
-            edits.push({ connection, delete: true })
+            edits.push({ connection, action: { type: 'delete' } })
         }
     }
 
     console.log('edits', edits)
-    if (!edits.any(e => e.delete)) {
+    if (!edits.some((e: Edit) => e.action.type === 'delete')) {
         throw new RouteValidationError('piece doesn\'t connect to any existing network')
     }
 
     // update game state
     gameState.routesDrawn.push(routeInfo)
     for (let edit of edits) {
-        if (edit.delete) {
+        if (edit.action.type === 'delete') {
             delete gameState.openRoutes[edit.connection]
-        } else {
-            gameState.openRoutes[edit.connection] = edit.piece
+        } else if (edit.action.type === 'add') {
+            gameState.openRoutes[edit.connection] = edit.action.piece
         }
     }
 }
 
-export function drawInFirstValidPosition(gameState: object, code: number): RouteInfo | undefined {
+export function drawInFirstValidPosition(gameState: GameState, code: number): RouteInfo | undefined {
     for (let x = 0; x < 7; x++) {
         for (let y = 0; y < 7; y++) {
             for (let rotation = 0; rotation < 4; rotation++) {
