@@ -1,9 +1,12 @@
 import type { NextApiResponse } from 'next'
-import type { RouteInfo } from 'rri-ai/types'
+import type { Piece, Route, RouteInfo } from 'rri-ai/types'
 import { v4 as uuid } from 'uuid'
-import { dice, roll, routes } from 'rri-ai/server/dice'
+import { routes } from 'rri-ai/server/dice'
 
-type GameId = string
+type GameId = string;
+type state = {
+    [key: GameId]: GameState
+}
 
 export const state = {}
 export function newGame(): GameId {
@@ -11,6 +14,7 @@ export function newGame(): GameId {
     state[gameId] = getInitialState()
     return gameId
 }
+
 // key is hyphen separated values:
 // x-y-direction (direction is one of 'n', 'e', 's', 'w'
 // value is the type of network piece: 'h' or 'r'
@@ -40,7 +44,7 @@ function getInitialState() {
     })
 }
 
-const rotate = (route, i) => {
+const rotate = (route: Route, i: number): Route => {
     // copy the route
     route = {...route}
     while (i-->0) {
@@ -53,7 +57,7 @@ const rotate = (route, i) => {
     return route
 }
 
-const oppositeDir = (direction) => {
+const oppositeDir = (direction: Direction): Direction => {
     switch (direction) {
         case 'north': return 'south'
         case 'east': return 'west'
@@ -63,16 +67,28 @@ const oppositeDir = (direction) => {
     }
 }
 
-const toShift = (direction) => {
+export interface Shift {
+    x: number;
+    y: number;
+}
+
+const toShift = (direction: Direction): Shift => {
     switch (direction) {
-        case 'north': return {x:0, y:-1}
-        case 'east': return {x:1, y:0}
-        case 'south': return {x:0,y:1}
-        case 'west': return {x:-1,y:0}
+        case 'north': return {x:  0, y: -1}
+        case 'east':  return {x:  1, y:  0}
+        case 'south': return {x:  0, y:  1}
+        case 'west':  return {x: -1, y:  0}
         default: throw new Error('invalid direction')
     }
 }
 
+export type Direction = 'north' | 'east' | 'south' | 'west';
+
+export interface Location {
+    x: number,
+    y: number,
+    direction: Direction,
+}
 function toConnectionKey({ x, y, direction }) {
     return `${x}-${y}-${direction[0]}`
 }
@@ -84,14 +100,20 @@ const oppositeConnection = ({x, y, direction}) => {
 
 export class RouteValidationError extends Error { }
 
+export interface Edit {
+    connection: string,
+    piece: 'r' | 'h',
+    delete: boolean,
+}
+
 export function drawRoute(gameState: object, routeInfo: RouteInfo) {
     const { x, y } = routeInfo
     console.log(routeInfo)
-    const route = rotate(routes[routeInfo.code], routeInfo.rotate)
+    const route = rotate(routes[routeInfo.code], routeInfo.rotation)
 
     // first we do a dry run of the edits to state for the given route
     // validate and then apply the state changes
-    const edits = []
+    const edits: Array<Edit> = []
     for (let direction of ['north', 'east', 'south', 'west']) {
         const connection = toConnectionKey({x, y, direction})
         const networkPiece = gameState.openRoutes[connection]
@@ -131,11 +153,11 @@ export function drawRoute(gameState: object, routeInfo: RouteInfo) {
     }
 }
 
-export function drawInFirstValidPosition(gameState: object, code: number): RouteInfo {
+export function drawInFirstValidPosition(gameState: object, code: number): RouteInfo | undefined {
     for (let x = 0; x < 7; x++) {
         for (let y = 0; y < 7; y++) {
-            for (let rotate = 0; rotate < 4; rotate++) {
-                const routeInfo = {code, rotate, x, y}
+            for (let rotation = 0; rotation < 4; rotation++) {
+                const routeInfo = {code, rotation, x, y}
                 try {
                     drawRoute(gameState, routeInfo)
                     return routeInfo;

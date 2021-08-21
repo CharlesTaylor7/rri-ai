@@ -6,6 +6,9 @@ export type Action = GenericAction<string>
 
 const defaultOptions: ConfigureStoreOptions<any, any> = { reducer: {} }
 
+/**
+ * Build the store from options based on the redux toolkit package
+ */
 export function useStore<S, A extends Action>(storeConfig: ConfigureStoreOptions<S, A> = defaultOptions): Store<S, A> {
     console.log(storeConfig)
     return useMemo(() => initializeStore<S, A>(storeConfig), [storeConfig])

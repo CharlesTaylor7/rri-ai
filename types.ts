@@ -13,14 +13,14 @@ export type RouteInfo = {
 }
 
 // highway, railway,
-type Connection = 'h' | 'r'
+export type Piece = 'h' | 'r'
     // river or lake
     //| 'v' | 'l';
 
-interface Route {
-    north?: Connection;
-    east?: Connection;
-    south?: Connection;
-    west?: Connection;
-    station?: bool;
+export interface Route {
+    north?: Piece;
+    east?: Piece;
+    south?: Piece;
+    west?: Piece;
+    station?: boolean;
 }

@@ -1,6 +1,6 @@
-import { useStore, StoreConfig } from 'hooks/useStore'
-import coreActions from 'rri-ai/store/core/actions'
-import {RouteInfo} from 'rri-ai/types'
+import { useStore } from 'hooks/useStore'
+import { RouteInfo } from 'rri-ai/types'
+import { Reducer } from 'redux'
 
 
 export type GameState = {
@@ -11,7 +11,7 @@ export type GameState = {
     diceCodes: Array<number>,
 }
 
-const defaultState = {
+export const preloadedState = {
     routes: {
         current: [],
         pending: [],
@@ -19,7 +19,7 @@ const defaultState = {
     diceCodes: []
 }
 
-const gameActions = {
+export const reducer = {
     'show_move': (state: GameState) => ({
         ...state,
         routes: {
@@ -40,22 +40,4 @@ const gameActions = {
     //         pending: nextRoutes,
     //         current: rs.current,
     //     }))
-    ...coreActions,
-}
-type ActionMap<S, A extends Action> = {
-    [actionType: string]: Reducer<S, A>,
-}
-
-function actionsMapToReducer<S, A extends Action>(actions: ActionMap<S, A>): Reducer<S, A> {
-    return (state: S, action: A) => actions[action.type](state, action)
-}
-
-
-export const GameStoreConfig: StoreConfig<GameState> = {
-    reducer: actionsMapToReducer(gameActions),
-    initialState: defaultState,
-}
-
-export function useGameStore() {
-    useStore(GameStoreConfig)
 }
