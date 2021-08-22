@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect, useContext, useReducer } from 'react'
-import Page from 'rri-ai/components/core/Page'
 import Image from 'next/image'
 import Grid from 'rri-ai/components/game/Grid'
 import Dice from 'rri-ai/components/game/Dice'
@@ -11,7 +10,7 @@ import { initStore } from 'rri-ai/store/game'
 import type { NextPageContext } from 'next'
 
 
-export default function Game(props) {
+export default function Game() {
     return (
        <div className={styles.gameRow}>
             <Grid />
@@ -22,24 +21,10 @@ export default function Game(props) {
         </div>
     )
 }
-Game.defaultProps = {
-    routes: {
-        current: [],
-        pending: [],
-    }
-}
 
-type GameProps = {
-    props: {
-            routes: {
-            current: Array<RouteInfo>,
-            pending: Array<RouteInfo>,
-        },
-    }
-}
 
 export async function getServerSideProps(context: NextPageContext) {
-    const { params: { gameId } } = context
+    const { params: { gameId } } = context as any
     const gameState = state[gameId]
     if (gameState === undefined) {
         const error = { statusCode: 404, title: 'Game does not exist' }

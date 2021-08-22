@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 
 
-export default function useComponentWillMount(callback) {
+export default function useComponentWillMount(callback: () => void) {
     // initialize the ref
     const willMountRef = useRef(true)
 

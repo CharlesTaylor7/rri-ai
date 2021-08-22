@@ -14,7 +14,7 @@ function HighwayTurn() {
             {// left curved path
             }
             <HighwayInsideTurn />
-            <HighwayInsideTurn transform={`rotate(90,${h},${h})`} />
+            <HighwayInsideTurn rotate={1} />
 
             {// horizontal line
             }
