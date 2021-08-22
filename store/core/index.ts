@@ -1,8 +1,10 @@
 import {initializeStore} from "../next";
 import reducer from "./reducer";
-import middleware from "./middleware";
+import middleware, {epicMiddleware} from "./middleware";
+import rootEpic from "./epic";
 
-const store = initializeStore({ reducer });
+
+const store = initializeStore({ reducer, middleware });
 epicMiddleware.run(rootEpic);
 
 export default store
