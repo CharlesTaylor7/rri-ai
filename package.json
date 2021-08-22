@@ -11,12 +11,14 @@
     "tc:watch": "npx tsc --noEmit --watch"
   },
   "dependencies": {
-    "redux-toolkit": "npm:@reduxjs/toolkit@^1.6.1",
     "next": "^11.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.3",
     "redux": "^4.1.1",
+    "redux-observable": "^2.0.0",
+    "redux-toolkit": "npm:@reduxjs/toolkit@^1.6.1",
+    "rxjs": "^7.3.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
