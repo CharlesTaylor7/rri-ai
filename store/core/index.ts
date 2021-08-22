@@ -4,7 +4,8 @@ import middleware, {epicMiddleware} from "./middleware";
 import rootEpic from "./epic";
 
 
-const store = initializeStore({ reducer, middleware });
+const store = initializeStore({ reducer });
+
 epicMiddleware.run(rootEpic);
 
 export default store
