@@ -1,15 +1,13 @@
-import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
+import { cellLength, hwyDashPattern } from 'rri-ai/constants'
 import HighwayInsideTurn from './elements/HighwayInsideTurn'
-import defaultProps from './defaultProps'
+import RouteComponent from '../RouteComponent'
 
 const s = cellLength;
 const h = s / 2;
-// highway width
-const w = hatchSize
 
-export default function HighwayFour(props) {
+function HighwayFour() {
     return (
-        <g {...props}>
+        <>
             <HighwayInsideTurn />
             <HighwayInsideTurn rotate="1" />
             <HighwayInsideTurn rotate="2" />
@@ -22,7 +20,7 @@ export default function HighwayFour(props) {
             {// vertical dashed hwy line
             }
             <line y1={0} y2={s} x1={h} x2={h} strokeDasharray={hwyDashPattern} />
-        </g>
+        </>
     )
 }
-HighwayFour.defaultProps = defaultProps
+export default RouteComponent(HighwayFour)

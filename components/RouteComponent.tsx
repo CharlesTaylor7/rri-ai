@@ -1,17 +1,16 @@
-import React from "React";
-import type { ReactSVGElement, SVGProps} from "react";
+// import React from "React";
+import React from "react";
 
-interface RouteProps {
-    id: string,
-}
 
-export default function RouteComponent(component: ReactSVGElement) {
-    const wrapped = (props: SVGProps<SVGGElement>) => (
+type Component = () => React.ReactElement;
+
+export default function RouteComponent(component: Component) {
+    const wrapped: React.FC = (props: any) => (
         <g {...props}>
             {component}
         </g>
     );
-    wrapped.displayName = component.displayName;
+    wrapped.displayName = (component as any).displayName;
     return wrapped;
 }
 

@@ -1,12 +1,12 @@
 import Station from './elements/Station'
 import HalfRailway from './elements/HalfRailway'
 import HalfHighway from './elements/HalfHighway'
-import defaultProps from './defaultProps'
+import RouteComponent from '../RouteComponent'
 
 
-export default function StationHighwayT(props) {
+function StationHighwayT() {
     return (
-        <g {...props}>
+        <g>
             <Station />
             <HalfHighway />
             <HalfRailway rotate="1" />
@@ -15,4 +15,4 @@ export default function StationHighwayT(props) {
         </g>
     )
 }
-StationHighwayT.defaultProps = defaultProps
+export default RouteComponent(StationHighwayT)

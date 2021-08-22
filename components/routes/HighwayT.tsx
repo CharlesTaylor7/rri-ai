@@ -1,6 +1,6 @@
 import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
+import RouteComponent from '../RouteComponent';
 import HighwayInsideTurn from './elements/HighwayInsideTurn'
-import defaultProps from './defaultProps'
 
 const s = cellLength;
 const h = s / 2;
@@ -8,9 +8,9 @@ const h = s / 2;
 const w = hatchSize
 
 // TODO: use bezier curve / parabola to get a more rounded edge
-export default function HighwayTurn(props) {
+function HighwayTurn() {
     return (
-        <g {...props}>
+        <>
             {// left curved path
             }
             <HighwayInsideTurn />
@@ -27,8 +27,7 @@ export default function HighwayTurn(props) {
             {// dashed vertical line
             }
             <line x1={h} x2={h} y1={0} y2={h} strokeDasharray={hwyDashPattern}/>
-        </g>
+        </>
     )
 }
-
-HighwayTurn.defaultProps = defaultProps
+export default RouteComponent(HighwayTurn)

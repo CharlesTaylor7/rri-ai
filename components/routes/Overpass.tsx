@@ -1,12 +1,12 @@
-import {FunctionComponent} from 'react';
 import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
+import { RouteComponent } from '../RouteComponent'
 
 
 const s = cellLength;
 const h = s / 2;
 const w = hatchSize
 
-const Overpass: FunctionComponent = () => {
+function Overpass() {
     return (
         <>
             {// 2 long for the highway lines
@@ -37,4 +37,4 @@ const Overpass: FunctionComponent = () => {
         </>
     )
 }
-export default Overpass
+export default RouteComponent(Overpass);

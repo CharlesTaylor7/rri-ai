@@ -1,5 +1,5 @@
 import { hatchSize, crossHatchSize, hatchLocation, cellLength } from 'rri-ai/constants'
-import defaultProps from './defaultProps'
+import RouteComponent from '../RouteComponent';
 
 const s = cellLength
 const h = s / 2;
@@ -10,9 +10,9 @@ const crossS = h - (w/2) - c;
 const crossE = h - (w/2) + c;
 
 // TODO: use bezier curve / parabola to get a more rounded edge
-export default function RailwayTurn(props) {
+function RailwayTurn() {
     return (
-        <g {...props}>
+        <>
             {// railway line
             }
             <polyline points={`0,${h} ${h-w},${h} ${h},${h-w} ${h},0`} />
@@ -39,8 +39,8 @@ export default function RailwayTurn(props) {
                     />
                 ))
             }
-        </g>
+        </>
     )
 }
 
-RailwayTurn.defaultProps = defaultProps
+export default RouteComponent(RailwayTurn)

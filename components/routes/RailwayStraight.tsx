@@ -1,11 +1,11 @@
 import { hatchSize, hatchLocation, cellLength } from 'rri-ai/constants'
-import defaultProps from './defaultProps'
+import RouteComponent from '../RouteComponent';
 
 const s = cellLength;
 
-export default function RailwayStraight(props) {
+function RailwayStraight() {
     return (
-        <g {...props}>
+        <>
             {// long vertical stroke
             }
             <line y1={0} y2={s} x1={s/2} x2={s/2} />
@@ -19,7 +19,7 @@ export default function RailwayStraight(props) {
                     />
                 ))
             }
-        </g>
+        </>
     )
 }
-RailwayStraight.defaultProps = defaultProps
+export default RouteComponent(RailwayStraight)

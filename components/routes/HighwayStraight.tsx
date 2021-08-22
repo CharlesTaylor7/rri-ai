@@ -1,11 +1,11 @@
 import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
-import defaultProps from './defaultProps'
+import RouteComponent from '../RouteComponent';
 
 const s = cellLength;
 const h = s / 2;
 const w = hatchSize
 
-export default function HighwayStraight(props) {
+function HighwayStraight(props) {
     return (
         <g {...props}>
             {// 2 long vertical lines
@@ -18,4 +18,4 @@ export default function HighwayStraight(props) {
         </g>
     )
 }
-HighwayStraight.defaultProps = defaultProps
+export default RouteComponent(HighwayStraight)

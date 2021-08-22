@@ -3,7 +3,7 @@ import { highwayWidth, cellLength, hwyDashPattern } from 'rri-ai/constants'
 const h = cellLength / 2;
 const w = highwayWidth / 2;
 
-export default function HalfHighway(props) {
+export default function HalfHighway(props: any) {
     const { rotate, ...rest } = props
     return (
         <g transform={`rotate(${rotate*90},${h},${h})`} {...rest} >
