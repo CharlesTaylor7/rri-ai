@@ -7,6 +7,8 @@ export const rootReducer = <S,A>(s: S, _a: A) => s;
 
 const rootConfig: ConfigureStoreOptions<RootState, RootAction> =  {
     reducer: rootReducer,
+    preloadedState: {},
+
 }
 
 export default rootConfig;

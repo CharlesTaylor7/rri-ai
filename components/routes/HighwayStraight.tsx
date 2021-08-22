@@ -1,4 +1,4 @@
-import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
+import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'app/constants'
 import RouteComponent from '../RouteComponent';
 
 const s = cellLength;

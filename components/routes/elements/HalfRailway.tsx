@@ -1,4 +1,4 @@
-import { hatchSize, hatchLocation, cellLength } from 'rri-ai/constants'
+import { hatchSize, hatchLocation, cellLength } from 'app/constants'
 
 const h = cellLength / 2;
 type Props = {

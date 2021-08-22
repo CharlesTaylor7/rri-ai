@@ -1,12 +1,15 @@
-import 'rri-ai/styles/globals.css'
+import 'app/styles/globals.css'
 import { Provider } from 'react-redux'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import Head from 'next/head'
 import Error from 'next/error'
 import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
-import { useStore } from 'hooks/useStore'
+import {initializeStore} from 'store/next'
 
+const defaultStoreConfig = {
+    reducer: (s: any, _a: any) => s,
+}
 
 export default function App({ Component, pageProps }: AppProps) {
     const { error, storeConfig, ...rest } = pageProps
@@ -22,7 +25,10 @@ export default function App({ Component, pageProps }: AppProps) {
         return ( <Error {...error} />)
     }
 
-    const store = useStore(storeConfig)
+    const store = useMemo(
+        () => initializeStore(storeConfig || defaultStoreConfig),
+        [storeConfig]
+    ) as any;
 
     return (
         <>

@@ -1,4 +1,4 @@
-import { cellLength, hwyDashPattern } from 'rri-ai/constants'
+import { cellLength, hwyDashPattern } from 'app/constants'
 import HighwayInsideTurn from './elements/HighwayInsideTurn'
 import RouteComponent from '../RouteComponent'
 

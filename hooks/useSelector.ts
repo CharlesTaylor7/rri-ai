@@ -1,7 +1,5 @@
-import { useSelector as useSel, shallowEqual } from 'react-redux'
+import { useSelector as useSel, shallowEqual, TypedUseSelectorHook } from 'react-redux'
 import type { RootState } from 'store/core/config';
 
-type Selector<T> = (s: RootState) => T
-export default function useSelector<T>(s: Selector<T>): T {
-    return useSel(s, shallowEqual)
-}
+const useSelector: TypedUseSelectorHook<RootState> = useSel;
+export default useSelector;

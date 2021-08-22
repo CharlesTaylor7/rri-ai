@@ -1,7 +1,7 @@
 import type { NextApiResponse } from 'next'
-import type { Piece, Route, RouteInfo } from 'rri-ai/types'
+import type { Piece, Route, RouteInfo } from 'app/types'
 import { v4 as uuid } from 'uuid'
-import { routes } from 'rri-ai/server/dice'
+import { routes } from 'app/dice'
 
 type GameId = string;
 

@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import styles from 'rri-ai/styles/Home.module.css'
+import styles from 'app/styles/Home.module.css'
 
 
 export default function Home() {

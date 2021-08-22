@@ -1,12 +1,12 @@
 //@ts-nocheck
 import type { FunctionComponent } from 'react'
-import type { RouteInfo } from 'rri-ai/types'
-import styles from 'rri-ai/styles/Game.module.css'
-import RouteDefinitions from 'rri-ai/components/RouteDefinitions'
-import HalfHighway from 'rri-ai/components/routes/elements/HalfHighway'
-import HalfRailway from 'rri-ai/components/routes/elements/HalfRailway'
-import { cellLength } from 'rri-ai/constants'
-import { useGameStore } from 'rri-ai/store/game'
+import type { RouteInfo } from 'app/types'
+import styles from 'app/styles/Game.module.css'
+import RouteDefinitions from 'app/components/RouteDefinitions'
+import HalfHighway from 'app/components/routes/elements/HalfHighway'
+import HalfRailway from 'app/components/routes/elements/HalfRailway'
+import { cellLength } from 'app/constants'
+import { useGameStore } from 'app/store/game'
 
 
 const Grid: FunctionComponent = () => {

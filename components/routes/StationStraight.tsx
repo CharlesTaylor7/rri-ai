@@ -1,4 +1,4 @@
-import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
+import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'app/constants'
 import Station from './elements/Station'
 import HalfRailway from './elements/HalfRailway'
 import HalfHighway from './elements/HalfHighway'

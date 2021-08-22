@@ -1,4 +1,4 @@
-import styles from 'rri-ai/styles/Game.module.css'
+import styles from 'app/styles/Game.module.css'
 
 type DiceProps = {
     diceCodes: Array<number>,

@@ -1,5 +1,4 @@
-import { useStore } from 'hooks/useStore'
-import { RouteInfo } from 'rri-ai/types'
+import { RouteInfo } from 'app/types'
 import { Reducer } from 'redux'
 
 
