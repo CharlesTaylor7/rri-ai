@@ -1,18 +1,16 @@
 import 'app/styles/globals.css'
-import { Provider } from 'react-redux'
-import { useEffect, useMemo } from 'react'
+import type { AppProps } from 'next/app'
+import type {RootState} from 'app/store/core/index'
+import { Provider, useDispatch } from 'react-redux'
+import { useEffect } from 'react'
 import Head from 'next/head'
 import Error from 'next/error'
-import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
-import {initializeStore} from 'store/next'
+import store from 'app/store/core/index'
 
-const defaultStoreConfig = {
-    reducer: (s: any, _a: any) => s,
-}
 
 export default function App({ Component, pageProps }: AppProps) {
-    const { error, storeConfig, ...rest } = pageProps
+    const { error, state, ...rest } = pageProps
 
     const router = useRouter()
 
@@ -25,11 +23,6 @@ export default function App({ Component, pageProps }: AppProps) {
         return ( <Error {...error} />)
     }
 
-    const store = useMemo(
-        () => initializeStore(storeConfig || defaultStoreConfig),
-        [storeConfig]
-    ) as any;
-
     return (
         <>
             <Head>
@@ -38,9 +31,23 @@ export default function App({ Component, pageProps }: AppProps) {
             </Head>
             <main>
                 <Provider store={store}>
-                    <Component {...rest} />
+                    <LoadState state={state}>
+                        <Component {...rest} />
+                    </LoadState>
                 </Provider>
             </main>
         </>
     )
+}
+
+function useInitialState(state: RootState) {
+    const dispatch = useDispatch();
+
+    useEffect(() => dispatch({type: 'load_state', state} as any), [state])
+}
+
+const LoadState: React.FC<{ state: RootState }> = ({ children, state }) => {
+    useInitialState(state)
+
+    return <>{children}</>
 }

@@ -1,5 +1,5 @@
 import { RouteInfo } from 'app/types'
-import { Reducer } from 'redux'
+import { Action, Reducer } from 'redux'
 
 
 export type GameState = {
@@ -18,25 +18,29 @@ export const preloadedState = {
     diceCodes: []
 }
 
-export const reducer = {
-    'show_move': (state: GameState) => ({
-        ...state,
-        routes: {
-            current: [
-                ...state.routes.current,
-                ...state.routes.pending,
-            ],
-            pending: [],
-        }
-    }),
-    'roll_dice': (state: GameState) => {
-        return state
-    },
-    //     const url = `/api/game/roll/?id=${props.id}`
-    //     const { diceCodes, nextRoutes } = await fetch(url).then(res => res.json())
-    //     setDiceCodes(diceCodes)
-    //     setRoutes(rs => ({
-    //         pending: nextRoutes,
-    //         current: rs.current,
-    //     }))
+export const reducer: Reducer<GameState, Action<string>> = (state = preloadedState, action) => {
+    switch (action.type) {
+        case 'show_move':
+            return ({
+                ...state,
+                routes: {
+                    current: [
+                        ...state.routes.current,
+                        ...state.routes.pending,
+                    ],
+                    pending: [],
+                }
+            })
+        case 'roll_dice':
+            return state
+            //     const url = `/api/game/roll/?id=${props.id}`
+            //     const { diceCodes, nextRoutes } = await fetch(url).then(res => res.json())
+            //     setDiceCodes(diceCodes)
+            //     setRoutes(rs => ({
+            //         pending: nextRoutes,
+            //         current: rs.current,
+            //     }))
+        default:
+            return state
+    }
 }
