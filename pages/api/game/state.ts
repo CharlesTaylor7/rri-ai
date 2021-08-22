@@ -8,11 +8,14 @@ type Data = {
 
 export default function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<Data | string>
 ) {
-    const gameState = state[req.query.id]
+    console.log("req.query.id", req.query.id)
+    const gameState = state[req.query.id as string]
     if (gameState === undefined) {
         res.status(404).send('Game not Found')
     }
-    res.status(200).json(gameState)
+    else {
+        res.status(200).json(gameState)
+    }
 }

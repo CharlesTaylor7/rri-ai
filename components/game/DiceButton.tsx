@@ -1,6 +1,6 @@
 import { useContext, useCallback } from 'react'
-import { useStore } from 'rri-ai/store/game'
 import styles from 'rri-ai/styles/Game.module.css'
+import { useStore } from 'hooks/useStore'
 
 
 export default function DiceButton() {
@@ -22,8 +22,7 @@ function useProps() {
         }
     } = useStore()
 
-    const onClick = useCallback(
-        () => dispatch(routesPending ? 'show_move' : 'roll_dice'),
+    const onClick = useCallback(() => dispatch({ type: routesPending ? 'show_move' : 'roll_dice'}),
         [routesPending],
     )
 

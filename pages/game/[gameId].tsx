@@ -1,12 +1,11 @@
 import { useCallback, useState, useEffect, useContext, useReducer } from 'react'
 import Image from 'next/image'
-import Grid from 'rri-ai/components/game/Grid'
-import Dice from 'rri-ai/components/game/Dice'
-import DiceButton from 'rri-ai/components/game/DiceButton'
-import { RouteInfo } from 'rri-ai/types'
-import { state } from 'rri-ai/server/state'
-import styles from 'rri-ai/styles/Game.module.css'
-import { initStore } from 'rri-ai/store/game'
+import Grid from 'components/game/Grid'
+import Dice from 'components/game/Dice'
+import DiceButton from 'components/game/DiceButton'
+import type { RouteInfo } from 'types'
+import { state } from 'server/state'
+import styles from 'styles/Game.module.css'
 import type { NextPageContext } from 'next'
 
 
@@ -16,7 +15,7 @@ export default function Game() {
             <Grid />
             <div className={styles.rightPanel}>
                 <DiceButton />
-                <Dice />
+                <Dice diceCodes={[0, 3, 5, 7]} />
             </div>
         </div>
     )
