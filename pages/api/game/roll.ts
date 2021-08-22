@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { RouteInfo } from '@/types'
-import { state, drawInFirstValidPosition} from '@/server/state'
-import { dice, roll } from '@/server/dice'
+import type { RouteInfo } from 'types';
+import { state, drawInFirstValidPosition} from 'server/state'
+import { dice, roll } from 'server/dice';
+import type { Dice } from 'server/dice';
 
 type Data = {
     diceCodes: Array<number>,
@@ -11,11 +12,13 @@ type Data = {
 
 export default function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<Data | string>
 ) {
-    const gameState = state[req.query.id]
+    console.log(req.query.id)
+
+    const gameState = state[req.query.id as string]
     if (gameState === undefined) {
-        res.status(404).json()
+        res.status(404).send('Game not found')
         return
     }
 

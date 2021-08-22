@@ -1,14 +1,14 @@
+import {FunctionComponent} from 'react';
 import { hatchSize, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/constants'
-import defaultProps from './defaultProps'
 
 
 const s = cellLength;
 const h = s / 2;
 const w = hatchSize
 
-export default function Overpass(props) {
+const Overpass: FunctionComponent = () => {
     return (
-        <g {...props}>
+        <>
             {// 2 long for the highway lines
             }
             <line y1={0} y2={s} x1={h-w} x2={h-w} />
@@ -34,7 +34,7 @@ export default function Overpass(props) {
                     />)
                 )
             }
-        </g>
+        </>
     )
 }
-Overpass.defaultProps = defaultProps
+export default Overpass

@@ -24,5 +24,5 @@ export const routes: Array<Route> = [
 const basicDie: Die = [0, 1, 2, 3, 4, 5];
 const specialDie: Die = [6, 7, 8, 6, 7, 8]
 
-export const dice = [basicDie, basicDie, basicDie, specialDie]
+export const dice: Array<Die> = [basicDie, basicDie, basicDie, specialDie]
 export const roll = (die: Die) => die[Math.floor(Math.random() * 6)]

@@ -12,7 +12,7 @@ export default function handler(
 ) {
     const gameState = state[req.query.id]
     if (gameState === undefined) {
-        res.status(404).json()
+        res.status(404).send('Game not Found')
     }
     res.status(200).json(gameState)
 }
