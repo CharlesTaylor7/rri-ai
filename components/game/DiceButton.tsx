@@ -15,13 +15,12 @@ export default function DiceButton() {
 
 function useProps() {
     const dispatch = useDispatch()
-    const routesPending = useSelector(state => state.game.routes.pending)
+    const routesPending = useSelector(state => state.game.routes.pending.length)
 
-    const onClick = useCallback(() => dispatch({ type: routesPending ? 'show_move' : 'roll_dice'}),
-        [routesPending],
-    )
+    const actionType = routesPending ? 'show_move' : 'roll_dice'
+    const onClick = useCallback(() => dispatch({ type: actionType }), [routesPending])
 
-    const text = routesPending ? 'Show Move' : 'RollDice'
+    const text = routesPending ? 'Show Move' : 'Roll Dice'
 
     return { text, onClick }
 }

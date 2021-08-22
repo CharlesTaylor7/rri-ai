@@ -1,4 +1,3 @@
-//@ts-nocheck
 import type { FunctionComponent } from 'react'
 import type { RouteInfo } from 'app/types'
 import styles from 'app/styles/Game.module.css'
@@ -6,38 +5,38 @@ import RouteDefinitions from 'app/components/RouteDefinitions'
 import HalfHighway from 'app/components/routes/elements/HalfHighway'
 import HalfRailway from 'app/components/routes/elements/HalfRailway'
 import { cellLength } from 'app/constants'
-import { useGameStore } from 'app/store/game'
+import useSelector from 'app/hooks/useSelector'
 
 
-const Grid: FunctionComponent = () => {
-    const { state: { routes } } = useStore(GameContext)
+function Grid () {
+    const routes = useSelector(state => state.game.routes.current)
 
     return (
         <svg className={styles.grid} viewBox="-0.5 -0.5 8 8" strokeWidth="0.01" >
-            <g id="exits" strokeWidth="1">
+            <g id="exits" strokeWidth={1}>
                 {// North
                 }
-                <Exit translateX="1" translateY="-1" rotate={2} kind="highway" />
-                <Exit translateX="3" translateY="-1" rotate={2} kind="railway" />
-                <Exit translateX="5" translateY="-1" rotate={2} kind="highway" />
+                <Exit translateX={1} translateY={-1} rotate={2} kind="highway" />
+                <Exit translateX={3} translateY={-1} rotate={2} kind="railway" />
+                <Exit translateX={5} translateY={-1} rotate={2} kind="highway" />
 
                 {// South
                 }
-                <Exit translateX="1" translateY="7" rotate={0} kind="highway" />
-                <Exit translateX="3" translateY="7" rotate={0} kind="railway" />
-                <Exit translateX="5" translateY="7" rotate={0} kind="highway" />
+                <Exit translateX={1} translateY={7} rotate={0} kind="highway" />
+                <Exit translateX={3} translateY={7} rotate={0} kind="railway" />
+                <Exit translateX={5} translateY={7} rotate={0} kind="highway" />
 
                 {// East
                 }
-                <Exit translateX="7" translateY="1" rotate={3} kind="railway" />
-                <Exit translateX="7" translateY="3" rotate={3} kind="highway" />
-                <Exit translateX="7" translateY="5" rotate={3} kind="railway" />
+                <Exit translateX={7} translateY={1} rotate={3} kind="railway" />
+                <Exit translateX={7} translateY={3} rotate={3} kind="highway" />
+                <Exit translateX={7} translateY={5} rotate={3} kind="railway" />
 
                 {// West
                 }
-                <Exit translateX="-1" translateY="1" rotate={1} kind="railway" />
-                <Exit translateX="-1" translateY="3" rotate={1} kind="highway" />
-                <Exit translateX="-1" translateY="5" rotate={1} kind="railway" />
+                <Exit translateX={-1} translateY={1} rotate={1} kind="railway" />
+                <Exit translateX={-1} translateY={3} rotate={1} kind="highway" />
+                <Exit translateX={-1} translateY={5} rotate={1} kind="railway" />
             </g>
             <g id="grid-lines">
                 {Array.from({length: 8}, (_, i) => (
@@ -70,8 +69,7 @@ export interface ExitProps {
     rotate: number,
 }
 
-const Exit: FunctionComponent<ExitProps> = ({ kind, translateX, translateY, rotate }) => {
-    console.log(props)
+function Exit ({ kind, translateX, translateY, rotate }: ExitProps) {
     return (
         <g
             transform={`
@@ -89,14 +87,16 @@ const Exit: FunctionComponent<ExitProps> = ({ kind, translateX, translateY, rota
 interface DrawnRouteProps {
     route: RouteInfo,
 }
-const DrawnRoute: FunctionComponent<DrawnRouteProps> = ({ route }) => (
-    <use
-        href={`#route-${route.code}`}
-        strokeWidth="1"
-        transform={`
-            translate(${route.x},${route.y}),
-            rotate(${route.rotation * 90}, 0.5, 0.5),
-            scale(${1 / cellLength})
-        `}
-    />
-)
+function DrawnRoute ({ route }: DrawnRouteProps) {
+    return (
+        <use
+            href={`#route-${route.code}`}
+            strokeWidth={1}
+            transform={`
+                translate(${route.x},${route.y}),
+                rotate(${route.rotation * 90}, 0.5, 0.5),
+                scale(${1 / cellLength})
+            `}
+        />
+    )
+}

@@ -1,11 +1,9 @@
+import useSelector from 'app/hooks/useSelector';
 import styles from 'app/styles/Game.module.css'
 
-type DiceProps = {
-    diceCodes: Array<number>,
-}
 
-export default function Dice(props: DiceProps) {
-    const { diceCodes } = props;
+export default function Dice() {
+    const diceCodes = useSelector(state => state.game.diceCodes);
     return (
         <>
             {diceCodes.map(c => (
