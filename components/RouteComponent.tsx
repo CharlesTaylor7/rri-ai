@@ -3,9 +3,11 @@ import React from "react";
 
 
 type Component = () => React.ReactElement;
+type Props = React.SVGProps<SVGGElement> 
 
-export default function RouteComponent(component: Component) {
-    const wrapped: React.FC = (props: any) => (
+
+export default function RouteComponent(component: Component): React.FC<Props> {
+    const wrapped: React.FC = (props: Props) => (
         <g {...props}>
             {component}
         </g>

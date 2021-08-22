@@ -3,8 +3,12 @@ import { highwayWidth, hatchLocation, cellLength, hwyDashPattern } from 'rri-ai/
 const h = cellLength / 2;
 const w = highwayWidth / 2;
 
+type Props = {
+    rotate: number
+}
+
 // TODO: use bezier curve / parabola to get a more rounded edge
-export default function HighwayInsideTurn(props) {
+export default function HighwayInsideTurn(props: Props) {
     const { rotate, ...rest } = props
     return (
         <polyline

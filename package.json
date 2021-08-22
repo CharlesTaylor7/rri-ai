@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "tc": "npx tsc --noEmit --incremental",
-    "tc:watch": "npx tsc --noEmit --incremental --watch"
+    "tc": "npx tsc --noEmit",
+    "tc:watch": "npx tsc --noEmit --watch"
   },
   "dependencies": {
     "redux-toolkit": "npm:@reduxjs/toolkit@^1.6.1",
