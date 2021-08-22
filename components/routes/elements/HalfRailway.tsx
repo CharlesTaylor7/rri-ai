@@ -1,8 +1,11 @@
 import { hatchSize, hatchLocation, cellLength } from 'rri-ai/constants'
 
 const h = cellLength / 2;
+type Props = {
+    rotate: number
+}
 
-export default function HalfRailway(props) {
+export default function HalfRailway(props: Props) {
     const { rotate, ...rest } = props
     return (
         <g transform={`rotate(${rotate*90},${h},${h})`} {...rest} >

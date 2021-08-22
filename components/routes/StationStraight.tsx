@@ -10,7 +10,7 @@ function StationStraight() {
         <>
             <HalfRailway />
             <Station />
-            <HalfHighway rotate="2" />
+            <HalfHighway rotate={2} />
         </>
     )
 }

@@ -9,9 +9,9 @@ function HighwayFour() {
     return (
         <>
             <HighwayInsideTurn />
-            <HighwayInsideTurn rotate="1" />
-            <HighwayInsideTurn rotate="2" />
-            <HighwayInsideTurn rotate="3" />
+            <HighwayInsideTurn rotate={1} />
+            <HighwayInsideTurn rotate={2} />
+            <HighwayInsideTurn rotate={3} />
 
             {// horizontal dashed hwy line
             }

@@ -5,9 +5,9 @@ const h = s / 2;
 const crossS = h - crossHatchSize;
 const crossE = h + crossHatchSize;
 
-export default function RailwayT(props) {
+function RailwayT() {
     return (
-        <g {...props} stroke="black">
+        <>
 
             {// horizontal rail line
             }
@@ -43,6 +43,7 @@ export default function RailwayT(props) {
                     />)
                 )
             }
-        </g>
+        </>
     )
 }
+export default RouteComponent(RailwayT)
