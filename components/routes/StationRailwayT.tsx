@@ -9,9 +9,9 @@ function StationHighwayT() {
         <g>
             <Station />
             <HalfHighway />
-            <HalfRailway rotate="1" />
-            <HalfRailway rotate="2"/>
-            <HalfRailway rotate="3" />
+            <HalfRailway rotate={1} />
+            <HalfRailway rotate={2}/>
+            <HalfRailway rotate={3} />
         </g>
     )
 }

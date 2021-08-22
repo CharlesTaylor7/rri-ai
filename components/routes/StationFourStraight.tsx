@@ -9,9 +9,9 @@ function StationFourStraight() {
         <>
             <Station />
             <HalfHighway />
-            <HalfRailway rotate="1"/>
-            <HalfHighway rotate="2"/>
-            <HalfRailway rotate="3"/>
+            <HalfRailway rotate={1}/>
+            <HalfHighway rotate={2}/>
+            <HalfRailway rotate={3}/>
         </>
     )
 }

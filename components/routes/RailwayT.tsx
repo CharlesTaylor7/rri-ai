@@ -1,4 +1,5 @@
 import { hatchSize, crossHatchSize, hatchLocation, cellLength } from 'rri-ai/constants'
+import RouteComponent from '../RouteComponent';
 
 const s = cellLength;
 const h = s / 2;
