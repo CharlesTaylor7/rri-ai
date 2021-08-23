@@ -10,7 +10,7 @@ export interface GameState {
     openRoutes: OpenRoutes,
 }
 
-type State = GameState
+type ServerState = GameState
 
 
 export interface Shift {
@@ -29,7 +29,12 @@ export interface Location extends Position {
 }
 
 
-export let state: State | undefined = undefined
+let state: ServerState | undefined = undefined
+
+export function getServerState(): ServerState | undefined {
+    return state;
+}
+
 export function newGame(): void {
     state = getInitialState()
 }

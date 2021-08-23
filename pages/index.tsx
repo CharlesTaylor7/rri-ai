@@ -8,8 +8,8 @@ export default function Home() {
         <button
             className={styles.newGameButton}
             onClick={async () => {
-                const { gameId } = await fetch('/api/game/new').then(res => res.json())
-                router.push(`/game/${gameId}`)
+                await fetch('/api/game/new').then(res => res.json())
+                router.push(`/game/`)
             }}
         >
             New Game

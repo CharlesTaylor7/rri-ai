@@ -1,7 +1,7 @@
 import Grid from 'components/game/Grid'
 import Dice from 'components/game/Dice'
 import DiceButton from 'components/game/DiceButton'
-import { state as serverState } from 'server/state'
+import { getServerState } from 'server/state'
 import styles from 'styles/Game.module.css'
 import type { NextPageContext } from 'next'
 
@@ -19,8 +19,8 @@ export default function Game() {
 }
 
 
-export async function getServerSideProps(context: NextPageContext) {
-    const gameState = serverState
+export async function getServerSideProps() {
+    const gameState = getServerState();
 
     if (gameState === undefined) {
         const error = { statusCode: 404, title: 'Game does not exist' }
@@ -35,6 +35,7 @@ export async function getServerSideProps(context: NextPageContext) {
                         current: gameState.routesDrawn,
                         pending: [],
                     },
+                    diceCodes: [],
                 },
             },
         },

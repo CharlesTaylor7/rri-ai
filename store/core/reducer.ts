@@ -11,6 +11,7 @@ const combinedReducer = combineReducers({
 
 
 const rootReducer: Reducer<RootState, RootAction> = (state, action) => {
+    console.log(action.type)
     switch (action.type) {
         case 'load_state':
             return ({...state, ...action.state})

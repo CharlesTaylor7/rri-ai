@@ -11,7 +11,7 @@ export const rollDiceFulfilled = (payload: object) => ({ type: 'roll_dice_fulfil
 export const rollDiceEpic: Epic = action$ => action$.pipe(
     ofType('roll_dice'),
     mergeMap(({ gameId }) =>
-         ajax.getJSON(`/pages/api/game/roll?gameId=${gameId}`).pipe(
+         ajax.getJSON(`/pages/api/game/roll`).pipe(
              map((response: any) => rollDiceFulfilled(response))
         )
     )

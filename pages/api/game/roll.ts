@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { RouteInfo } from 'types';
-import { state, drawInFirstValidPosition} from 'server/state'
+import { getServerState, drawInFirstValidPosition} from 'server/state'
 import { dice, roll } from 'server/dice';
 import type { Die } from 'server/dice';
 
@@ -14,7 +14,7 @@ export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data | string>
 ) {
-    const gameState = state
+    const gameState = getServerState();
     if (gameState === undefined) {
         res.status(404).send('Game not found')
         return
