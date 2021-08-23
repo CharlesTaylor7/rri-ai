@@ -1,13 +1,13 @@
 import React from 'react'
 
 type Component = () => React.ReactElement;
-type Props = React.SVGProps<SVGGElement> 
+type Props = React.SVGProps<SVGGElement>
 
 
 export default function RouteComponent(component: Component): React.FC<Props> {
     const wrapped: React.FC<Props> = (props) => (
         <g {...props}>
-            {component}
+            {React.createElement(component)}
         </g>
     );
     wrapped.displayName = (component as any).displayName;

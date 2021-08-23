@@ -10,10 +10,8 @@ export interface GameState {
     openRoutes: OpenRoutes,
 }
 
-type state = {
-    // key: GameId
-    [key: string]: GameState
-}
+type State = GameState
+
 
 export interface Shift {
     x: number;
@@ -31,11 +29,9 @@ export interface Location extends Position {
 }
 
 
-export const state: state = {}
-export function newGame(): GameId {
-    const gameId: GameId = uuid()
-    state[gameId] = getInitialState()
-    return gameId
+export let state: State | undefined = undefined
+export function newGame(): void {
+    state = getInitialState()
 }
 
 // key is hyphen separated values:

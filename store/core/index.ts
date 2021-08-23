@@ -1,15 +1,22 @@
 import {initializeStore} from "../next";
 import reducer from "./reducer";
-import middleware, {epicMiddleware} from "./middleware";
+import { epicMiddleware } from "./middleware";
 import rootEpic from "./epic";
+import {getDefaultMiddleware} from "redux-toolkit";
 
 
-const store = initializeStore({ reducer });
+const store = initializeStore({
+    reducer: reducer as any,
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware()
+            .concat(
+                epicMiddleware,
+            ),
+});
 
 epicMiddleware.run(rootEpic);
 
 export default store
 
 
-export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

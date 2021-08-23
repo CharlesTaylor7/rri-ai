@@ -10,8 +10,7 @@ export default function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data | string>
 ) {
-    console.log("req.query.id", req.query.id)
-    const gameState = state[req.query.id as string]
+    const gameState = state
     if (gameState === undefined) {
         res.status(404).send('Game not Found')
     }

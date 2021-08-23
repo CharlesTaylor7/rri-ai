@@ -2,7 +2,8 @@ import { RouteInfo } from 'app/types'
 import { Action, Reducer } from 'redux'
 
 
-export type GameState = {
+export interface GameState {
+    id: string,
     routes: {
         current: Array<RouteInfo>,
         pending: Array<RouteInfo>
@@ -11,6 +12,7 @@ export type GameState = {
 }
 
 export const preloadedState = {
+    id: '',
     routes: {
         current: [],
         pending: [],
@@ -32,6 +34,7 @@ export const reducer: Reducer<GameState, Action<string>> = (state = preloadedSta
                 }
             })
         case 'roll_dice':
+            // TODO: show loading indicator
             return state
             //     const url = `/api/game/roll/?id=${props.id}`
             //     const { diceCodes, nextRoutes } = await fetch(url).then(res => res.json())
@@ -40,6 +43,9 @@ export const reducer: Reducer<GameState, Action<string>> = (state = preloadedSta
             //         pending: nextRoutes,
             //         current: rs.current,
             //     }))
+            //
+        case 'roll_dice_fulfilled':
+
         default:
             return state
     }

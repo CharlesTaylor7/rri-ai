@@ -4,14 +4,14 @@ import { ajax } from 'rxjs/ajax';
 
 
  // action creators
-export const rollDice = ({ type: 'roll_dice', payload: username });
+export const rollDice = (gameId: string) => ({ type: 'roll_dice', gameId })
 export const rollDiceFulfilled = (payload: object) => ({ type: 'roll_dice_fulfilled', payload });
 
  // epic
 export const rollDiceEpic: Epic = action$ => action$.pipe(
     ofType('roll_dice'),
-    mergeMap(action =>
-         ajax.getJSON('/pages/api/game/roll').pipe(
+    mergeMap(({ gameId }) =>
+         ajax.getJSON(`/pages/api/game/roll?gameId=${gameId}`).pipe(
              map((response: any) => rollDiceFulfilled(response))
         )
     )
