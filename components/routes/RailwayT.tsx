@@ -9,7 +9,6 @@ const crossE = h + crossHatchSize;
 function RailwayT() {
     return (
         <>
-
             {// horizontal rail line
             }
             <line x1={0} x2={s} y1={h} y2={h}/>
