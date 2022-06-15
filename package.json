@@ -1,5 +1,5 @@
 {
-  "name": "next-template",
+  "name": "railroad-inc-ai",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -50,7 +50,7 @@
   "jest": {
     "preset": "ts-jest",
     "moduleNameMapper": {
-      "^app/(.*)$": "<rootDir>/src/$1",
+      "^app/(.*)$": "<rootDir>/$1",
       "^@/(.*)$": "<rootDir>/src/$1",
       "^@@/(.*)$": "<rootDir>/$1"
     }

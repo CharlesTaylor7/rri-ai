@@ -3,14 +3,16 @@ import useSelector from 'app/hooks/useSelector'
 import useDispatch from 'app/hooks/useDispatch'
 import styles from 'app/styles/Game.module.css'
 import { rollDice } from 'app/store/game/actions'
+import Button, {labelButtonStyle} from '../inputs/Button'
 
 
 export default function DiceButton() {
     const { text, onClick } = useProps()
     return (
-        <button className={styles.diceButton} onClick={onClick}>
+      <Button className={labelButtonStyle("bg-green-200")} 
+        onClick={onClick}>
             {text}
-        </button>
+        </Button>
     )
 }
 

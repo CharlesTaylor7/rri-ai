@@ -1,6 +1,9 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import Error from "components/Error";
+
+import 'app/styles/globals.css'
+import Error from "app/components/Error";
+
 
 export default function App({ Component, pageProps }: AppProps) {
   const { error, ...rest } = pageProps;

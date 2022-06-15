@@ -1,38 +1,35 @@
-import {useState, useCallback} from "react"
 import Grid from "components/game/Grid";
 import Dice from "components/game/Dice";
 import DiceButton from "components/game/DiceButton";
-import styles from "styles/Game.module.css";
 import debugData from "app/debugData";
 import { Provider } from 'app/context'
-import { GameState } from 'app/server/state'
 import {RouteInfo} from "app/types";
+import useErgonomicState from "app/hooks/useErgonomicState";
+
+type AppState = {
+  routes: {
+    current: Array<RouteInfo>,
+    pending: Array<RouteInfo>,
+  }, 
+  diceCodes: Array<number>
+}
 
 type Props = {
-  state: {
-    game: {
-      routes: {
-        current: Array<RouteInfo>,
-        pending: Array<RouteInfo>,
-      }, 
-      diceCodes: Array<number>
-    }
-  }
+  state: AppState
+
 }
 
 export default function Game(props: Props) {
-  const [ state, setState ] = useState<GameState>(props.state)
-  const pushState = useCallback((updates: Partial<GameState>) => setState(state => ({...state, ...updates})), [setState])
-
+  const providerValue = useErgonomicState(props.state) 
   return (
-    <Provider value={{state, pushState}}>
-    <div className={styles.gameRow}>
-      <Grid />
-      <div className={styles.rightPanel}>
-        <DiceButton />
-        <Dice />
+    <Provider value={providerValue}>
+      <div className="flex h-full justify-around items-center" >
+        <Grid />
+        <div>
+          <DiceButton />
+          <Dice />
+        </div>
       </div>
-    </div>
     </Provider>
   );
 }

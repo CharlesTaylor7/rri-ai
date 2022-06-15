@@ -1,14 +1,13 @@
 import {createContext, useContext} from "react";
-import {GameState} from "app/server/state";
 
 
-interface AppContext {
-  state: GameState, 
-  pushState: (updates: Partial<GameState>) => void
+export interface AppContext<T> {
+  state: T, 
+  pushState: (updates: Partial<T>) => void
 }
 
 
-const context = createContext<undefined | AppContext>(undefined)
+const context = createContext<undefined | AppContext<any>>(undefined)
 
 export const Provider = context.Provider
 export function useSelector(fn: Function) {
