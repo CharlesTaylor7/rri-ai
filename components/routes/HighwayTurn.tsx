@@ -15,10 +15,10 @@ function HighwayTurn() {
 
             {// outside curved line
             }
-            <polyline points={`0,${h+w} ${h},${h+w} ${h+w},${h} ${h+w},0`} />
+            <polyline points={`0,${h+w} ${h},${h+w} ${h+w},${h} ${h+w},0`} fill="none" />
 
             {// 1 dashed hwy line
-            <polyline points={`0,${h} ${h-w},${h} ${h},${h-w} ${h},0`} strokeDasharray={hwyDashPattern}/>}
+            <polyline points={`0,${h} ${h-w},${h} ${h},${h-w} ${h},0`} strokeDasharray={hwyDashPattern} fill="none"/>}
         </>
     )
 }

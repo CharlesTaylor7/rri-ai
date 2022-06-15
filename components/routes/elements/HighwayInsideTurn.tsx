@@ -9,12 +9,12 @@ type Props = {
 
 // TODO: use bezier curve / parabola to get a more rounded edge
 export default function HighwayInsideTurn(props: Props) {
-    const { rotate, ...rest } = props
+  const { rotate } = props
     return (
         <polyline
             points={`0,${h-w} ${h-2*w},${h-w} ${h-w},${h-2*w} ${h-w},0`}
             transform={`rotate(${rotate*90},${h},${h})`}
-            {...rest}
+            fill="none"
         />
     )
 }

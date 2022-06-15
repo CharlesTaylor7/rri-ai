@@ -15,7 +15,7 @@ function RailwayTurn() {
         <>
             {// railway line
             }
-            <polyline points={`0,${h} ${h-w},${h} ${h},${h-w} ${h},0`} />
+            <polyline points={`0,${h} ${h-w},${h} ${h},${h-w} ${h},0`} fill="none" />
 
             {// diagonal hatch -->
             }
