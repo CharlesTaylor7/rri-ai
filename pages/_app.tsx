@@ -8,6 +8,7 @@ import store from "app/store/core/index";
 import Error from "components/Error";
 
 export default function App({ Component, pageProps }: AppProps) {
+  console.log(pageProps)
   const { error, state, ...rest } = pageProps;
   if (error) {
     return <Error {...error} />;

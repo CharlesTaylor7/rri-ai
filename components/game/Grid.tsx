@@ -10,6 +10,7 @@ import useSelector from 'app/hooks/useSelector'
 
 function Grid () {
     const routes = useSelector(state => state.game.routes.current)
+  console.log(routes)
 
     return (
         <svg className={styles.grid} viewBox="-0.5 -0.5 8 8" strokeWidth="0.01" >
