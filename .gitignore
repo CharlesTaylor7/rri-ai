@@ -23,6 +23,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
 # local env files
 .env.local
@@ -34,4 +35,10 @@ yarn-error.log*
 .vercel
 
 # typescript
-# *.tsbuildinfo
+*.tsbuildinfo
+
+# Generated tailwind file
+styles/tailwind.css
+
+# vim swap files
+*.swp

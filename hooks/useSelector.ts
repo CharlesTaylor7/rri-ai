@@ -1,3 +1,3 @@
-import {useSelector} from "app/context";
+import { useSelector } from 'app/context'
 
 export default useSelector

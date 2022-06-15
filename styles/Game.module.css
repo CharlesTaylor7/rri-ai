@@ -1,11 +1,8 @@
-
 .grid {
-    height: 700px;
-    width: 700px;
-    stroke: black;
+  height: 700px;
+  width: 700px;
+  stroke: black;
 }
-
-
 
 .die {
   height: 100px;

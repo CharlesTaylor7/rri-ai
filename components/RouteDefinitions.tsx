@@ -15,25 +15,25 @@ import StationFourTurn from 'app/components/routes/StationFourTurn'
 import StationFourStraight from 'app/components/routes/StationFourStraight'
 
 // this component provides svg <defs> to be used inside the grid
-export default function RouteDefinitions () {
-    return (
-        <defs>
-            // as listed on the player boards in order from left to right:
-            <RailwayTurn id="route-0" />
-            <RailwayT id="route-1" />
-            <RailwayStraight id="route-2" />
-            <HighwayTurn id="route-3" />
-            <HighwayT id="route-4" />
-            <HighwayStraight id="route-5" />
-            <Overpass id="route-6" />
-            <StationStraight id="route-7" />
-            <StationTurn id="route-8" />
-            <StationHighwayT id="route-9" />
-            <StationRailwayT id="route-10" />
-            <HighwayFour id="route-11" />
-            <RailwayFour id="route-12" />
-            <StationFourTurn id="route-13" />
-            <StationFourStraight id="route-14" />
-        </defs>
-    )
+export default function RouteDefinitions() {
+  return (
+    <defs>
+      // as listed on the player boards in order from left to right:
+      <RailwayTurn id="route-0" />
+      <RailwayT id="route-1" />
+      <RailwayStraight id="route-2" />
+      <HighwayTurn id="route-3" />
+      <HighwayT id="route-4" />
+      <HighwayStraight id="route-5" />
+      <Overpass id="route-6" />
+      <StationStraight id="route-7" />
+      <StationTurn id="route-8" />
+      <StationHighwayT id="route-9" />
+      <StationRailwayT id="route-10" />
+      <HighwayFour id="route-11" />
+      <RailwayFour id="route-12" />
+      <StationFourTurn id="route-13" />
+      <StationFourStraight id="route-14" />
+    </defs>
+  )
 }

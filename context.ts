@@ -1,17 +1,15 @@
-import {createContext, useContext} from "react";
-
+import { createContext, useContext } from 'react'
 
 export interface AppContext<T> {
-  state: T, 
+  state: T
   pushState: (updates: Partial<T>) => void
 }
-
 
 const context = createContext<undefined | AppContext<any>>(undefined)
 
 export const Provider = context.Provider
 export function useSelector(fn: Function) {
-  const value = useContext(context) 
+  const value = useContext(context)
   if (value === undefined) {
     throw new Error("Used 'useSelector' outside of provider context")
   }
@@ -19,7 +17,7 @@ export function useSelector(fn: Function) {
 }
 
 export function useDispatch() {
-  const value = useContext(context) 
+  const value = useContext(context)
   if (value === undefined) {
     throw new Error("Used 'useDispatch' outside of provider context")
   }

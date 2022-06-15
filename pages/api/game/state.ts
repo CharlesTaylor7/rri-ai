@@ -1,19 +1,19 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import type { RouteInfo } from "app/types";
-import { getServerState } from "app/server/state";
+import type { NextApiRequest, NextApiResponse } from 'next'
+import type { RouteInfo } from 'app/types'
+import { getServerState } from 'app/server/state'
 
 type Data = {
-  routesDrawn: Array<RouteInfo>;
-};
+  routesDrawn: Array<RouteInfo>
+}
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data | string>
+  res: NextApiResponse<Data | string>,
 ) {
-  const gameState = getServerState();
+  const gameState = getServerState()
   if (gameState === undefined) {
-    res.status(404).send("Game not Found");
+    res.status(404).send('Game not Found')
   } else {
-    res.status(200).json(gameState);
+    res.status(200).json(gameState)
   }
 }

@@ -1,29 +1,28 @@
-import Grid from "components/game/Grid";
-import Dice from "components/game/Dice";
-import DiceButton from "components/game/DiceButton";
-import debugData from "app/debugData";
+import Grid from 'components/game/Grid'
+import Dice from 'components/game/Dice'
+import DiceButton from 'components/game/DiceButton'
+import debugData from 'app/debugData'
 import { Provider } from 'app/context'
-import {RouteInfo} from "app/types";
-import useErgonomicState from "app/hooks/useErgonomicState";
+import { RouteInfo } from 'app/types'
+import useErgonomicState from 'app/hooks/useErgonomicState'
 
 type AppState = {
   routes: {
-    current: Array<RouteInfo>,
-    pending: Array<RouteInfo>,
-  }, 
+    current: Array<RouteInfo>
+    pending: Array<RouteInfo>
+  }
   diceCodes: Array<number>
 }
 
 type Props = {
   state: AppState
-
 }
 
 export default function Game(props: Props) {
-  const providerValue = useErgonomicState(props.state) 
+  const providerValue = useErgonomicState(props.state)
   return (
     <Provider value={providerValue}>
-      <div className="flex h-full justify-around items-center" >
+      <div className="flex h-full justify-around items-center">
         <Grid />
         <div>
           <DiceButton />
@@ -31,7 +30,7 @@ export default function Game(props: Props) {
         </div>
       </div>
     </Provider>
-  );
+  )
 }
 
 export async function getServerSideProps() {
@@ -47,5 +46,5 @@ export async function getServerSideProps() {
         },
       },
     },
-  };
+  }
 }

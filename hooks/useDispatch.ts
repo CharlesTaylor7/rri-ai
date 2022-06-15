@@ -1,3 +1,3 @@
-import { useDispatch } from "app/context";
+import { useDispatch } from 'app/context'
 
-export default useDispatch;
+export default useDispatch

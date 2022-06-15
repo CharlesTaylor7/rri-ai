@@ -1,14 +1,13 @@
-import type { AppProps } from "next/app";
-import Head from "next/head";
+import type { AppProps } from 'next/app'
+import Head from 'next/head'
 
 import 'app/styles/globals.css'
-import Error from "app/components/Error";
-
+import Error from 'app/components/Error'
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { error, ...rest } = pageProps;
+  const { error, ...rest } = pageProps
   if (error) {
-    return <Error {...error} />;
+    return <Error {...error} />
   }
   return (
     <>
@@ -20,5 +19,5 @@ export default function App({ Component, pageProps }: AppProps) {
         <Component {...rest} />
       </main>
     </>
-  );
+  )
 }
