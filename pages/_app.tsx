@@ -1,9 +1,8 @@
-import "app/styles/globals.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import {useCallback, useState} from "react";
 import Error from "components/Error";
 import { Provider } from 'app/context'
-import {useCallback, useState} from "react";
 import {GameState} from "app/server/state";
 
 export default function App({ Component, pageProps }: AppProps) {
