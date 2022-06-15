@@ -1,3 +1,3 @@
-import { useDispatch } from "react-redux";
+import { useDispatch } from "app/context";
 
 export default useDispatch;
