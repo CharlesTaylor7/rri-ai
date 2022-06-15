@@ -1,7 +1,6 @@
-import React from 'react'
+import { useEffect }  from 'react'
 import NextError from 'next/error'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
 
 export interface ErrorProps {
   statusCode: string

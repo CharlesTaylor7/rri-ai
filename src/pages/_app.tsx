@@ -1,7 +1,7 @@
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 
-import 'app/styles/globals.css'
+import 'app/styles/tailwind.css'
 import Error from 'app/components/Error'
 
 export default function App({ Component, pageProps }: AppProps) {
