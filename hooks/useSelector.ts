@@ -1,5 +1,3 @@
-import { useSelector as useUntypedSelector, TypedUseSelectorHook } from 'react-redux'
-import type { RootState } from 'store/core/reducer';
+import {useSelector} from "app/context";
 
-const useSelector: TypedUseSelectorHook<RootState> = useUntypedSelector;
-export default useSelector;
+export default useSelector

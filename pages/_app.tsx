@@ -1,18 +1,20 @@
 import "app/styles/globals.css";
 import type { AppProps } from "next/app";
-import type { RootState } from "app/store/core/reducer";
-import { Provider, useDispatch } from "react-redux";
-import { useEffect } from "react";
 import Head from "next/head";
-import store from "app/store/core/index";
 import Error from "components/Error";
+import { Provider } from 'app/context'
+import {useCallback, useState} from "react";
+import {GameState} from "app/server/state";
 
 export default function App({ Component, pageProps }: AppProps) {
   console.log(pageProps)
-  const { error, state, ...rest } = pageProps;
+  const { error, state: initialState, ...rest } = pageProps;
   if (error) {
     return <Error {...error} />;
   }
+
+  const [ state, setState] = useState<GameState>(initialState)
+  const pushState = useCallback((updates: Partial<GameState>) => setState(state => ({...state, ...updates})), [setState])
 
   return (
     <>
@@ -21,7 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Provider store={store}>
+        <Provider value={{state, pushState}}>
           <Component {...rest} />
         </Provider>
       </main>
