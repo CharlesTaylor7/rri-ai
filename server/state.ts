@@ -1,7 +1,7 @@
 import type { NextApiResponse } from 'next'
-import type { Piece, Route, RouteInfo } from 'app/types'
+import type { Piece, Route, RouteInfo } from '@/types'
 import { v4 as uuid } from 'uuid'
-import { routes } from 'app/server/dice'
+import { routes } from '@/server/dice'
 
 type GameId = string
 

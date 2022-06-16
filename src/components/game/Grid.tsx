@@ -1,17 +1,15 @@
-import type { FunctionComponent } from 'react'
 import type { RouteInfo } from 'app/types'
-import styles from 'app/styles/Game.module.css'
 import RouteDefinitions from 'app/components/RouteDefinitions'
 import HalfHighway from 'app/components/routes/elements/HalfHighway'
 import HalfRailway from 'app/components/routes/elements/HalfRailway'
 import { cellLength } from 'app/constants'
 import useSelector from 'app/hooks/useSelector'
 
-function Grid() {
+export default function Grid() {
   const routes = useSelector((state) => state.game.routes.current)
 
   return (
-    <svg className={styles.grid} viewBox="-0.5 -0.5 8 8" strokeWidth="0.01">
+    <svg viewBox="-0.5 -0.5 8 8" stroke="black" strokeWidth="0.01" >
       <Exits />
       <GridLines />
       <RouteDefinitions />
@@ -23,7 +21,6 @@ function Grid() {
     </svg>
   )
 }
-export default Grid
 
 function Exits() {
   return (
