@@ -10,12 +10,10 @@ export default function Grid() {
 
   return (
     <svg
-      className="shrink-0"
+      className="shrink-0 min-w-max"
       viewBox="-0.5 -0.5 8 8"
       stroke="black"
       strokeWidth="0.01"
-      height="700px"
-      width="700px"
     >
       <Exits />
       <GridLines />
