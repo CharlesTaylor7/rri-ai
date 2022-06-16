@@ -10,7 +10,7 @@ async function defineSchema(db: Knex) {
       CREATE TABLE games
         ( id SERIAL PRIMARY KEY
         , created_at TIMESTAMP DEFAULT current_timestamp
-        , uuid UUID UNIQUE
+        , uuid VARCHAR(36) UNIQUE
         , client_json JSON NOT NULL DEFAULT '{}'::json
         , server_json JSON NOT NULL DEFAULT '{}'::json
         )

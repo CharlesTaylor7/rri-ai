@@ -2,14 +2,12 @@ import type { Piece, Route, RouteInfo } from '@/types'
 import { routes } from '@/server/dice'
 import db from '@/server/db'
 
-type GameId = string
 
 export interface GameState {
   routesDrawn: Array<RouteInfo>
   openRoutes: OpenRoutes
 }
 
-type ServerState = GameState
 
 export interface Shift {
   x: number
@@ -27,6 +25,7 @@ export interface Location extends Position {
 }
 
 export async function getServerState(gameId: string): Promise<GameState | undefined> {
+  console.log('gameId', gameId)
   const rows = await db.select('server_json').from('games').where('uuid', gameId).limit(1)
   if (rows.length === 0) return undefined
   return ({

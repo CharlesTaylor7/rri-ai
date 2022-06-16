@@ -15,7 +15,7 @@ export default function DiceButton() {
 
 function useProps() {
   const dispatch = useDispatch()
-  const { pending, current } = useSelector((state) => state.routes)
+  const { gameId, routes: { pending, current } } = useSelector((state) => state)
 
   let onClick
   if (pending.length > 0) {
@@ -24,7 +24,7 @@ function useProps() {
     }
   } else {
     onClick = async () => {
-      const { diceCodes, routesDrawn } = await fetch('/api/game/roll').then(
+      const { diceCodes, routesDrawn } = await fetch(`/api/game/roll?gameId=${gameId}`).then(
         (res) => res.json(),
       )
       dispatch({ pending: routesDrawn, diceCodes })

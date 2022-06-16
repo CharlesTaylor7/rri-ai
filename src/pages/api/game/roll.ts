@@ -9,11 +9,16 @@ type Data = {
   nextRoutes: Array<RouteInfo>
 }
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data | string>,
 ) {
-  const gameState = getServerState(req.query.gameId)
+  const gameId = req.query.gameId 
+  if (gameId === undefined) {
+    res.status(404).send('Game not found')
+    return
+  }
+  const gameState = await getServerState(gameId)
   if (gameState === undefined) {
     res.status(404).send('Game not found')
     return
