@@ -16,7 +16,7 @@ export default function Home(props: Props) {
     </Button>
   )
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col items-center p-8 text-3xl">
       {gameLink(props.newGameId, 'New Game')}
       {props.games.map((game) => gameLink(game.uuid, game.createdAt))}
     </div>
