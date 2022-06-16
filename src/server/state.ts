@@ -26,8 +26,9 @@ export interface Location extends Position {
   direction: Direction
 }
 
-export async function getServerState(gameId: String): Promise<GameState> {
+export async function getServerState(gameId: string): Promise<GameState | undefined> {
   const rows = await db.select('server_json').from('games').where('uuid', gameId).limit(1)
+  if (rows.length === 0) return undefined
   return ({
     ...getInitialState(),
     ...rows[0].server_json,
