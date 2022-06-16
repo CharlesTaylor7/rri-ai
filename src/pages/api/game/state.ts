@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { RouteInfo } from 'app/types'
-import { getServerState } from 'app/server/state'
+import type { RouteInfo } from '@/types'
+import { getServerState } from '@/server/state'
 
 type Data = {
   routesDrawn: Array<RouteInfo>

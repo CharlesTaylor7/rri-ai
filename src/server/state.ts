@@ -1,7 +1,6 @@
-import type { NextApiResponse } from 'next'
 import type { Piece, Route, RouteInfo } from '@/types'
-import { v4 as uuid } from 'uuid'
 import { routes } from '@/server/dice'
+import db from '@/server/db'
 
 type GameId = string
 
@@ -27,14 +26,12 @@ export interface Location extends Position {
   direction: Direction
 }
 
-let state: ServerState | undefined = undefined
-
-export function getServerState(): ServerState | undefined {
-  return state
-}
-
-export function newGame(): void {
-  state = getInitialState()
+export async function getServerState(gameId: String): Promise<GameState> {
+  const rows = await db.select('server_json').from('games').where('uuid', gameId).limit(1)
+  return ({
+    ...getInitialState(),
+    ...rows[0].server_json,
+  })
 }
 
 // key is hyphen separated values:

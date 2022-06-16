@@ -49,12 +49,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
-      ...(game?.client_json || {}),
       routes: {
         current: debugData,
         pending: [],
       },
       diceCodes: [],
+      ...(game?.client_json || {}),
     },
   }
 }
