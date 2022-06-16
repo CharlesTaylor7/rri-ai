@@ -19,10 +19,9 @@ type Props = {
 }
 
 export default function Game(props: Props) {
-  const providerValue = useErgonomicState(props.state)
   return (
-    <Provider value={providerValue}>
-      <div className="flex h-full justify-around items-center">
+    <Provider value={useErgonomicState(props.state)}>
+      <div className="flex flex-wrap h-full justify-around items-center">
         <Grid />
         <div>
           <DiceButton />

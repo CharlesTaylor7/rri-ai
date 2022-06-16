@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import useSelector from 'app/hooks/useSelector'
 import useDispatch from 'app/hooks/useDispatch'
-import styles from 'app/styles/Game.module.css'
 import { rollDice } from 'app/store/game/actions'
 import Button, { labelButtonStyle } from '../inputs/Button'
 
