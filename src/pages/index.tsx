@@ -7,9 +7,14 @@ type Props = {
   games: Array<{ uuid: string; createdAt: string }>
 }
 
+const doNothing = () => {}
 export default function Home(props: Props) {
   const gameLink = (uuid: string, label: string) => (
-    <Button key={uuid} className={labelButtonStyle('bg-green-200')}>
+    <Button
+      key={uuid}
+      className={labelButtonStyle('bg-green-200')}
+      onClick={doNothing}
+    >
       <Link href="/game/[uuid]" as={`/game/${uuid}`}>
         {label}
       </Link>

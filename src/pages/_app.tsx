@@ -5,17 +5,16 @@ import '@@/styles/tailwind.output.css'
 import Error from '@/components/Error'
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { error, ...rest } = pageProps
-  if (error) {
-    return <Error {...error} />
-  }
-  return (
+  const { error, ...props } = pageProps
+  return error ? (
+    <Error {...error} />
+  ) : (
     <>
       <Head>
         <title>Railroad Inc. AI</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Component {...rest} />
+      <Component {...props} />
     </>
   )
 }

@@ -1,18 +1,19 @@
-import Grid from 'app/components/game/Grid'
-import Dice from 'app/components/game/Dice'
-import DiceButton from 'app/components/game/DiceButton'
-import debugData from 'app/debugData'
-import { Provider } from 'app/context'
-import { AppState } from 'app/types'
-import useErgonomicState from 'app/hooks/useErgonomicState'
+import Grid from '@/components/game/Grid'
+import Dice from '@/components/game/Dice'
+import DiceButton from '@/components/game/DiceButton'
+import debugData from '@/debugData'
+import { Provider } from '@/context'
+import { AppState } from '@/types'
+import useErgonomicState from '@/hooks/useErgonomicState'
+import { SSR } from '@/core/types'
+import db from '@/server/db'
+import { GetServerSideProps } from 'next'
 
-type Props = {
-  state: AppState
-}
+type Props = AppState
 
 export default function Game(props: Props) {
   return (
-    <Provider value={useErgonomicState(props.state)}>
+    <Provider value={useErgonomicState(props)}>
       <div className="h-full overflow-y-scroll flex flex-wrap justify-around">
         <Grid />
         <div className="flex flex-col">
@@ -24,16 +25,33 @@ export default function Game(props: Props) {
   )
 }
 
-export async function getServerSideProps() {
+const notFound = (context: any) => {
+  const code = 404
+  context.res.statusCode = code
+  return {
+    props: { error: { statusCode: code, title: 'Game not found' } },
+  }
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const gameId = context.params?.uuid
+  if (gameId === undefined) return notFound(context)
+  const game = await db
+    .select('*')
+    .from('games')
+    .where('uuid', gameId)
+    .limit(1)
+    .then((rows) => rows[0])
+
+  if (game === undefined) return notFound(context)
+
   return {
     props: {
-      state: {
-        routes: {
-          current: debugData,
-          pending: [],
-        },
-        diceCodes: [],
+      routes: {
+        current: debugData,
+        pending: [],
       },
+      diceCodes: [],
     },
   }
 }

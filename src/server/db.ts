@@ -1,12 +1,10 @@
-import { Knex, knex } from 'knex'
-import { name } from '@@/package.json'
+import { knex } from 'knex'
+import packageJson from '@@/package.json'
 
-export function connect(): Knex {
-  return knex({
-    client: 'postgres',
-    connection: {
-      user: 'postgres',
-      database: name.replaceAll('-', '_'),
-    },
-  })
-}
+export default knex({
+  client: 'postgres',
+  connection: {
+    user: 'postgres',
+    database: packageJson.name.replaceAll('-', '_'),
+  },
+})

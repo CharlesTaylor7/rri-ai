@@ -1,5 +1,5 @@
 import type { Knex } from 'knex'
-import { connect } from '@/server/db'
+import db from '@/server/db'
 
 async function defineSchema(db: Knex) {
   await db.schema
@@ -17,7 +17,6 @@ async function defineSchema(db: Knex) {
 }
 
 async function setupDatabase() {
-  const db = connect()
   await defineSchema(db)
   await db.destroy()
 }
