@@ -1,12 +1,12 @@
 import { useRef } from 'react'
 
-export default function useComponentWillMount(callback: () => void) {
+export default function useComponentWillMount<T>(callback: () => T): T {
   // initialize the ref
-  const willMountRef = useRef(true)
+  const ref = useRef<T | undefined>()
 
   // run the callback before mounting
-  if (willMountRef.current) callback()
-
-  // turn off ref flag, so that the callback doesn't run again
-  willMountRef.current = false
+  if (ref.current === undefined) {
+    ref.current = callback()
+  }
+  return ref.current
 }
