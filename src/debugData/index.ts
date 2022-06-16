@@ -1,4 +1,4 @@
-import {RouteInfo} from "app/types"
+import { RouteInfo } from 'app/types'
 
 const debugRoutes: Array<RouteInfo> = [
   { code: 0, x: 0, y: 0, rotation: 0 },

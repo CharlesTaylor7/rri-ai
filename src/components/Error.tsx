@@ -1,4 +1,4 @@
-import { useEffect }  from 'react'
+import { useEffect } from 'react'
 import NextError from 'next/error'
 import { useRouter } from 'next/router'
 
