@@ -10,7 +10,7 @@ export default function Grid() {
 
   return (
     <svg
-      className="shrink-0 min-w-max"
+      className="shrink-0 max-w-[700px]"
       viewBox="-0.5 -0.5 8 8"
       stroke="black"
       strokeWidth="0.01"
