@@ -33,24 +33,23 @@ const notFound = (context: any) => {
   }
 }
 
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const gameId = context.params?.uuid
   if (gameId === undefined) return notFound(context)
   let game = await db
-    .select('*')
+    .select('client_json')
     .from('games')
     .where('uuid', gameId)
     .limit(1)
     .then((rows) => rows[0])
 
   if (game === undefined) {
-    game = await db('games').insert({ uuid: gameId}).returning('*').then(rows => rows[0])
+    await db('games').insert({ uuid: gameId })
   }
 
   return {
     props: {
-      ...game.json,
+      ...(game?.client_json || {}),
       routes: {
         current: debugData,
         pending: [],

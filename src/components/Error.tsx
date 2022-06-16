@@ -15,7 +15,5 @@ export default function Error(props: ErrorProps) {
     setTimeout(() => router.push('/'), 1000)
   }, [])
 
-  return (
-    <NextError {...(props as any)} />
-  )
+  return <NextError {...(props as any)} />
 }

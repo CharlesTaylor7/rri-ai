@@ -1,4 +1,6 @@
+import db from '@/server/db'
 import Button, { labelButtonStyle } from 'app/components/inputs/Button'
+import { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { v4 as uuid } from 'uuid'
 
@@ -21,19 +23,29 @@ export default function Home(props: Props) {
     </Button>
   )
   return (
-    <div className="flex flex-col items-center p-8 text-3xl">
+    <div className="p-8 text-3xl flex flex-col gap-4 items-center">
       {gameLink(props.newGameId, 'New Game')}
       {props.games.map((game) => gameLink(game.uuid, game.createdAt))}
     </div>
   )
 }
 
-type SSR<P> = { props: P }
-export async function getServerSideProps(): Promise<SSR<Props>> {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const games = await db
+    .select('uuid', 'created_at')
+    .from('games')
+    .orderBy('created_at', 'desc')
+    .limit(5)
+    .then((rows) =>
+      rows.map((row) => ({
+        uuid: row.uuid,
+        createdAt: String(row.created_at),
+      })),
+    )
   return {
     props: {
       newGameId: String(uuid()),
-      games: [],
+      games: games,
     },
   }
 }
