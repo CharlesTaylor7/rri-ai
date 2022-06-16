@@ -1,3 +1,11 @@
+export type AppState = {
+  routes: {
+    current: Array<RouteInfo>
+    pending: Array<RouteInfo>
+  }
+  diceCodes: Array<number>
+}
+
 export type RouteInfo = {
   // in the order printed at the top of the player boards:
   // 0-8: the normal die faces

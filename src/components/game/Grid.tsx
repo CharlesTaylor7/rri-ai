@@ -6,7 +6,7 @@ import { cellLength } from 'app/constants'
 import useSelector from 'app/hooks/useSelector'
 
 export default function Grid() {
-  const routes = useSelector((state) => state.game.routes.current)
+  const routes = useSelector((state) => state.routes.current)
 
   return (
     <svg

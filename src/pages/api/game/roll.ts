@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { RouteInfo } from 'types'
-import { getServerState, drawInFirstValidPosition } from 'server/state'
-import { dice, roll } from 'server/dice'
-import type { Die } from 'server/dice'
+import type { RouteInfo } from '@/types'
+import { getServerState, drawInFirstValidPosition } from '@/server/state'
+import { dice, roll } from '@/server/dice'
+import type { Die } from '@/server/dice'
 
 type Data = {
   diceCodes: Array<number>

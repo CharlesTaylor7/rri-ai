@@ -8,7 +8,7 @@ export interface AppContext<T> {
 const context = createContext<undefined | AppContext<any>>(undefined)
 
 export const Provider = context.Provider
-export function useSelector(fn: Function) {
+export function useSelector<S, V>(fn: (state: S) => V): V {
   const value = useContext(context)
   if (value === undefined) {
     throw new Error("Used 'useSelector' outside of provider context")

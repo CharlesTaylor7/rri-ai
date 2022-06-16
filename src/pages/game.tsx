@@ -3,16 +3,8 @@ import Dice from 'app/components/game/Dice'
 import DiceButton from 'app/components/game/DiceButton'
 import debugData from 'app/debugData'
 import { Provider } from 'app/context'
-import { RouteInfo } from 'app/types'
+import { AppState } from 'app/types'
 import useErgonomicState from 'app/hooks/useErgonomicState'
-
-type AppState = {
-  routes: {
-    current: Array<RouteInfo>
-    pending: Array<RouteInfo>
-  }
-  diceCodes: Array<number>
-}
 
 type Props = {
   state: AppState
@@ -36,13 +28,11 @@ export async function getServerSideProps() {
   return {
     props: {
       state: {
-        game: {
-          routes: {
-            current: debugData,
-            pending: [],
-          },
-          diceCodes: [],
+        routes: {
+          current: debugData,
+          pending: [],
         },
+        diceCodes: [],
       },
     },
   }
