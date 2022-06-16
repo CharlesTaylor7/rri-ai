@@ -13,7 +13,7 @@
     "test": "jest",
     "format": "prettier --write .",
     "watch-css": "tailwindcss -i styles/tailwind.source.css -o styles/tailwind.output.css --watch",
-    "reset-db": "ts-node -T src/backend/setup"
+    "reset-db": "ts-node -T src/server/setup"
   },
   "dependencies": {
     "immutable": "^4.0.0",
