@@ -9,9 +9,9 @@ async function defineSchema(db: Knex) {
     .raw(`
       CREATE TABLE games
         ( id SERIAL PRIMARY KEY
-        , created_at TIMESTAMP default current_timestamp
+        , created_at TIMESTAMP DEFAULT current_timestamp
         , uuid UUID UNIQUE
-        , json JSON
+        , json JSON NOT NULL DEFAULT '{}'::json
         )
     `)
 }
