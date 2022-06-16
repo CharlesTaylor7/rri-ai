@@ -9,7 +9,14 @@ export default function Grid() {
   const routes = useSelector((state) => state.game.routes.current)
 
   return (
-    <svg viewBox="-0.5 -0.5 8 8" stroke="black" strokeWidth="0.01">
+    <svg
+      className="shrink-0"
+      viewBox="-0.5 -0.5 8 8"
+      stroke="black"
+      strokeWidth="0.01"
+      height="700px"
+      width="700px"
+    >
       <Exits />
       <GridLines />
       <RouteDefinitions />

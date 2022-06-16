@@ -38,7 +38,7 @@ yarn-error.log*
 *.tsbuildinfo
 
 # Generated tailwind file
-styles/tailwind.css
+styles/tailwind.output.css
 
 # vim swap files
 *.swp

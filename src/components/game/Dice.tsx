@@ -5,7 +5,7 @@ export default function Dice() {
   return (
     <>
       {diceCodes.map((c) => (
-        <div className="" >{c}</div>
+        <div className="">{c}</div>
       ))}
     </>
   )
