@@ -11,8 +11,7 @@ async function defineSchema(db: Knex) {
         ( id SERIAL PRIMARY KEY
         , created_at TIMESTAMP DEFAULT current_timestamp
         , uuid VARCHAR(36) UNIQUE
-        , client_json JSON NOT NULL DEFAULT '{}'::json
-        , server_json JSON NOT NULL DEFAULT '{}'::json
+        , json JSON NOT NULL DEFAULT '{}'::json
         )
     `)
 }

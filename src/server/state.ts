@@ -26,14 +26,14 @@ export async function getServerState(
   gameId: string,
 ): Promise<GameState | undefined> {
   const rows = await db
-    .select('server_json')
+    .select('json')
     .from('games')
     .where('uuid', gameId)
     .limit(1)
   if (rows.length === 0) return undefined
   return {
     ...getInitialState(),
-    ...rows[0].server_json,
+    ...rows[0].json,
   }
 }
 

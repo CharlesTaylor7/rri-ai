@@ -30,7 +30,7 @@ export default async function handler(
     .map((code) => drawInFirstValidPosition(gameState, code))
     .filter((route) => route) as Array<RouteInfo>
 
-  await db('games').where('uuid', gameId).update('server_json', gameState)
+  await db('games').where('uuid', gameId).update('json', gameState)
 
   res.status(200).json({
     diceCodes,

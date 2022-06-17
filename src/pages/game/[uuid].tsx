@@ -32,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const gameId = context.params?.uuid
   if (gameId === undefined) return notFound(context)
   let game = await db
-    .select('client_json')
+    .select('json')
     .from('games')
     .where('uuid', gameId)
     .limit(1)
@@ -45,10 +45,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       gameId,
-      currentRoutes: [],
+      currentRoutes: game?.json.routesDrawn || [],
       pendingRoutes: [],
       diceCodes: [],
-      ...(game?.client_json || {}),
     },
   }
 }
