@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import type { RouteInfo } from '@/types'
 import { getServerState, drawInFirstValidPosition } from '@/server/state'
 import { dice, roll } from '@/server/dice'
-import type { Die } from '@/server/dice'
+import db from '@/server/db'
 
 type Data = {
   diceCodes: Array<number>
@@ -30,7 +30,8 @@ export default async function handler(
     .map((code) => drawInFirstValidPosition(gameState, code))
     .filter((route) => route) as Array<RouteInfo>
 
-  console.log(nextRoutes)
+  await db('games').where('uuid', gameId).update('server_json', gameState)
+
   res.status(200).json({
     diceCodes,
     nextRoutes,
