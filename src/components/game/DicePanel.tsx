@@ -6,9 +6,8 @@ import DiceButton from '@/components/game/DiceButton'
 export default function DicePanel() {
   const diceCodes = useSelector((state) => state.diceCodes)
   return (
-    <div className="m-6 flex flex-wrap gap-2 ">
+    <div className="m-6 flex flex-wrap gap-2 items-start ">
       <DiceButton />
-      <div/>
       {diceCodes.map((c, i) => (
         <Die key={i} code={c} /> 
       ))}
