@@ -15,6 +15,7 @@ function useProps() {
   const dispatch = useDispatch()
   const {
     gameId,
+    round,
     pendingRoutes,
     currentRoutes,
   } = useSelector((state) => state)
@@ -22,7 +23,7 @@ function useProps() {
   let onClick
   if (pendingRoutes.length > 0) {
     onClick = () => {
-      dispatch({ currentRoutes: [...currentRoutes, ...pendingRoutes], pendingRoutes: [] })
+      dispatch({ round: round+1, currentRoutes: [...currentRoutes, ...pendingRoutes], pendingRoutes: [] })
     }
   } else {
     onClick = async () => {

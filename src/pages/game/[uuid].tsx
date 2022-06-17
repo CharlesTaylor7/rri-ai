@@ -1,6 +1,5 @@
 import Grid from '@/components/game/Grid'
 import DicePanel from '@/components/game/DicePanel'
-import debugData from '@/debugData'
 import { Provider } from '@/context'
 import { AppState } from '@/types'
 import useErgonomicState from '@/hooks/useErgonomicState'
@@ -45,6 +44,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       gameId,
+      round: game?.json.round || 1,
       currentRoutes: game?.json.routesDrawn || [],
       pendingRoutes: [],
       diceCodes: [],

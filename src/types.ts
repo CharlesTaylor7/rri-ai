@@ -1,5 +1,6 @@
 export type AppState = {
   gameId: string
+  round: number
   diceCodes: Array<number>
   currentRoutes: Array<RouteInfo>
   pendingRoutes: Array<RouteInfo>

@@ -3,13 +3,12 @@ import RouteDefinitions from '@/components/RouteDefinitions'
 import DiceButton from '@/components/game/DiceButton'
 
 export default function DicePanel() {
-  const diceCodes = useSelector((state) => state.diceCodes)
+  const { diceCodes, round } = useSelector((state) => state)
   return (
     <div className="flex flex-col items-center">
-      <div className="m-4">
-        <DiceButton />
-      </div>
       <div className="grid grid-cols-2 gap-4">
+        <DiceButton />
+        <div className="flex justify-center items-center">Round {round}</div>
         {diceCodes.map((c, i) => (
           <Die key={i} code={c} />
         ))}
