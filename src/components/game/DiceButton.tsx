@@ -1,8 +1,6 @@
-import { useCallback } from 'react'
 import useSelector from 'app/hooks/useSelector'
 import useDispatch from 'app/hooks/useDispatch'
 import Button, { labelButtonStyle } from '../inputs/Button'
-import { AppState } from 'app/types'
 
 export default function DiceButton() {
   const { text, onClick } = useProps()
@@ -15,23 +13,27 @@ export default function DiceButton() {
 
 function useProps() {
   const dispatch = useDispatch()
-  const { gameId, routes: { pending, current } } = useSelector((state) => state)
+  const {
+    gameId,
+    pendingRoutes,
+    currentRoutes,
+  } = useSelector((state) => state)
 
   let onClick
-  if (pending.length > 0) {
+  if (pendingRoutes.length > 0) {
     onClick = () => {
-      dispatch({ current: [...current, ...pending], pending: [] })
+      dispatch({ currentRoutes: [...currentRoutes, ...pendingRoutes], pendingRoutes: [] })
     }
   } else {
     onClick = async () => {
-      const { diceCodes, routesDrawn } = await fetch(`/api/game/roll?gameId=${gameId}`).then(
-        (res) => res.json(),
-      )
-      dispatch({ pending: routesDrawn, diceCodes })
+      const { diceCodes, nextRoutes: pendingRoutes } = await fetch(
+        `/api/game/roll?gameId=${gameId}`,
+      ).then((res) => res.json())
+      dispatch({ diceCodes, pendingRoutes })
     }
   }
 
-  const text = pending.length > 0 ? 'Show Move' : 'Roll Dice'
+  const text = pendingRoutes.length > 0 ? 'Show Move' : 'Roll Dice'
 
   return { text, onClick }
 }

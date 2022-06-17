@@ -13,7 +13,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data | string>,
 ) {
-  const gameId = req.query.gameId 
+  const gameId = req.query.gameId
   if (gameId === undefined) {
     res.status(404).send('Game not found')
     return

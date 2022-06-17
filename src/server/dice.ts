@@ -1,4 +1,4 @@
-import { Route } from 'types'
+import { Route } from '@/types'
 
 export type Die = [number, number, number, number, number, number]
 

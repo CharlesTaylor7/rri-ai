@@ -1,10 +1,8 @@
 export type AppState = {
   gameId: string
-  routes: {
-    current: Array<RouteInfo>
-    pending: Array<RouteInfo>
-  }
   diceCodes: Array<number>
+  currentRoutes: Array<RouteInfo>
+  pendingRoutes: Array<RouteInfo>
 }
 
 export type RouteInfo = {

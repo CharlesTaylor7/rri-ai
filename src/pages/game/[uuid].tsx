@@ -45,10 +45,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       gameId,
-      routes: {
-        current: debugData,
-        pending: [],
-      },
+      currentRoutes: [],
+      pendingRoutes: [],
       diceCodes: [],
       ...(game?.client_json || {}),
     },

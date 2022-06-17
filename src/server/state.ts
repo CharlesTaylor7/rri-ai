@@ -2,12 +2,10 @@ import type { Piece, Route, RouteInfo } from '@/types'
 import { routes } from '@/server/dice'
 import db from '@/server/db'
 
-
 export interface GameState {
   routesDrawn: Array<RouteInfo>
   openRoutes: OpenRoutes
 }
-
 
 export interface Shift {
   x: number
@@ -24,13 +22,19 @@ export interface Location extends Position {
   direction: Direction
 }
 
-export async function getServerState(gameId: string): Promise<GameState | undefined> {
-  const rows = await db.select('server_json').from('games').where('uuid', gameId).limit(1)
+export async function getServerState(
+  gameId: string,
+): Promise<GameState | undefined> {
+  const rows = await db
+    .select('server_json')
+    .from('games')
+    .where('uuid', gameId)
+    .limit(1)
   if (rows.length === 0) return undefined
-  return ({
+  return {
     ...getInitialState(),
     ...rows[0].server_json,
-  })
+  }
 }
 
 // key is hyphen separated values:
@@ -140,11 +144,6 @@ export function drawRoute(gameState: GameState, routeInfo: RouteInfo) {
     const connection = toConnectionKey({ x, y, direction })
     const networkPiece = gameState.openRoutes[connection]
 
-    if (networkPiece !== route[direction]) {
-      throw new RouteValidationError(
-        'cannot connect railway directly to highway',
-      )
-    }
     if (networkPiece === undefined) {
       // add the opposite connection to the map
       const connection = oppositeConnection({ x, y, direction })
@@ -153,9 +152,13 @@ export function drawRoute(gameState: GameState, routeInfo: RouteInfo) {
       }
       const piece: Piece = route[direction] as Piece
       edits.push({ connection, action: { type: 'add', piece } })
-    } else {
+    } else if (networkPiece === route[direction]) {
       // clear the current connection from the map
       edits.push({ connection, action: { type: 'delete' } })
+    } else {
+      throw new RouteValidationError(
+        'cannot connect railway directly to highway',
+      )
     }
   }
 

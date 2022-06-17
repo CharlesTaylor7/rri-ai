@@ -3,8 +3,8 @@ module.exports = {
   theme: {
     extend: {
       width: {
-        'fit-content': 'fit-content'
-      }
+        'fit-content': 'fit-content',
+      },
     },
   },
   plugins: [],
