@@ -1,4 +1,5 @@
 export type AppState = {
+  gameId: string
   routes: {
     current: Array<RouteInfo>
     pending: Array<RouteInfo>

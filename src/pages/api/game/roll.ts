@@ -30,6 +30,7 @@ export default async function handler(
     .map((code) => drawInFirstValidPosition(gameState, code))
     .filter((route) => route) as Array<RouteInfo>
 
+  console.log(nextRoutes)
   res.status(200).json({
     diceCodes,
     nextRoutes,

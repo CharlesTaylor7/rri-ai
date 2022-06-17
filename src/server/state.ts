@@ -25,7 +25,6 @@ export interface Location extends Position {
 }
 
 export async function getServerState(gameId: string): Promise<GameState | undefined> {
-  console.log('gameId', gameId)
   const rows = await db.select('server_json').from('games').where('uuid', gameId).limit(1)
   if (rows.length === 0) return undefined
   return ({
@@ -132,7 +131,6 @@ const directions: Array<Direction> = ['north', 'east', 'south', 'west']
 
 export function drawRoute(gameState: GameState, routeInfo: RouteInfo) {
   const { x, y } = routeInfo
-  console.log(routeInfo)
   const route = rotate(routes[routeInfo.code], routeInfo.rotation)
 
   // first we do a dry run of the edits to state for the given route
@@ -141,9 +139,6 @@ export function drawRoute(gameState: GameState, routeInfo: RouteInfo) {
   for (let direction of directions) {
     const connection = toConnectionKey({ x, y, direction })
     const networkPiece = gameState.openRoutes[connection]
-
-    console.log('existing piece', networkPiece)
-    console.log('new piece', route[direction])
 
     if (networkPiece !== route[direction]) {
       throw new RouteValidationError(
@@ -164,7 +159,6 @@ export function drawRoute(gameState: GameState, routeInfo: RouteInfo) {
     }
   }
 
-  console.log('edits', edits)
   if (!edits.some((e: Edit) => e.action.type === 'delete')) {
     throw new RouteValidationError(
       "piece doesn't connect to any existing network",

@@ -21,3 +21,7 @@ input[type='checkbox'].custom {
   -webkit-appearance: none;
   -o-appearance: none;
 }
+
+.flex {
+  align-items: start;
+}

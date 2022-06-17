@@ -20,7 +20,7 @@ export default function Grid() {
       <RouteDefinitions />
       <g id="drawn-routes">
         {routes.map((route: RouteInfo, i: number) => (
-          <DrawnRoute key={i} route={route} />
+          <DrawnRoute key={i} {...route} />
         ))}
       </g>
     </svg>
@@ -93,19 +93,18 @@ function Exit({ kind, translateX, translateY, rotate }: ExitProps) {
   )
 }
 
-interface DrawnRouteProps {
-  route: RouteInfo
-}
-function DrawnRoute({ route }: DrawnRouteProps) {
+type DrawnRouteProps = RouteInfo
+
+export function DrawnRoute(route: DrawnRouteProps) {
   return (
     <use
       href={`#route-${route.code}`}
       strokeWidth={1}
       transform={`
-                translate(${route.x},${route.y}),
-                rotate(${(route.rotation || 0) * 90}, 0.5, 0.5),
-                scale(${1 / cellLength})
-            `}
+        translate(${route.x},${route.y}),
+        rotate(${route.rotation * 90}, 0.5, 0.5),
+        scale(${1 / cellLength})
+      `}
     />
   )
 }

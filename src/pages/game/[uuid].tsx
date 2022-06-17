@@ -1,11 +1,9 @@
 import Grid from '@/components/game/Grid'
-import Dice from '@/components/game/Dice'
-import DiceButton from '@/components/game/DiceButton'
+import DicePanel from '@/components/game/DicePanel'
 import debugData from '@/debugData'
 import { Provider } from '@/context'
 import { AppState } from '@/types'
 import useErgonomicState from '@/hooks/useErgonomicState'
-import { SSR } from '@/core/types'
 import db from '@/server/db'
 import { GetServerSideProps } from 'next'
 
@@ -14,12 +12,9 @@ type Props = AppState
 export default function Game(props: Props) {
   return (
     <Provider value={useErgonomicState(props)}>
-      <div className="h-full overflow-y-scroll flex flex-wrap justify-around">
+      <div className="h-full overflow-y-scroll font-mono flex flex-wrap justify-around items-start">
         <Grid />
-        <div className="flex flex-col">
-          <DiceButton />
-          <Dice />
-        </div>
+        <DicePanel />
       </div>
     </Provider>
   )
