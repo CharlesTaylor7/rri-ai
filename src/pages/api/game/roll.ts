@@ -18,6 +18,7 @@ export default async function handler(
     res.status(404).send('Game not found')
     return
   }
+  // @ts-ignore
   const gameState = await getServerState(gameId)
   if (gameState === undefined) {
     res.status(404).send('Game not found')

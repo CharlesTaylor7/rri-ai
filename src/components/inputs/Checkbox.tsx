@@ -20,6 +20,7 @@ export default function Numeric(props: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const inputId = useId()
   const onChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    // @ts-ignore
     (event) => props.onChange(event.target.checked),
     [props.onChange],
   )
