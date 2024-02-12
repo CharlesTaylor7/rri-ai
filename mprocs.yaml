@@ -3,4 +3,4 @@ procs:
     shell: yarn dev
 
   Tailwind:
-    shell: yarn watch-css
+    shell: watchexec -e css -- yarn tailwind
