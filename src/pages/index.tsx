@@ -1,5 +1,4 @@
 import db from '@/server/db'
-import Button, { labelButtonStyle } from 'app/components/inputs/Button'
 import { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { v4 as uuid } from 'uuid'
@@ -9,18 +8,19 @@ type Props = {
   games: Array<{ uuid: string; createdAt: string }>
 }
 
-const doNothing = () => {}
+const doNothing = () => {};
+
 export default function Home(props: Props) {
   const gameLink = (uuid: string, label: string) => (
-    <Button
+    <button
       key={uuid}
-      className={labelButtonStyle('bg-green-200')}
+      className="p-2 rounded-lg bg-green-200"
       onClick={doNothing}
     >
       <Link href="/game/[uuid]" as={`/game/${uuid}`}>
         {label}
       </Link>
-    </Button>
+    </button>
   )
   return (
     <div className="p-8 text-3xl flex flex-col gap-4 items-center">

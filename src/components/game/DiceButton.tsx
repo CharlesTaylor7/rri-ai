@@ -1,13 +1,12 @@
 import useSelector from 'app/hooks/useSelector'
 import useDispatch from 'app/hooks/useDispatch'
-import Button, { labelButtonStyle } from '../inputs/Button'
 
 export default function DiceButton() {
   const { text, onClick } = useProps()
   return (
-    <Button className={labelButtonStyle('bg-green-200')} onClick={onClick}>
+    <button className="p-2 rounded-lg bg-green-200" onClick={onClick}>
       {text}
-    </Button>
+    </button>
   )
 }
 
