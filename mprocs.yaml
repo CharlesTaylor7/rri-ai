@@ -1,0 +1,6 @@
+procs:
+  Server:
+    shell: yarn dev
+
+  Tailwind:
+    shell: yarn watch-css
