@@ -1,95 +1,39 @@
-use serde::{Deserialize, Serialize};
-use std::borrow::Borrow;
-use std::fmt::{self, Debug, Display};
-use std::sync::Arc;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
-pub enum CardSuit {
-    Trade,
-    Religious,
-    Military,
-    Noble,
-    Unique,
+pub struct AppState = {
+  gameId: String,
+  round: usize,
+  diceCodes: Vec<u8>,
+  currentRoutes: Vec<RouteInfo>,
+  pendingRoutes: Vec<RouteInfo>,
 }
 
-impl CardSuit {
-    pub const ALL: [CardSuit; 5] = [
-        Self::Trade,
-        Self::Religious,
-        Self::Military,
-        Self::Noble,
-        Self::Unique,
-    ];
+pub struct RouteInfo = {
+  // in the order printed at the top of the player boards:
+  // 0-8: the normal die faces
+  // 9-14: the special routes
+  code: u8,
+
+  // 0-3: the number of clockwise rotations applied to the route
+  // (default orientation is as shown on the player board)
+  rotation: u8,
+
+  // grid coordinates, 0 to 6 inclusive
+  x: u8,
+  y: u8,
 }
 
-impl fmt::Display for CardSuit {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:#?}", self)
-    }
+// highway, railway,
+pub enum Piece {
+    Highway,
+    Railway,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum CardSet {
-    Base,
-    DarkCity,
-    Citadels2016,
-    Custom,
-}
+// river or lake
+//| 'v' | 'l';
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Marker {
-    Discarded,
-    Killed,
-    Bewitched,
-    Robbed,
-    Blackmail { flowered: bool },
-    Warrant { signed: bool },
-}
-
-impl Marker {
-    pub fn is_warrant(&self) -> bool {
-        if let Marker::Warrant { .. } = self {
-            true
-        } else {
-            false
-        }
-    }
-
-    pub fn is_blackmail(&self) -> bool {
-        if let Marker::Blackmail { .. } = self {
-            true
-        } else {
-            false
-        }
-    }
-}
-
-pub type PlayerId = String;
-pub type Result<T> = std::result::Result<T, &'static str>;
-
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Hash)]
-pub struct PlayerName(pub Arc<str>);
-
-impl Borrow<str> for PlayerName {
-    fn borrow(&self) -> &str {
-        self.0.borrow()
-    }
-}
-
-impl<T: Into<Arc<str>>> From<T> for PlayerName {
-    fn from(str: T) -> Self {
-        PlayerName(str.into())
-    }
-}
-
-impl Display for PlayerName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl PartialEq<PlayerName> for &PlayerName {
-    fn eq(&self, other: &PlayerName) -> bool {
-        self.0.eq(&other.0)
-    }
+pub struct Route {
+  north: Option<Piece>,
+  east: Option<Piece>,
+  south: Option<Piece>,
+  west: Option<Piece>,
+  station: bool
 }
