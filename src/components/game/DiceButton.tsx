@@ -13,17 +13,18 @@ export default function DiceButton() {
 
 function useProps() {
   const dispatch = useDispatch()
-  const {
-    gameId,
-    round,
-    pendingRoutes,
-    currentRoutes,
-  } = useSelector((state) => state)
+  const { gameId, round, pendingRoutes, currentRoutes } = useSelector(
+    (state) => state,
+  )
 
   let onClick
   if (pendingRoutes.length > 0) {
     onClick = () => {
-      dispatch({ round: round+1, currentRoutes: [...currentRoutes, ...pendingRoutes], pendingRoutes: [] })
+      dispatch({
+        round: round + 1,
+        currentRoutes: [...currentRoutes, ...pendingRoutes],
+        pendingRoutes: [],
+      })
     }
   } else {
     onClick = async () => {

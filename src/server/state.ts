@@ -168,10 +168,8 @@ export function drawRoute(gameState: GameState, routeInfo: RouteInfo) {
     )
   }
 
-  if (gameState.routesDrawn.some(r => r.x === x && r.y === y)) {
-    throw new RouteValidationError(
-      "route cannot draw over existing route",
-    )
+  if (gameState.routesDrawn.some((r) => r.x === x && r.y === y)) {
+    throw new RouteValidationError('route cannot draw over existing route')
   }
 
   // commit the edits to state

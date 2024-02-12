@@ -10,7 +10,7 @@
     "tc": "npx tsc --noEmit",
     "tc:watch": "npx tsc --noEmit --watch",
     "test": "jest",
-    "format": "prettier --write .",
+    "format": "prettier --write src",
     "watch-css": "tailwindcss -i styles/tailwind.source.css -o styles/tailwind.output.css --watch",
     "reset-db": "ts-node -T src/server/setup"
   },
