@@ -1,5 +1,6 @@
 [package]
 name = "railroad-inc"
+version = "0.0.0"
 edition = "2021"
 default-run = "railroad-inc"
 
@@ -23,7 +24,6 @@ tokio-stream = "0.1.14"
 tower = "0.4.13"
 tower-http = { version = "0.5.0", features = ["fs", "trace"] }
 uuid = { version = "1.6.1", features = ["v4"] }
-macros = { path = "./macros"}
 log = "0.4.20"
 env_logger = { version = "0.10.1", features = ["color"] }
 serde = { version = "1.0.195", features = ["derive","rc"] }
@@ -31,6 +31,7 @@ dotenv = "0.15.0"
 axum-core = "0.4.3"
 mime = "0.3.17"
 serde_with = "3.5.0"
+sqlx = "0.7.3"
 
 [features]
 dev = []
