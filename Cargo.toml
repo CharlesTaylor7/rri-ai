@@ -8,10 +8,6 @@ default-run = "railroad-inc"
 name = "railroad-inc"
 path = "src/main.rs" 
 
-[[bin]]
-name = "sqlite"
-path = "src/bins/reset_db.rs"
-
 [dependencies]
 askama = "0.12.1"
 axum = { version = "0.7.2", features = ["ws"] }
@@ -35,7 +31,6 @@ sqlx = "0.7.3"
 anyhow = "1.0.79"
 
 [features]
-dev = []
 dotenv = []
 
 # https://old.reddit.com/r/rust/comments/gvrgca/this_is_a_neat_trick_for_getting_good_runtime/

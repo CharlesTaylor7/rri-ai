@@ -1,19 +1,13 @@
-pub mod filters;
-pub mod game;
-pub mod lobby;
-
-use std::borrow::Cow;
-
-use crate::districts::DistrictName;
-use crate::game::{CityDistrict, Game};
-use crate::roles::{Rank, RoleName};
-use crate::types::CardSuit;
 use askama::Template;
 use axum::response::Html;
 
 #[derive(Template)]
-#[template(path = "game.html")]
+#[template(path = "index.html")]
 pub struct GameTemplate;
+
+pub trait MyTemplate {
+    fn to_html(&self) -> axum::response::Result<Html<String>>;
+}
 
 impl<T: Template> MyTemplate for T {
     fn to_html(&self) -> axum::response::Result<Html<String>> {
@@ -23,7 +17,6 @@ impl<T: Template> MyTemplate for T {
         }
     }
 }
-
 
 pub const DAISY_THEMES: [&'static str; 30] = [
     "light",
