@@ -1,4 +1,11 @@
-This is a single page app for a Railroad Inc. AI
+## Project goals
+- Get better and faster at writing Rust
+- Learn more of the ecosystem
+- Learn from past mistakes
+    - Use anyhow from the beginning
+    - Use sqlite from the beginning
+    - Don't unwrap willy nilly 
+
 
 ## Getting Started
 
@@ -8,18 +15,7 @@ createdb railroad_inc_ai
 yarn reset-db
 ```
 
-
-For development, you'll need to run tailwind and the development server.
-
+Install sqlx
 ```bash
-yarn watch-css
-yarn dev
+cargo install sqlx-cli --no-default-features --features sqlite
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## About
-This is a Next.js project, deployed on Vercel: 
-
-- [Next.js Documentation](https://nextjs.org/docs) 
-

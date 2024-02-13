@@ -26,12 +26,13 @@ tower-http = { version = "0.5.0", features = ["fs", "trace"] }
 uuid = { version = "1.6.1", features = ["v4"] }
 log = "0.4.20"
 env_logger = { version = "0.10.1", features = ["color"] }
-serde = { version = "1.0.195", features = ["derive","rc"] }
+serde = { version = "1.0.195", features = ["derive", "rc"] }
 dotenv = "0.15.0"
 axum-core = "0.4.3"
 mime = "0.3.17"
 serde_with = "3.5.0"
 sqlx = "0.7.3"
+anyhow = "1.0.79"
 
 [features]
 dev = []

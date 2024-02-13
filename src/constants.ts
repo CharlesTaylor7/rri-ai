@@ -1,4 +1,4 @@
-// frontend constants
+//Array frontend constants
 export const cellLength = 80
 
 // railways

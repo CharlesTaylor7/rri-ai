@@ -13,7 +13,9 @@
 
 More broadly, I want to evaluate if I should migrate tech stack.
 The new stack I have in mind would be:
-    - Rust with axum & maud
+    - Rust axum
+        - axum
+        - askama. I want to try maud at some point, but I like askama for integrating with html snippets.
     - htmx
     - tailwind + daisyUI
 
