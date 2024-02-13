@@ -25,6 +25,7 @@ pub fn get_router() -> Router {
         .route("/", get(index))
         .route("/version", get(get_version))
         .nest_service("/public", ServeDir::new("public"))
+        .nest_service("/styles", ServeDir::new("styles"))
         .with_state(context)
 }
 
