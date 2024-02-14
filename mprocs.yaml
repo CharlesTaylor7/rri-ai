@@ -6,4 +6,4 @@ procs:
     shell: cargo watch -c -x run --features=dotenv
 
   Tailwind:
-    shell: watchexec -e css -- yarn tailwind
+    shell: tailwindcss -i styles/tailwind.source.css -o styles/tailwind.output.css --watch

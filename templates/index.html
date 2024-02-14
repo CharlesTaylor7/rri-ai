@@ -11,15 +11,12 @@
     <link rel="stylesheet" href="/styles/tailwind.output.css" />
     <script src="https://unpkg.com/htmx.org@1.9.10/dist/htmx.js"></script>
   </head>
-  <body>
-    <div
-      class="h-full overflow-y-scroll font-mono flex flex-wrap justify-around items-start"
-    >
+  <body class="flex flex-row flex-wrap">
       <svg
-        class="shrink-0 max-w-[700px]"
-        viewBox="-0.5 -0.5 8 8"
+        viewBox="0 0 8 8"
         stroke="black"
         stroke-width="0.01"
+        class="grow max-h-[80vh]"
       >
         {% include "exits.html" %}
         {% include "grid-lines.html" %}
@@ -45,7 +42,6 @@
           >
         </g>
       </svg>
-    </div>
       <div class="flex flex-col items-center">
         <div class="grid grid-cols-2 gap-4">
           <button class="p-2 rounded-lg bg-green-200">Roll Dice</button>
