@@ -18,28 +18,30 @@
         stroke-width="0.01"
         class="grow max-h-[80vh]"
       >
-        {% include "exits.html" %}
-        {% include "grid-lines.html" %}
-        {% include "defs.html" %}
-        <g id="drawn-routes">
-          <use
-            href="#route-0"
-            stroke-width="1"
-            transform="
-        translate(0,1),
-        rotate(0, 0.5, 0.5),
-        scale(0.0125)
-      "
-          ></use>
-          <use
-            href="#route-3"
-            stroke-width="1"
-            transform="
-        translate(0,3),
-        rotate(0, 0.5, 0.5),
-        scale(0.0125)
-      "
-          >
+        <g transform="translate(0.5, 0.5)">
+          {% include "exits.html" %}
+          {% include "grid-lines.html" %}
+          {% include "defs.html" %}
+          <g id="drawn-routes">
+            <use
+              href="#route-0"
+              stroke-width="1"
+              transform="
+          translate(0,1),
+          rotate(0, 0.5, 0.5),
+          scale(0.0125)
+        "
+            ></use>
+            <use
+              href="#route-3"
+              stroke-width="1"
+              transform="
+          translate(0,3),
+          rotate(0, 0.5, 0.5),
+          scale(0.0125)
+        "
+            >
+          </g>
         </g>
       </svg>
       <div class="flex flex-col items-center">
