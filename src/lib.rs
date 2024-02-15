@@ -1,6 +1,5 @@
-#![allow(clippy::len_zero)]
-
 pub mod logger;
+pub mod neat;
 pub mod server;
 pub mod templates;
 pub mod types;
