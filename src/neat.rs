@@ -8,6 +8,10 @@
 #![allow(unreachable_code)]
 
 use anyhow::{bail, Result};
+use decorum::R64;
+use num_traits::real::Real;
+use num_traits::sign::Signed;
+use rand::seq::SliceRandom;
 use std::cell::RefCell;
 use std::ops::Range;
 use std::rc::Rc;
@@ -15,20 +19,173 @@ use std::rc::Rc;
 pub struct Config {
     input_layer_size: usize,
     output_layer_size: usize,
-    fitness: Box<dyn FnOnce(&Genome) -> f64>,
+    fitness: Box<dyn Fn(&Network) -> R64>,
     speciation: Speciation,
-    new_node_chance: f64,
-    new_link_chance: f64,
+    new_node_chance: R64,
+    new_link_chance: R64,
     population: usize,
-    survivor_rate: f64,
+    // percentage allowed to recombine
+    reproduction_rate: R64,
+}
+
+pub struct Population {
+    config: Config,
+    genomes: Vec<Rc<Genome>>,
+    node_count: usize,
+    edge_count: usize,
+}
+
+impl Population {
+    fn classify_species(&self) -> Vec<Species> {
+        let mut groups: Vec<Species> = vec![];
+        'outer: for genome in self.genomes.iter() {
+            for species in groups.iter_mut() {
+                let rep = species
+                    .genomes
+                    .choose(&mut rand::thread_rng())
+                    .expect("Species group should not be empty");
+                if self.config.speciation.compatible(genome, rep) {
+                    species.genomes.push(genome.clone());
+                    continue 'outer;
+                }
+            }
+            groups.push(Species {
+                genomes: vec![genome.clone()],
+            });
+        }
+        groups
+    }
+    pub fn advance_gen(&mut self) {
+        let groups = self.classify_species();
+        let mut total_fitness: R64 = (0.).into();
+        let mut group_fitness: Vec<R64> = vec![(0.).into(); groups.len()];
+        let mut individual_fitness: Vec<Vec<R64>> = Vec::with_capacity(groups.len());
+
+        for (j, species) in groups.iter().enumerate() {
+            individual_fitness.push(Vec::with_capacity(species.genomes.len()));
+            for (i, genome) in species.genomes.iter().enumerate() {
+                let network = Network::new(genome, &self.config).expect("valid network");
+                let fitness: R64 = (self.config.fitness)(&network);
+                let adjusted: R64 = fitness / species.genomes.len() as f64;
+                individual_fitness[j][i] = adjusted;
+                group_fitness[j] += adjusted;
+                total_fitness += adjusted;
+            }
+        }
+
+        let average_fitness: R64 = total_fitness / self.config.population as f64;
+
+        self.genomes = Vec::with_capacity(self.config.population);
+        for (j, species) in groups.into_iter().enumerate() {
+            let mut genomes = species
+                .genomes
+                .into_iter()
+                .enumerate()
+                .map(|(i, genome)| ScoredGenome {
+                    genome,
+                    fitness: individual_fitness[j][i],
+                })
+                .collect::<Vec<ScoredGenome>>();
+            genomes.sort_unstable_by_key(|g| g.fitness);
+            let new_pop_size = (group_fitness[j] / average_fitness).ceil().into_inner() as usize;
+            let group_size: R64 = (genomes.len() as f64).into();
+            let parents = (group_size * self.config.reproduction_rate)
+                .ceil()
+                .into_inner() as usize;
+
+            self.reproduce(&mut genomes[0..parents], new_pop_size);
+            //let parents = self.config.
+        }
+    }
+
+    fn reproduce(&mut self, parents: &mut [ScoredGenome], target_size: usize) {
+        let mut remaining = target_size;
+        loop {
+            parents.shuffle(&mut rand::thread_rng());
+            for chunk in parents.chunks(2) {
+                if chunk.get(1).is_none() {
+                    // copy directly
+                    self.genomes.push(chunk[0].genome.clone());
+                } else {
+                    // crossover 2 genomes
+                    self.genomes
+                        .push(Rc::new(self.crossover(&chunk[0], &chunk[1])));
+                }
+                remaining -= 1;
+                if remaining == 0 {
+                    return;
+                }
+            }
+        }
+    }
+
+    fn crossover(&self, a: &ScoredGenome, b: &ScoredGenome) -> Genome {
+        let mut i = 0;
+        let mut j = 0;
+        let mut genome = Genome {
+            genes: vec![],
+            hidden_layer_size: std::cmp::max(
+                a.genome.hidden_layer_size,
+                b.genome.hidden_layer_size,
+            ),
+        };
+        loop {
+            match (a.genome.genes.get(i), b.genome.genes.get(j)) {
+                (Some(gene_a), Some(gene_b)) => {
+                    if gene_a.id == gene_b.id {
+                        genome.genes.push(
+                            if a.fitness > b.fitness {
+                                gene_a
+                            } else {
+                                gene_b
+                            }
+                            .clone(),
+                        );
+                        i += 1;
+                        j += 1;
+                    } else {
+                        if gene_a.id < gene_b.id {
+                            genome.genes.push(gene_a.clone());
+                            i += 1;
+                        } else {
+                            genome.genes.push(gene_b.clone());
+                            j += 1;
+                        }
+                    }
+                }
+                (Some(gene_a), None) => {
+                    genome.genes.push(gene_a.clone());
+                    i += 1;
+                }
+                (None, Some(gene_b)) => {
+                    genome.genes.push(gene_b.clone());
+                    j += 1;
+                }
+                (None, None) => {
+                    break;
+                }
+            }
+        }
+
+        genome
+    }
+}
+
+pub struct ScoredGenome {
+    fitness: R64,
+    genome: Rc<Genome>,
+}
+
+pub struct Species {
+    genomes: Vec<Rc<Genome>>,
 }
 
 pub struct Speciation {
-    c1: f64, // disjoint
-    c2: f64, // excess
-    c3: f64, // weight
+    c1: R64, // disjoint
+    c2: R64, // excess
+    c3: R64, // weight
     // compatibility threshold
-    ct: f64,
+    ct: R64,
 }
 
 impl Speciation {
@@ -39,7 +196,7 @@ impl Speciation {
         let mut excess = 0;
         let mut matching = 0;
 
-        let mut weight_diff = 0.0;
+        let mut weight_diff: R64 = 0.0.into();
 
         let N = std::cmp::max(a.genes.len(), b.genes.len());
 
@@ -90,18 +247,6 @@ impl Speciation {
     }
 }
 
-pub struct Population {
-    genomes: Vec<Genome>,
-    node_count: usize,
-    edge_count: usize,
-}
-
-impl Population {
-    pub fn advance_gen(&mut self, config: &Config) {
-        todo!();
-    }
-}
-
 #[derive(Default, Debug)]
 pub struct NodeId(pub usize);
 
@@ -118,7 +263,7 @@ pub enum NodeType {
 
 /* === Genome description === */
 pub struct Genome {
-    pub genes: Vec<Gene>,
+    pub genes: Vec<Rc<Gene>>,
     pub hidden_layer_size: usize,
 }
 
@@ -126,7 +271,7 @@ pub struct Gene {
     pub id: GeneId,
     pub in_node: NodeId,
     pub out_node: NodeId,
-    pub weight: f64,
+    pub weight: R64,
     pub enabled: bool,
 }
 
@@ -147,7 +292,7 @@ pub struct Network {
 
 pub struct Edge {
     pub id: GeneId,
-    pub weight: f64,
+    pub weight: R64,
     pub in_node: Ref<Node>,
     pub out_node: Ref<Node>,
     pub visited: bool,
@@ -156,8 +301,8 @@ pub struct Edge {
 #[derive(Default)]
 pub struct Node {
     pub id: NodeId,
-    pub weight: f64,
-    pub activation: f64,
+    pub weight: R64,
+    pub activation: R64,
     pub node_type: NodeType,
     pub incoming: Vec<Ref<Edge>>,
     pub outgoing: Vec<Ref<Edge>>,
@@ -252,7 +397,7 @@ impl Network {
         })
     }
 
-    fn input(&self, x: &[f64]) {
+    fn input(&self, x: &[R64]) {
         for (i, x) in x.iter().enumerate() {
             RefCell::borrow_mut(&self.nodes[i]).activation = *x;
         }
@@ -268,7 +413,7 @@ impl Network {
 
     fn propagate_nodes<'a>(iterator: impl Iterator<Item = &'a Ref<Node>>) {
         for node in iterator {
-            let mut value = 0.0;
+            let mut value: R64 = 0_f64.into();
             for edge in node.borrow().incoming.iter() {
                 value += edge.borrow().weight * edge.borrow().in_node.borrow().activation;
             }
@@ -278,7 +423,7 @@ impl Network {
         }
     }
 
-    fn output(&self) -> Vec<f64> {
+    fn output(&self) -> Vec<R64> {
         let begin = self.in_nodes;
         let end = self.in_nodes + self.out_nodes;
         self.nodes[begin..end]
@@ -288,6 +433,7 @@ impl Network {
     }
 }
 
-fn sigmoid(num: f64) -> f64 {
-    1.0 / (1.0 + (-num).exp())
+fn sigmoid(num: R64) -> R64 {
+    let one: R64 = 1.0.into();
+    one / (one + (-num).exp())
 }

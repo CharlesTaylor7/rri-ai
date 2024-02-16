@@ -29,6 +29,8 @@ mime = "0.3.17"
 serde_with = "3.5.0"
 sqlx = "0.7.3"
 anyhow = "1.0.79"
+decorum = "0.3.1"
+num-traits = "0.2.18"
 
 [features]
 dotenv = []
