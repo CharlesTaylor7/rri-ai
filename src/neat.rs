@@ -6,14 +6,16 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 #![allow(unreachable_code)]
-
 use anyhow::{bail, Result};
 use decorum::R64;
 use num_traits::real::Real;
 use num_traits::sign::Signed;
 use rand::seq::SliceRandom;
+use rand::Rng;
+use rand_distr::StandardNormal;
+use std::borrow::BorrowMut;
 use std::cell::RefCell;
-use std::ops::Range;
+use std::ops::{Add, Range};
 use std::rc::Rc;
 
 pub struct Config {
@@ -21,16 +23,47 @@ pub struct Config {
     output_layer_size: usize,
     fitness: Box<dyn Fn(&Network) -> R64>,
     speciation: Speciation,
-    new_node_chance: R64,
-    new_link_chance: R64,
+    mutation: MutationWeights,
     population: usize,
     // percentage allowed to recombine
+    mutation_rate: R64,
     reproduction_rate: R64,
+}
+
+// rates of mutation
+pub struct MutationWeights {
+    adjust_weight: R64,
+    add_node: R64,
+    add_connection: R64,
+}
+
+impl MutationWeights {
+    pub fn sample(&self) -> Mutation {
+        let mut value: R64 = rand::thread_rng().gen::<f64>().into();
+        if value < self.adjust_weight {
+            return Mutation::AdjustWeight;
+        }
+        value -= self.adjust_weight;
+
+        if value < self.add_node {
+            return Mutation::AddNode;
+        }
+        value -= self.add_node;
+
+        return Mutation::AddGene;
+    }
+}
+
+#[derive(Clone, Copy)]
+pub enum Mutation {
+    AdjustWeight,
+    AddNode,
+    AddGene,
 }
 
 pub struct Population {
     config: Config,
-    genomes: Vec<Rc<Genome>>,
+    population: Vec<Rc<Genome>>,
     node_count: usize,
     edge_count: usize,
 }
@@ -38,7 +71,7 @@ pub struct Population {
 impl Population {
     fn classify_species(&self) -> Vec<Species> {
         let mut groups: Vec<Species> = vec![];
-        'outer: for genome in self.genomes.iter() {
+        'outer: for genome in self.population.iter() {
             for species in groups.iter_mut() {
                 let rep = species
                     .genomes
@@ -75,7 +108,7 @@ impl Population {
 
         let average_fitness: R64 = total_fitness / self.config.population as f64;
 
-        self.genomes = Vec::with_capacity(self.config.population);
+        self.population = Vec::with_capacity(self.config.population);
         for (j, species) in groups.into_iter().enumerate() {
             let mut genomes = species
                 .genomes
@@ -94,7 +127,6 @@ impl Population {
                 .into_inner() as usize;
 
             self.reproduce(&mut genomes[0..parents], new_pop_size);
-            //let parents = self.config.
         }
     }
 
@@ -105,10 +137,10 @@ impl Population {
             for chunk in parents.chunks(2) {
                 if chunk.get(1).is_none() {
                     // copy directly
-                    self.genomes.push(chunk[0].genome.clone());
+                    self.population.push(chunk[0].genome.clone());
                 } else {
                     // crossover 2 genomes
-                    self.genomes
+                    self.population
                         .push(Rc::new(self.crossover(&chunk[0], &chunk[1])));
                 }
                 remaining -= 1;
@@ -124,10 +156,7 @@ impl Population {
         let mut j = 0;
         let mut genome = Genome {
             genes: vec![],
-            hidden_layer_size: std::cmp::max(
-                a.genome.hidden_layer_size,
-                b.genome.hidden_layer_size,
-            ),
+            hidden_nodes: std::cmp::max(a.genome.hidden_nodes, b.genome.hidden_nodes),
         };
         loop {
             match (a.genome.genes.get(i), b.genome.genes.get(j)) {
@@ -168,6 +197,81 @@ impl Population {
         }
 
         genome
+    }
+
+    // mutate the whole population.
+    fn mutate_population(&mut self) {
+        self.population.shuffle(&mut rand::thread_rng());
+        let count = (self.config.mutation_rate * self.population.len() as f64)
+            .ceil()
+            .into_inner() as usize;
+
+        for genome in self.population[0..count].iter_mut() {
+            let genome = Rc::make_mut(genome);
+            match self.config.mutation.sample() {
+                Mutation::AdjustWeight => {
+                    if let Some(gene) = genome.genes.choose_mut(&mut rand::thread_rng()) {
+                        let gene = Rc::make_mut(gene);
+                        gene.weight += rand::thread_rng().sample::<f64, _>(StandardNormal);
+                    }
+                }
+
+                Mutation::AddNode => {
+                    if let Some(gene) = genome.genes.choose_mut(&mut rand::thread_rng()) {
+                        let gene = Rc::make_mut(gene);
+                        gene.enabled = false;
+                        let in_node = gene.in_node;
+                        let out_node = gene.out_node;
+                        let new_node = NodeId(self.node_count);
+                        let weight = gene.weight;
+                        genome.genes.push(Rc::new(Gene {
+                            weight,
+                            enabled: true,
+                            id: GeneId(self.edge_count),
+                            in_node,
+                            out_node: new_node,
+                        }));
+
+                        genome.genes.push(Rc::new(Gene {
+                            weight,
+                            enabled: true,
+                            id: GeneId(self.edge_count + 1),
+                            in_node: new_node,
+                            out_node,
+                        }));
+                        genome.hidden_nodes += 1;
+                        self.node_count += 1;
+                        self.edge_count += 2;
+                    }
+                }
+
+                Mutation::AddGene => {
+                    self.edge_count += 1;
+
+                    let mut nodes = (0..self.node_count).collect::<Vec<_>>();
+                    nodes.shuffle(&mut rand::thread_rng());
+                    let last = genome.genes.len();
+                    genome.genes.push(Rc::new(Gene {
+                        weight: 0.5.into(),
+                        enabled: true,
+                        id: GeneId(self.edge_count),
+                        in_node: NodeId(0),
+                        out_node: NodeId(1),
+                    }));
+
+                    'outer: for i in 0..nodes.len() {
+                        Rc::make_mut(&mut genome.genes[last]).in_node = NodeId(i);
+                        for j in (i + 1)..nodes.len() {
+                            let gene = Rc::make_mut(&mut genome.genes[last]);
+                            Rc::make_mut(&mut genome.genes[last]).out_node = NodeId(j);
+                            if Network::new(genome, &self.config).is_ok() {
+                                break 'outer;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -247,7 +351,7 @@ impl Speciation {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone, Copy)]
 pub struct NodeId(pub usize);
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
@@ -262,11 +366,13 @@ pub enum NodeType {
 }
 
 /* === Genome description === */
+#[derive(Clone)]
 pub struct Genome {
     pub genes: Vec<Rc<Gene>>,
-    pub hidden_layer_size: usize,
+    pub hidden_nodes: usize,
 }
 
+#[derive(Clone)]
 pub struct Gene {
     pub id: GeneId,
     pub in_node: NodeId,
@@ -310,8 +416,7 @@ pub struct Node {
 
 impl Network {
     fn new(genome: &Genome, config: &Config) -> Result<Self> {
-        let node_count =
-            config.input_layer_size + config.output_layer_size + genome.hidden_layer_size;
+        let node_count = config.input_layer_size + config.output_layer_size + genome.hidden_nodes;
 
         let mut nodes = vec![Rc::new(RefCell::new(Node::default())); node_count];
 
@@ -333,7 +438,7 @@ impl Network {
         }
 
         begin = end;
-        end += genome.hidden_layer_size;
+        end += genome.hidden_nodes;
         for i in begin..end {
             let mut node = RefCell::borrow_mut(&nodes[i]);
             node.id = NodeId(i);
