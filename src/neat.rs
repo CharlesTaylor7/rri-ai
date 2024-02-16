@@ -1,4 +1,6 @@
-use std::sync::{Arc, Weak};
+use std::borrow::BorrowMut;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct Config {
     input_layer_size: usize,
@@ -40,42 +42,69 @@ pub struct Gene {
 }
 
 /* === Neural Network === */
-pub struct Network<'a> {
-    // sorted topologically
-    nodes: Vec<Node<'a>>,
-    // out_nodes: Vec<Arc<Node>>
+type Ref<T> = Rc<RefCell<T>>;
+pub struct Network {
+    edges: Vec<Ref<Edge>>,
+    /// sorted topologically
+    nodes: Vec<Ref<Node>>,
+    in_nodes: Vec<Ref<Node>>,
+    out_nodes: Vec<Ref<Node>>,
 }
 
-pub struct Node<'a> {
-    pub nodeId: NodeId,
+#[derive(Default, Clone)]
+pub struct Edge {
+    pub weight: f64,
+    pub in_node: Ref<Node>,
+    pub visited: bool,
+}
+
+#[derive(Default, Clone)]
+pub struct Node {
     pub activation: f64,
-    pub incoming: Vec<&'a Gene>,
-    pub outgoing: Vec<&'a Gene>,
+    pub incoming: Vec<Ref<Edge>>,
+    pub outgoing: Vec<Ref<Edge>>,
 }
 
-impl<'a> Network<'a> {
-    fn new(genome: &'a Genome, config: &'_ Config) -> Self {
-        let mut nodes = Vec::with_capacity(genome.node_count);
-        for i in 0..genome.node_count {
-            nodes.push(Node {
-                nodeId: NodeId(i),
+impl Network {
+    fn new(genome: &Genome, config: &Config) -> Self {
+        let mut nodes_to_sort = Vec::with_capacity(genome.node_count);
+        for i in 0..config.input_layer_size {
+            nodes_to_sort.push(Node {
                 activation: 0.0,
                 incoming: vec![],
                 outgoing: vec![],
             });
         }
 
-        for edge in genome.edges.iter() {
-            nodes[edge.out_node.0].incoming.push(edge);
-            nodes[edge.in_node.0].outgoing.push(edge);
+        let mut nodes = vec![Rc::new(RefCell::new(Node::default())); genome.node_count];
+
+        let mut edges = Vec::with_capacity(genome.edges.len());
+        for gene in genome.edges.iter() {
+            let edge = Rc::new(RefCell::new(Edge {
+                weight: gene.weight,
+                in_node: nodes[gene.in_node.0].clone(),
+                visited: false,
+            }));
+            let mut node = RefCell::borrow_mut(&nodes[gene.out_node.0]);
+            node.incoming.push(edge.clone());
+
+            let mut node = RefCell::borrow_mut(&nodes[gene.in_node.0]);
+            node.incoming.push(edge.clone());
+        }
+
+        while let Some(node) = nodes_to_sort.pop() {
+            todo!();
         }
 
         // TODO: Sort nodes topologically
-        Self { nodes }
+        Self {
+            nodes,
+            edges,
+            in_nodes: vec![],
+            out_nodes: vec![],
+        }
     }
-}
 
-impl Network<'_> {
     fn feed_input(&mut self, x: &[f64]) {
         todo!();
     }
