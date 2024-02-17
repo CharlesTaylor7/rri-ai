@@ -20,20 +20,3 @@ pub struct RouteInfo {
     x: u8,
     y: u8,
 }
-
-// highway, railway,
-pub enum Piece {
-    Highway,
-    Railway,
-}
-
-// river or lake
-//| 'v' | 'l';
-
-pub struct Route {
-    north: Option<Piece>,
-    east: Option<Piece>,
-    south: Option<Piece>,
-    west: Option<Piece>,
-    station: bool,
-}

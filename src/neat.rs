@@ -542,3 +542,35 @@ fn sigmoid(num: R64) -> R64 {
     let one: R64 = 1.0.into();
     one / (one + (-num).exp())
 }
+
+#[macro_export]
+macro_rules! assert_approx_eq {
+    ($a:expr, $b:expr, $eps:expr) => {{
+        let (a, b) = (&$a, &$b);
+        let eps = $eps;
+        assert!(
+            (*a - *b).abs() < eps,
+            "assertion failed: `(left !== right)` \
+             (left: `{:?}`, right: `{:?}`, expected diff: `{:?}`, real diff: `{:?}`)",
+            *a,
+            *b,
+            eps,
+            (*a - *b).abs()
+        );
+    }};
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sigmoid() {
+        assert_approx_eq!(sigmoid(1.0.into()), R64::from(0.7310585), 1e-7);
+    }
+
+    #[test]
+    fn test_genome() {
+        assert_approx_eq!(sigmoid(1.0.into()), R64::from(0.7310585), 1e-7);
+    }
+}

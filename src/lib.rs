@@ -1,5 +1,6 @@
 pub mod logger;
 pub mod neat;
+pub mod rri;
 pub mod server;
 pub mod templates;
 pub mod types;
