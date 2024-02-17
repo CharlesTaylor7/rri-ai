@@ -1,5 +1,6 @@
 use crate::rri::{DieFace, Piece, Route};
-const ROUTES: [Route; 34] = [
+
+pub const DIE_PATTERNS: [Route; 34] = [
     Route {
         face: DieFace::AngleRail,
         north: Some(Piece::Rail),
