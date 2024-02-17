@@ -1,7 +1,7 @@
-use crate::rri::{DieFace, Piece, Route};
+use crate::rri::{DieFace, DiePattern, Piece};
 
-pub const DIE_PATTERNS: [Route; 34] = [
-    Route {
+pub const DIE_PATTERNS: [DiePattern; 34] = [
+    DiePattern {
         face: DieFace::AngleRail,
         north: Some(Piece::Rail),
         east: None,
@@ -9,7 +9,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Rail),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleRail,
         north: Some(Piece::Rail),
         east: Some(Piece::Rail),
@@ -17,7 +17,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleRail,
         north: None,
         east: Some(Piece::Rail),
@@ -25,7 +25,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleRail,
         north: None,
         east: None,
@@ -33,7 +33,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Rail),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::ThreeRail,
         north: Some(Piece::Rail),
         east: Some(Piece::Rail),
@@ -41,7 +41,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Rail),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::ThreeRail,
         north: Some(Piece::Rail),
         east: Some(Piece::Rail),
@@ -49,7 +49,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::ThreeRail,
         north: None,
         east: Some(Piece::Rail),
@@ -57,7 +57,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Rail),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::ThreeRail,
         north: Some(Piece::Rail),
         east: None,
@@ -65,7 +65,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Rail),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::StraightRail,
         north: Some(Piece::Rail),
         east: None,
@@ -73,7 +73,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::StraightRail,
         north: None,
         east: Some(Piece::Rail),
@@ -82,7 +82,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         station: false,
     },
     // angle road
-    Route {
+    DiePattern {
         face: DieFace::AngleRoad,
         north: Some(Piece::Road),
         east: None,
@@ -90,7 +90,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Road),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleRoad,
         north: Some(Piece::Road),
         east: Some(Piece::Road),
@@ -98,7 +98,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleRoad,
         north: None,
         east: Some(Piece::Road),
@@ -106,7 +106,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleRoad,
         north: None,
         east: None,
@@ -115,7 +115,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         station: false,
     },
     // 3 road
-    Route {
+    DiePattern {
         face: DieFace::ThreeRoad,
         north: Some(Piece::Road),
         east: Some(Piece::Road),
@@ -123,7 +123,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Road),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::ThreeRoad,
         north: Some(Piece::Road),
         east: Some(Piece::Road),
@@ -131,7 +131,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::ThreeRoad,
         north: None,
         east: Some(Piece::Road),
@@ -139,7 +139,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Road),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::ThreeRoad,
         north: Some(Piece::Road),
         east: None,
@@ -148,7 +148,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         station: false,
     },
     // straight road
-    Route {
+    DiePattern {
         face: DieFace::StraightRoad,
         north: Some(Piece::Road),
         east: None,
@@ -156,7 +156,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::StraightRoad,
         north: None,
         east: Some(Piece::Road),
@@ -165,7 +165,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         station: false,
     },
     // overpass
-    Route {
+    DiePattern {
         face: DieFace::Overpass,
         north: Some(Piece::Road),
         east: Some(Piece::Rail),
@@ -173,7 +173,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Rail),
         station: false,
     },
-    Route {
+    DiePattern {
         face: DieFace::Overpass,
         north: Some(Piece::Rail),
         east: Some(Piece::Road),
@@ -182,7 +182,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         station: false,
     },
     // straight station
-    Route {
+    DiePattern {
         face: DieFace::StraightStation,
         north: Some(Piece::Rail),
         east: None,
@@ -190,7 +190,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::StraightStation,
         north: None,
         east: Some(Piece::Rail),
@@ -198,7 +198,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Road),
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::StraightStation,
         north: Some(Piece::Road),
         east: None,
@@ -206,7 +206,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::StraightStation,
         north: None,
         east: Some(Piece::Road),
@@ -215,7 +215,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         station: true,
     },
     // angle station
-    Route {
+    DiePattern {
         face: DieFace::AngleStation,
         north: Some(Piece::Rail),
         east: None,
@@ -223,7 +223,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Road),
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleStation,
         north: Some(Piece::Road),
         east: Some(Piece::Rail),
@@ -231,7 +231,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleStation,
         north: None,
         east: Some(Piece::Road),
@@ -239,7 +239,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleStation,
         north: None,
         east: None,
@@ -248,7 +248,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         station: true,
     },
     // mirrored angle station
-    Route {
+    DiePattern {
         face: DieFace::AngleStation,
         north: Some(Piece::Road),
         east: None,
@@ -256,7 +256,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: Some(Piece::Rail),
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleStation,
         north: Some(Piece::Rail),
         east: Some(Piece::Road),
@@ -264,7 +264,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleStation,
         north: None,
         east: Some(Piece::Rail),
@@ -272,7 +272,7 @@ pub const DIE_PATTERNS: [Route; 34] = [
         west: None,
         station: true,
     },
-    Route {
+    DiePattern {
         face: DieFace::AngleStation,
         north: None,
         east: None,

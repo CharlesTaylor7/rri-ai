@@ -1,11 +1,3 @@
-#![allow(unused_imports)]
-#![allow(unused_braces)]
-#![allow(unused_mut)]
-#![allow(unused_variables)]
-#![allow(unused_assignments)]
-#![allow(non_snake_case)]
-#![allow(dead_code)]
-#![allow(unreachable_code)]
 use anyhow::{bail, Result};
 use decorum::R64;
 use num_traits::real::Real;
@@ -302,6 +294,7 @@ impl Speciation {
 
         let mut weight_diff: R64 = 0.0.into();
 
+        #[allow(non_snake_case)]
         let N = std::cmp::max(a.genes.len(), b.genes.len());
 
         // genome indices
@@ -545,17 +538,18 @@ fn sigmoid(num: R64) -> R64 {
 
 #[macro_export]
 macro_rules! assert_approx_eq {
-    ($a:expr, $b:expr, $eps:expr) => {{
+    ($a:expr, $b:expr, $epsilon:expr) => {{
         let (a, b) = (&$a, &$b);
-        let eps = $eps;
+        let diff = (*a - *b).abs();
+        let epsilon = $epsilon;
         assert!(
-            (*a - *b).abs() < eps,
+            (*a - *b).abs() < epsilon,
             "assertion failed: `(left !== right)` \
              (left: `{:?}`, right: `{:?}`, expected diff: `{:?}`, real diff: `{:?}`)",
             *a,
             *b,
-            eps,
-            (*a - *b).abs()
+            epsilon,
+            diff,
         );
     }};
 }
@@ -566,11 +560,6 @@ mod tests {
 
     #[test]
     fn test_sigmoid() {
-        assert_approx_eq!(sigmoid(1.0.into()), R64::from(0.7310585), 1e-7);
-    }
-
-    #[test]
-    fn test_genome() {
         assert_approx_eq!(sigmoid(1.0.into()), R64::from(0.7310585), 1e-7);
     }
 }

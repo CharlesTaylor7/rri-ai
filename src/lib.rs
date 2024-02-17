@@ -1,3 +1,4 @@
+#![allow(warnings, unused)]
 pub mod logger;
 pub mod neat;
 pub mod routes;
