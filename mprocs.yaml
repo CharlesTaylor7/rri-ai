@@ -1,8 +1,5 @@
 procs:
-  Next Server:
-    shell: yarn dev
-
-  Axum Server:
+  Server:
     shell: cargo watch -c -x run --features=dotenv
 
   Tailwind:
