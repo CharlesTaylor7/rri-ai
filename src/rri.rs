@@ -145,90 +145,75 @@ impl GameState {
         }
     }
 
-    pub fn apply_edit(&mut self, edit: Edit) -> Result<()> {
-        todo!()
+    pub fn apply_edit(&mut self, edit: Edit) -> () {
+        match edit {
+            Edit::Add(edge, piece) => {
+                //
+                self.open_edges.insert(edge, piece);
+            }
+            Edit::Delete(edge) => {
+                //
+                self.open_edges.remove(&edge);
+            }
+        }
     }
     pub fn apply_route(&mut self, action: DrawAction) -> Result<()> {
         // dry run of edits
         let DrawAction(RouteInfo { pattern, tile }) = action;
-        let mut edits: Vec<Edit> = Vec::with_capacity(10);
+        let mut edits: Vec<Edit> = Vec::with_capacity(4);
         for direction in Direction::ALL {
             let edge = TileEdge { tile, direction };
             match self.open_edges.get(&edge) {
                 None => {
-                    /*
                     let opposite = edge.adjacent();
-                    if self.open_edges.get(&opposite).is_some() {
+                    if opposite.is_some_and(|opposite| self.open_edges.get(&opposite).is_some()) {
                         bail!("Cannot draw over another route")
                     }
                     if let Some(piece) = pattern.get(direction) {
                         edits.push(Edit::Add(edge, piece));
                     }
-                    */
                 }
                 Some(network_piece) => {
-                    //if network_piece ==
-                    todo!()
-                }
-                Some(Piece::Rail) => {
-                    todo!()
+                    if pattern
+                        .get(direction)
+                        .is_some_and(|piece| *network_piece == piece)
+                    {
+                        edits.push(Edit::Delete(edge));
+                    } else {
+                        bail!("Cannot connect railway directly to roadway")
+                    }
                 }
             }
         }
-
-        todo!()
-        /*
-            if (networkPiece === undefined) {
-              // add the opposite connection to the map
-              const connection = oppositeConnection({ x, y, direction })
-              if (gameState.openRoutes[connection]) {
-                throw new RouteValidationError('cannot draw over another route')
-              }
-              const piece: Piece = route[direction] as Piece
-              edits.push({ connection, action: { type: 'add', piece } })
-            } else if (networkPiece === route[direction]) {
-              // clear the current connection from the map
-              edits.push({ connection, action: { type: 'delete' } })
-            } else {
-              throw new RouteValidationError(
-                'cannot connect railway directly to highway',
-              )
-            }
-          }
-
-          if (!edits.some((e: Edit) => e.action.type === 'delete')) {
-            throw new RouteValidationError(
-              "piece doesn't connect to any existing network",
-            )
-          }
-
-          if (gameState.routesDrawn.some((r) => r.x === x && r.y === y)) {
-            throw new RouteValidationError('route cannot draw over existing route')
-          }
-
-          // commit the edits to state
-          gameState.routesDrawn.push(routeInfo)
-          for (let edit of edits) {
-            if (edit.action.type === 'delete') {
-              delete gameState.openRoutes[edit.connection]
-            } else if (edit.action.type === 'add') {
-              gameState.openRoutes[edit.connection] = edit.action.piece
-            }
-          }
+        if !edits
+            .iter()
+            .any(|e| if let Edit::Delete(_) = e { true } else { false })
+        {
+            bail!("Route doesn't connect to any road or rail in your network.")
         }
 
-        */
+        if self.drawn_routes.iter().any(|route| route.tile == tile) {
+            bail!("Cannot draw over existing route")
+        }
+
+        // commit edits to state
+        for edit in edits {
+            self.apply_edit(edit);
+        }
+        self.drawn_routes.push(RouteInfo { pattern, tile });
+        Ok(())
     }
 
     pub fn apply_turn(&mut self, turn: Turn) -> Result<()> {
-        //self
-
-        todo!()
+        for route in turn.actions {
+            self.apply_route(route)?;
+        }
+        Ok(())
     }
 }
 
 pub struct Turn {
-    actions: Rc<[DrawAction]>,
+    actions: Vec<DrawAction>,
 }
 
 pub struct DrawAction(pub RouteInfo);
@@ -275,31 +260,25 @@ impl TileEdge {
             Direction::North => {
                 TileEdge::new(self.tile.x, self.tile.y.checked_sub(1)?, Direction::South)
             }
-
             Direction::West => {
                 TileEdge::new(self.tile.x.checked_sub(1)?, self.tile.y, Direction::East)
             }
-
-            Direction::South => TileEdge::new(
-                self.tile.x,
-                if self.tile.y == 6 {
-                    None
+            Direction::South => {
+                let y = if self.tile.y == 6 {
+                    None?
                 } else {
-                    Some(self.tile.y + 1)
-                }?,
-                Direction::North,
-            ),
-            _ => todo!(),
-
-            Direction::East => TileEdge::new(
-                if self.tile.x == 6 {
-                    None
+                    self.tile.y + 1
+                };
+                TileEdge::new(self.tile.x, y, Direction::North)
+            }
+            Direction::East => {
+                let x = if self.tile.x == 6 {
+                    None?
                 } else {
-                    Some(self.tile.x + 1)
-                }?,
-                self.tile.y,
-                Direction::West,
-            ),
+                    self.tile.x + 1
+                };
+                TileEdge::new(x, self.tile.y, Direction::West)
+            }
         };
         Some(edge)
     }
