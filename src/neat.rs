@@ -10,7 +10,7 @@ use std::borrow::BorrowMut;
 use std::cell::RefCell;
 use std::ops::{Add, Range};
 use std::rc::Rc;
-use std::usize;
+use std::{default, usize};
 
 pub struct DomainConfig {
     pub input_layer_size: usize,
@@ -428,8 +428,7 @@ pub struct Network {
     // ^ a big vector divided into 3 section
     // the first section is the input layer
     // the second section is the output layer
-    // the third section is the hidden layers sorted topologically
-    // The third section is the only one that is dynamic and needs to be sorted.
+    // the third section is the hidden layers
 }
 
 #[derive(Debug)]
@@ -444,11 +443,18 @@ pub struct Edge {
 #[derive(Default, Debug)]
 pub struct Node {
     pub id: NodeId,
-    pub weight: f64,
     pub activation: f64,
+    pub step: Propagation,
     pub node_type: NodeType,
     pub incoming: Vec<Ref<Edge>>,
     pub outgoing: Vec<Ref<Edge>>,
+}
+
+#[derive(Default, Debug, PartialEq, Eq)]
+pub enum Propagation {
+    #[default]
+    Inert, // already normalized
+    Activating, // receiving input from previous layer of nodes
 }
 
 impl Network {
@@ -488,8 +494,8 @@ impl Network {
             node.node_type = NodeType::Hidden;
         }
 
-        let mut edges = Vec::with_capacity(genome.genes.len());
-        let mut to_process = Vec::with_capacity(genome.genes.len());
+        let mut sorted_edges = Vec::with_capacity(genome.genes.len());
+        let mut edges_to_sort = Vec::with_capacity(genome.genes.len());
         for gene in genome.genes.iter().filter(|edge| edge.enabled) {
             let edge = Rc::new(RefCell::new(Edge {
                 id: gene.id,
@@ -504,51 +510,30 @@ impl Network {
             let mut node = RefCell::borrow_mut(&nodes[gene.in_node.0]);
             node.outgoing.push(edge.clone());
 
-            edges.push(edge);
             if nodes[gene.in_node.0].borrow().node_type == NodeType::Input {
-                to_process.push(nodes[gene.in_node.0].clone());
+                edges_to_sort.push(edge);
             }
         }
 
-        // The hidden layer nodes need to be re-added but in topological order
-        nodes.truncate(config.domain.input_layer_size + config.domain.output_layer_size);
-
         // https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
-        while let Some(node) = to_process.pop() {
-            log::info!(
-                "node: {:?}, remaining: {:?}",
-                node.borrow().id,
-                to_process.len()
-            );
-
-            for edge in node.borrow().outgoing.iter() {
-                if edge.borrow().visited {
-                    let edge = edge.borrow();
-                    bail!(
-                        "Neural net contains a cycle. Gene: {:?} between nodes: {:?}, {:?}",
-                        edge.id,
-                        edge.in_node.borrow().id,
-                        edge.out_node.borrow().id,
-                    );
-                }
-                let mut cell = RefCell::borrow_mut(edge);
-                cell.visited = true;
-                drop(cell);
-
-                let edge = edge.borrow();
-                let next_node = edge.out_node.borrow();
-                if next_node.node_type == NodeType::Hidden
-                    && next_node.incoming.iter().all(|edge| edge.borrow().visited)
-                {
-                    nodes.push(node.clone());
-                    to_process.push(edge.out_node.clone());
-                }
+        while let Some(edge) = edges_to_sort.pop() {
+            let mut ref_cell = RefCell::borrow_mut(&edge);
+            if ref_cell.visited {
+                bail!("Neural net contains a cycle")
+            } else {
+                ref_cell.visited = true;
+            }
+            sorted_edges.push(edge.clone());
+            let edge = edge.borrow();
+            let next_node = edge.out_node.borrow();
+            if next_node.incoming.iter().all(|edge| edge.borrow().visited) {
+                edges_to_sort.extend_from_slice(&next_node.outgoing);
             }
         }
 
         Ok(Self {
             nodes,
-            edges,
+            edges: sorted_edges,
             in_nodes: config.domain.input_layer_size,
             out_nodes: config.domain.output_layer_size,
         })
@@ -556,27 +541,29 @@ impl Network {
 
     fn input(&self, x: &[f64]) {
         for (i, x) in x.iter().enumerate() {
-            RefCell::borrow_mut(&self.nodes[i]).activation = *x;
+            let mut ref_cell = RefCell::borrow_mut(&self.nodes[i]);
+            ref_cell.activation = *x;
+            ref_cell.step = Propagation::Inert;
         }
     }
 
     fn propagate(&self) {
-        let fixed_end = self.in_nodes + self.out_nodes;
-        let hidden_range = (fixed_end)..;
-        let output_range = self.in_nodes..fixed_end;
-        Self::propagate_nodes(self.nodes[fixed_end..].iter());
-        Self::propagate_nodes(self.nodes[self.in_nodes..fixed_end].iter());
-    }
+        for edge in self.edges.iter() {
+            let edge = edge.borrow();
 
-    fn propagate_nodes<'a>(iterator: impl Iterator<Item = &'a Ref<Node>>) {
-        for node in iterator {
-            let mut value: f64 = 0_f64.into();
-            for edge in node.borrow().incoming.iter() {
-                value += edge.borrow().weight * edge.borrow().in_node.borrow().activation;
+            let mut source = RefCell::borrow_mut(&edge.in_node);
+            if source.step == Propagation::Activating {
+                source.activation = sigmoid(source.activation);
+                source.step = Propagation::Inert;
             }
 
-            let mut node = RefCell::borrow_mut(&node);
-            node.activation = sigmoid(value);
+            let mut target = RefCell::borrow_mut(&edge.out_node);
+            if target.step == Propagation::Inert {
+                target.activation = 0.0;
+                target.step = Propagation::Activating;
+            }
+
+            target.activation += edge.weight * source.activation;
         }
     }
 
