@@ -558,11 +558,13 @@ impl Network {
             }));
             log::info!("in_node: {:?}", nodes[gene.in_node.0]);
             log::info!("out_node: {:?}", nodes[gene.out_node.0]);
-            let mut node = RefCell::borrow_mut(&nodes[gene.out_node.0]);
-            node.incoming.push(edge.clone());
+            {
+                let mut node = RefCell::borrow_mut(&nodes[gene.out_node.0]);
+                node.incoming.push(edge.clone());
 
-            let mut node = RefCell::borrow_mut(&nodes[gene.in_node.0]);
-            node.outgoing.push(edge.clone());
+                let mut node = RefCell::borrow_mut(&nodes[gene.in_node.0]);
+                node.outgoing.push(edge.clone());
+            }
 
             if nodes[gene.in_node.0].borrow().node_type == NodeType::Input {
                 edges_to_sort.push(edge);
