@@ -91,7 +91,7 @@ impl DieFace {
 }
 
 pub struct DrawAction {
-    pub pattern: DiePattern,
+    pub pattern: &'static DiePattern,
     pub tile: Tile,
 }
 
@@ -99,14 +99,14 @@ pub struct DrawAction {
 // speedup: Replace hashmaps with arrays of options.
 // that would use less memory and spend less time hashing data.
 pub struct GameState {
-    pub drawn_routes: HashMap<Tile, DiePattern>,
+    pub drawn_routes: Vec<DrawAction>,
     pub open_edges: HashMap<TileEdge, Piece>,
     pub dice: Dice,
 }
 
 pub struct Dice {
-    regular: [RegularDieFace; 3],
-    special: SpecialDieFace,
+    pub regular: [RegularDieFace; 3],
+    pub special: SpecialDieFace,
 }
 
 impl Dice {
@@ -158,7 +158,7 @@ impl GameState {
                 regular: [RegularDieFace::AngleRail; 3],
                 special: SpecialDieFace::Overpass,
             },
-            drawn_routes: HashMap::new(),
+            drawn_routes: Vec::with_capacity(28),
             open_edges: HashMap::from([
                 // north exits
                 (TileEdge::new(1, 0, Direction::North), Piece::Road),
@@ -195,7 +195,7 @@ impl GameState {
     pub fn apply_route(&mut self, action: DrawAction) -> Result<()> {
         let DrawAction { pattern, tile } = action;
 
-        if self.drawn_routes.contains_key(&tile) {
+        if self.drawn_routes.iter().any(|action| action.tile == tile) {
             bail!("Cannot draw over existing route")
         }
 
@@ -230,13 +230,13 @@ impl GameState {
         for edit in edits {
             self.apply_edit(edit);
         }
-        self.drawn_routes.insert(tile, pattern);
+        self.drawn_routes.push(DrawAction { tile, pattern });
         Ok(())
     }
 }
 
 pub struct Turn {
-    actions: Vec<DrawAction>,
+    pub actions: Vec<DrawAction>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]

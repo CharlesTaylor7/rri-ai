@@ -1,5 +1,6 @@
 use crate::neat::{Config, DomainConfig, Genome, Network};
-use crate::rri::{GameState, RRIAgent, Tile, Turn};
+use crate::routes::DIE_PATTERNS;
+use crate::rri::{DrawAction, GameState, RRIAgent, Tile, Turn};
 use decorum::R64;
 use std::rc::Rc;
 
@@ -10,25 +11,9 @@ pub struct NeatAgent {
 
 impl RRIAgent for NeatAgent {
     fn prompt(&mut self, state: &GameState) -> Turn {
-        let mut input = [R64::from(0.0); Self::INPUT_LAYER_SIZE];
-        let mut index: usize = 0;
-        // regular dice:
-        for x in 0..7 {
-            for y in 0..7 {
-                if let Some(pattern) = state.drawn_routes.get(&Tile { x, y }) {
-                    input[index + pattern.face as usize] = R64::from(1.0);
-                    //input[index +
-                }
-                index += 34;
-            }
-        }
-        for _ in 0..3 {
-            //input[index] = state.dice_roll;
-            index += 6;
-        }
-
+        let input = Self::to_input(state);
         let output = self.network.process(&input);
-        todo!()
+        Self::from_output(&output)
     }
 
     // errors are penalized; but the game doesn't halt
@@ -51,7 +36,54 @@ impl NeatAgent {
 
     const OUTPUT_LAYER_SIZE: usize = 4 * 49 * 34; // 4 dice patterns placed on the grid.
 
-    const GAME_COUNT: usize = 100;
+    #[inline]
+    pub fn to_input(state: &GameState) -> [R64; Self::INPUT_LAYER_SIZE] {
+        let mut input = [R64::from(0.0); Self::INPUT_LAYER_SIZE];
+        for action in state.drawn_routes.iter() {
+            let tile_offset = 34 * (action.tile.x + action.tile.y * 7) as usize;
+            input[tile_offset + action.pattern.face as usize] = R64::from(1.0);
+        }
+        let mut index: usize = 34 * 49;
+
+        // regular dice:
+        for face in state.dice.regular {
+            input[index + face as usize] = R64::from(1.0);
+            index += 6;
+        }
+
+        // special die
+        input[index + (state.dice.special as usize - 6)] = R64::from(1.0);
+        input
+    }
+
+    #[inline]
+    pub fn from_output(output: &[R64]) -> Turn {
+        let mut actions = Vec::with_capacity(4);
+        // largest value in the grid is the placement,
+        // if its larger than 0.5 Otherwise place none.
+        let mut index = 0;
+        let mut action_window = 49 * 34;
+        for _ in 0..4 {
+            let pair = output[index..index + action_window]
+                .iter()
+                .enumerate()
+                .max_by_key(|(i, v)| *v)
+                .expect("Not empty");
+
+            if *pair.1 > R64::from(0.5) {
+                let pattern = &DIE_PATTERNS[pair.0 % 34];
+                let tile = pair.0 / 34;
+                let x = (tile / 7) as u8;
+                let y = (tile % 7) as u8;
+                actions.push(DrawAction {
+                    tile: Tile { x, y },
+                    pattern,
+                })
+            }
+            index += action_window;
+        }
+        Turn { actions }
+    }
 
     pub fn new(network: Rc<Network>) -> Self {
         Self {
@@ -59,6 +91,7 @@ impl NeatAgent {
             score_modifier: 0,
         }
     }
+    const GAME_COUNT: usize = 100;
 
     // average score across many games
     pub fn fitness(&mut self) -> R64 {
