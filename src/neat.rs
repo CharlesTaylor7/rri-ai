@@ -10,16 +10,24 @@ use std::cell::RefCell;
 use std::ops::{Add, Range};
 use std::rc::Rc;
 
+pub struct DomainConfig {
+    pub input_layer_size: usize,
+    pub output_layer_size: usize,
+    pub fitness: Box<dyn Fn(Rc<Network>) -> R64>,
+}
+
 pub struct Config {
-    input_layer_size: usize,
-    output_layer_size: usize,
-    fitness: Box<dyn Fn(&Network) -> R64>,
-    speciation: Speciation,
-    mutation: MutationWeights,
-    population: usize,
+    pub domain: DomainConfig,
+    pub parameters: Parameters,
+}
+
+pub struct Parameters {
+    pub speciation: Speciation,
+    pub mutation: MutationWeights,
+    pub population: usize,
     // percentage allowed to recombine
-    mutation_rate: R64,
-    reproduction_rate: R64,
+    pub mutation_rate: R64,
+    pub reproduction_rate: R64,
 }
 
 // rates of mutation
@@ -69,7 +77,7 @@ impl Population {
                     .genomes
                     .choose(&mut rand::thread_rng())
                     .expect("Species group should not be empty");
-                if self.config.speciation.compatible(genome, rep) {
+                if self.config.parameters.speciation.compatible(genome, rep) {
                     species.genomes.push(genome.clone());
                     continue 'outer;
                 }
@@ -90,7 +98,7 @@ impl Population {
             individual_fitness.push(Vec::with_capacity(species.genomes.len()));
             for (i, genome) in species.genomes.iter().enumerate() {
                 let network = Network::new(genome, &self.config).expect("valid network");
-                let fitness: R64 = (self.config.fitness)(&network);
+                let fitness: R64 = (self.config.domain.fitness)(Rc::new(network));
                 let adjusted: R64 = fitness / species.genomes.len() as f64;
                 individual_fitness[j][i] = adjusted;
                 group_fitness[j] += adjusted;
@@ -98,9 +106,9 @@ impl Population {
             }
         }
 
-        let average_fitness: R64 = total_fitness / self.config.population as f64;
+        let average_fitness: R64 = total_fitness / self.config.parameters.population as f64;
 
-        self.population = Vec::with_capacity(self.config.population);
+        self.population = Vec::with_capacity(self.config.parameters.population);
         for (j, species) in groups.into_iter().enumerate() {
             let mut genomes = species
                 .genomes
@@ -114,7 +122,7 @@ impl Population {
             genomes.sort_unstable_by_key(|g| g.fitness);
             let new_pop_size = (group_fitness[j] / average_fitness).ceil().into_inner() as usize;
             let group_size: R64 = (genomes.len() as f64).into();
-            let parents = (group_size * self.config.reproduction_rate)
+            let parents = (group_size * self.config.parameters.reproduction_rate)
                 .ceil()
                 .into_inner() as usize;
 
@@ -194,13 +202,13 @@ impl Population {
     // mutate the whole population.
     fn mutate_population(&mut self) {
         self.population.shuffle(&mut rand::thread_rng());
-        let count = (self.config.mutation_rate * self.population.len() as f64)
+        let count = (self.config.parameters.mutation_rate * self.population.len() as f64)
             .ceil()
             .into_inner() as usize;
 
         for genome in self.population[0..count].iter_mut() {
             let genome = Rc::make_mut(genome);
-            match self.config.mutation.sample() {
+            match self.config.parameters.mutation.sample() {
                 Mutation::AdjustWeight => {
                     if let Some(gene) = genome.genes.choose_mut(&mut rand::thread_rng()) {
                         let gene = Rc::make_mut(gene);
@@ -408,13 +416,19 @@ pub struct Node {
 }
 
 impl Network {
-    fn new(genome: &Genome, config: &Config) -> Result<Self> {
-        let node_count = config.input_layer_size + config.output_layer_size + genome.hidden_nodes;
+    pub fn process(&self, input: &[R64]) -> Rc<[R64]> {
+        self.input(input);
+        self.propagate();
+        self.output()
+    }
+    pub fn new(genome: &Genome, config: &Config) -> Result<Self> {
+        let node_count =
+            config.domain.input_layer_size + config.domain.output_layer_size + genome.hidden_nodes;
 
         let mut nodes = vec![Rc::new(RefCell::new(Node::default())); node_count];
 
         let mut begin = 0;
-        let mut end = config.input_layer_size;
+        let mut end = config.domain.input_layer_size;
 
         for i in begin..end {
             let mut node = RefCell::borrow_mut(&nodes[i]);
@@ -423,7 +437,7 @@ impl Network {
         }
 
         begin = end;
-        end += config.output_layer_size;
+        end += config.domain.output_layer_size;
         for i in begin..end {
             let mut node = RefCell::borrow_mut(&nodes[i]);
             node.id = NodeId(i);
@@ -457,10 +471,10 @@ impl Network {
         }
 
         // The hidden layer nodes need to be re-added but in topological order
-        nodes.truncate(config.input_layer_size + config.output_layer_size);
+        nodes.truncate(config.domain.input_layer_size + config.domain.output_layer_size);
 
         // https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
-        let mut to_process = nodes[0..config.input_layer_size].to_vec();
+        let mut to_process = nodes[0..config.domain.input_layer_size].to_vec();
         while let Some(node) = to_process.pop() {
             for edge in node.borrow().outgoing.iter() {
                 if edge.borrow().visited {
@@ -490,8 +504,8 @@ impl Network {
         Ok(Self {
             nodes,
             edges,
-            in_nodes: config.input_layer_size,
-            out_nodes: config.output_layer_size,
+            in_nodes: config.domain.input_layer_size,
+            out_nodes: config.domain.output_layer_size,
         })
     }
 
@@ -521,7 +535,7 @@ impl Network {
         }
     }
 
-    fn output(&self) -> Vec<R64> {
+    fn output(&self) -> Rc<[R64]> {
         let begin = self.in_nodes;
         let end = self.in_nodes + self.out_nodes;
         self.nodes[begin..end]
