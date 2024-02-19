@@ -8,6 +8,7 @@ use rand::Rng;
 use rand_distr::StandardNormal;
 use std::borrow::BorrowMut;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::Write;
 use std::ops::{Add, Range};
@@ -93,18 +94,19 @@ pub enum Mutation {
     AddGene,
 }
 
-pub struct Population {
-    pub config: Config,
-    pub population: Vec<Rc<Genome>>,
-    pub node_count: usize,
-    pub edge_count: usize,
-    pub champion: ScoredGenome,
-}
-
 #[derive(Default, Clone)]
 pub struct Fitness {
     pub actual: f64,
     pub adjusted: f64,
+}
+
+pub struct Population {
+    pub config: Config,
+    pub champion: ScoredGenome,
+    pub population: Vec<Rc<Genome>>,
+    //pub genes: HashMap<(NodeId, NodeId)>
+    pub node_count: usize,
+    pub edge_count: usize,
 }
 
 impl Population {
@@ -432,7 +434,7 @@ impl Speciation {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NodeId(pub usize);
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
