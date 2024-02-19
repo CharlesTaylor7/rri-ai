@@ -1,3 +1,4 @@
+## UI
 - [ ] Stop game at round 7
 - [ ] Show running score for Bot
 - [ ] Reset game button
@@ -11,28 +12,24 @@
     - Dockerize
 
 
-More broadly, I want to evaluate if I should migrate tech stack.
-The new stack I have in mind would be:
+The new stack:
     - Rust axum
         - axum
         - askama. I want to try maud at some point, but I like askama for integrating with html snippets.
     - htmx
     - tailwind + daisyUI
 
-I want to make a bot that makes sensible decisions instead of just random ones.
-I want to do that in a robust language instead of the janky typescript I wrote 2-3 years ago.
+## Bot / NEAt
+- [ ] Disallow multiedges
+- [ ] 
 
-
-## Bot development
-This youtube video covers Neuro Evolution of Augmenting Topologies (NEAT). I think it may be a good fit for the problem.
+## Bot Background 
+This youtube video is a good introduction to Neuro Evolution of Augmenting Topologies (NEAT). I think it may be a good fit for the problem.
 https://www.youtube.com/watch?v=dkvFcYBznPI&ab_channel=b2studios
 
-They have an implementation of NEAT in C#:
+Reference implementations:
 https://github.com/b2developer/MonopolyNEAT
-
-There's also an implementation of NEAT in python here:
-https://neat-python.readthedocs.io/en/latest/installation.html
-
+https://github.com/colgreen/sharpneat
 
 Current plan of action is:
 - Build bot that chooses legal actions but at random. 
@@ -41,13 +38,6 @@ Current plan of action is:
 
 Use those as baselines to compare against the NEAT based bot. Scoring is the fitness function, so it's a necessary step to using Neat.
 
-I need to decide between:
-- Python 
-- C#
-- Rust
-
-I think I will read the initial paper, before proceeding.
-Ok I read the paper. I think the C# implementation is clearer. So I will use that as a reference. The amount of code is not huge and it's based on the paper, so I will reimplement the NEAT algorithm in Rust.
 
 I'm going to simplify the game further for the sake of figuring out unknowns:
 
