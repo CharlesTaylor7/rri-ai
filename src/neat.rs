@@ -167,6 +167,7 @@ impl Population {
     fn reproduce(&mut self, parents: &mut [ScoredGenome], target_size: usize) {
         let mut remaining = target_size;
         loop {
+            log::info!("Reproduce");
             parents.shuffle(&mut rand::thread_rng());
             for chunk in parents.chunks(2) {
                 if chunk.get(1).is_none() {
@@ -193,6 +194,7 @@ impl Population {
             hidden_nodes: std::cmp::max(a.genome.hidden_nodes, b.genome.hidden_nodes),
         };
         loop {
+            log::info!("Crossover");
             match (a.genome.genes.get(i), b.genome.genes.get(j)) {
                 (Some(gene_a), Some(gene_b)) => {
                     if gene_a.id == gene_b.id {
@@ -395,7 +397,7 @@ pub struct NodeId(pub usize);
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
 pub struct GeneId(pub usize);
 
-#[derive(Default, PartialEq, Eq)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub enum NodeType {
     #[default]
     Input,
@@ -434,6 +436,7 @@ pub struct Network {
     // The third section is the only one that is dynamic and needs to be sorted.
 }
 
+#[derive(Debug)]
 pub struct Edge {
     pub id: GeneId,
     pub weight: R64,
@@ -442,7 +445,7 @@ pub struct Edge {
     pub visited: bool,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Node {
     pub id: NodeId,
     pub weight: R64,
@@ -512,7 +515,15 @@ impl Network {
 
         // https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
         let mut to_process = nodes[0..config.domain.input_layer_size].to_vec();
+        log::info!("Topological sorting");
         while let Some(node) = to_process.pop() {
+            log::info!("Topological sorting");
+            log::info!(
+                "node: {:?}, remaining: {:?}",
+                node.borrow().id,
+                to_process.len()
+            );
+
             for edge in node.borrow().outgoing.iter() {
                 if edge.borrow().visited {
                     let edge = edge.borrow();

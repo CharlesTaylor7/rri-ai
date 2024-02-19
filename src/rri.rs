@@ -148,7 +148,7 @@ impl GameState {
     }
 
     pub fn score(&self) -> isize {
-        log::warn!("TODO: implement scoring");
+        //log::warn!("TODO: implement scoring");
         0
     }
 
