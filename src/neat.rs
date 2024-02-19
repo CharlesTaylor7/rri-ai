@@ -340,6 +340,7 @@ impl Speciation {
         let mut i = 0;
         let mut j = 0;
         loop {
+            log::info!("Checking compatibility");
             let gene_a = a.genes.get(i);
             let gene_b = b.genes.get(j);
             match (a.genes.get(i), b.genes.get(j)) {
