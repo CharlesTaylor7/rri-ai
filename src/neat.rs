@@ -25,9 +25,30 @@ pub struct Parameters {
     pub speciation: Speciation,
     pub mutation: MutationWeights,
     pub population: usize,
-    // percentage allowed to recombine
+    // percentage changed in new generation
     pub mutation_rate: R64,
+    // percentage allowed to recombine
     pub reproduction_rate: R64,
+}
+impl Parameters {
+    pub fn default() -> Self {
+        Self {
+            reproduction_rate: 0.5.into(),
+            mutation_rate: 0.3.into(),
+            population: 200,
+            mutation: MutationWeights {
+                adjust_weight: 0.7.into(),
+                add_node: 0.2.into(),
+                add_connection: 0.1.into(),
+            },
+            speciation: Speciation {
+                c1: 1.0.into(),
+                c2: 1.0.into(),
+                c3: 3.0.into(),
+                ct: 4.0.into(),
+            },
+        }
+    }
 }
 
 // rates of mutation
@@ -69,6 +90,16 @@ pub struct Population {
 }
 
 impl Population {
+    pub fn new(config: Config) -> Population {
+        let node_count = config.domain.input_layer_size + config.domain.output_layer_size;
+        Self {
+            node_count,
+            edge_count: 0,
+            population: vec![Rc::new(Genome::default()); config.parameters.population],
+            config,
+        }
+    }
+
     fn classify_species(&self) -> Vec<Species> {
         let mut groups: Vec<Species> = vec![];
         'outer: for genome in self.population.iter() {
@@ -88,6 +119,7 @@ impl Population {
         }
         groups
     }
+
     pub fn advance_gen(&mut self) {
         let groups = self.classify_species();
         let mut total_fitness: R64 = (0.).into();
@@ -367,7 +399,7 @@ pub enum NodeType {
 }
 
 /* === Genome description === */
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Genome {
     pub genes: Vec<Rc<Gene>>,
     pub hidden_nodes: usize,

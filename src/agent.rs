@@ -103,7 +103,7 @@ impl NeatAgent {
         }
         R64::from((score + self.score_modifier) as f64 / Self::GAME_COUNT as f64)
     }
-    fn config() -> DomainConfig {
+    pub fn config() -> DomainConfig {
         DomainConfig {
             input_layer_size: Self::INPUT_LAYER_SIZE,
             output_layer_size: Self::OUTPUT_LAYER_SIZE,
