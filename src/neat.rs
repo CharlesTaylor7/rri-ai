@@ -89,16 +89,29 @@ pub struct Population {
     population: Vec<Rc<Genome>>,
     node_count: usize,
     edge_count: usize,
+    champion: ScoredGenome,
+}
+
+#[derive(Default, Clone)]
+pub struct Fitness {
+    pub actual: f64,
+    pub adjusted: f64,
 }
 
 impl Population {
     pub fn new(config: Config) -> Population {
         let node_count = config.domain.input_layer_size + config.domain.output_layer_size;
+        let population = vec![Rc::new(Genome::default()); config.parameters.population];
+        let champion = population[0].clone();
         Self {
             node_count,
             edge_count: 0,
-            population: vec![Rc::new(Genome::default()); config.parameters.population],
+            population,
             config,
+            champion: ScoredGenome {
+                fitness: Fitness::default(),
+                genome: champion,
+            },
         }
     }
 
@@ -127,34 +140,35 @@ impl Population {
         let groups = self.classify_species();
         let mut total_fitness: f64 = (0.).into();
         let mut group_fitness: Vec<f64> = vec![(0.).into(); groups.len()];
-        let mut individual_fitness: Vec<Vec<f64>> = Vec::with_capacity(groups.len());
+        let mut individual_fitness: Vec<Vec<ScoredGenome>> = Vec::with_capacity(groups.len());
 
         for (j, species) in groups.iter().enumerate() {
             individual_fitness.push(Vec::with_capacity(species.genomes.len()));
             for genome in species.genomes.iter() {
                 let network = Network::new(genome, &self.config).expect("valid network");
-                let fitness: f64 = (self.config.domain.fitness)(Rc::new(network));
-                let adjusted: f64 = fitness / species.genomes.len() as f64;
-                individual_fitness[j].push(adjusted);
-                group_fitness[j] += adjusted;
+                let actual = (self.config.domain.fitness)(Rc::new(network));
+                let adjusted = actual / species.genomes.len() as f64;
+                let scored = ScoredGenome {
+                    fitness: Fitness { actual, adjusted },
+                    genome: genome.clone(),
+                };
+                if scored.fitness.actual > self.champion.fitness.actual {
+                    self.champion = scored.clone();
+                }
+
                 total_fitness += adjusted;
+                group_fitness[j] += adjusted;
+                individual_fitness[j].push(scored);
             }
         }
 
         let average_fitness: f64 = total_fitness / self.config.parameters.population as f64;
 
         self.population = Vec::with_capacity(self.config.parameters.population);
-        for (j, species) in groups.into_iter().enumerate() {
-            let mut genomes = species
-                .genomes
-                .into_iter()
-                .enumerate()
-                .map(|(i, genome)| ScoredGenome {
-                    genome,
-                    fitness: individual_fitness[j][i],
-                })
-                .collect::<Vec<ScoredGenome>>();
-            genomes.sort_unstable_by_key(|g| R64::from(g.fitness));
+        for (j, species) in individual_fitness.into_iter().enumerate() {
+            let mut genomes = species;
+
+            genomes.sort_unstable_by_key(|g| R64::from(g.fitness.actual));
             log::info!("average_fitness: {}", average_fitness);
             let new_pop_size = (group_fitness[j] / average_fitness).ceil() as usize;
             let group_size: f64 = (genomes.len() as f64).into();
@@ -197,7 +211,7 @@ impl Population {
                 (Some(gene_a), Some(gene_b)) => {
                     if gene_a.id == gene_b.id {
                         genome.genes.push(
-                            if a.fitness > b.fitness {
+                            if a.fitness.actual > b.fitness.actual {
                                 gene_a
                             } else {
                                 gene_b
@@ -308,8 +322,9 @@ impl Population {
     }
 }
 
+#[derive(Clone)]
 pub struct ScoredGenome {
-    fitness: f64,
+    fitness: Fitness,
     genome: Rc<Genome>,
 }
 
@@ -431,6 +446,18 @@ pub struct Network {
     // the third section is the hidden layers
 }
 
+pub trait NeuralInterface {
+    fn run(&self, input: &[f64], output: &mut [f64]);
+}
+
+impl NeuralInterface for Network {
+    fn run(&self, input: &[f64], output: &mut [f64]) {
+        self.input(input);
+        self.propagate();
+        self.output(output)
+    }
+}
+
 #[derive(Debug)]
 pub struct Edge {
     pub id: GeneId,
@@ -458,11 +485,6 @@ pub enum Propagation {
 }
 
 impl Network {
-    pub fn process(&self, input: &[f64]) -> Rc<[f64]> {
-        self.input(input);
-        self.propagate();
-        self.output()
-    }
     pub fn new(genome: &Genome, config: &Config) -> Result<Self> {
         let node_count =
             config.domain.input_layer_size + config.domain.output_layer_size + genome.hidden_nodes;
@@ -567,13 +589,14 @@ impl Network {
         }
     }
 
-    fn output(&self) -> Rc<[f64]> {
+    fn output(&self, output: &mut [f64]) {
         let begin = self.in_nodes;
         let end = self.in_nodes + self.out_nodes;
-        self.nodes[begin..end]
-            .iter()
-            .map(|node| node.borrow().activation)
-            .collect()
+        let mut index = self.in_nodes;
+        for i in 0..self.out_nodes {
+            index += i;
+            output[i] = self.nodes[index].borrow().activation;
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::neat::{Config, DomainConfig, Genome, Network};
+use crate::neat::{Config, DomainConfig, Genome, Network, NeuralInterface};
 use crate::routes::DIE_PATTERNS;
 use crate::rri::{DrawAction, GameState, RRIAgent, Tile, Turn};
 use decorum::R64;
@@ -6,14 +6,15 @@ use std::rc::Rc;
 
 pub struct NeatAgent {
     network: Rc<Network>,
+    output: [f64; Self::OUTPUT_LAYER_SIZE],
     score_modifier: isize,
 }
 
 impl RRIAgent for NeatAgent {
     fn prompt(&mut self, state: &GameState) -> Turn {
         let input = Self::to_input(state);
-        let output = self.network.process(&input);
-        Self::from_output(&output)
+        self.network.run(&input, &mut self.output);
+        Self::from_output(&self.output)
     }
 
     // errors are penalized; but the game doesn't halt
@@ -86,6 +87,7 @@ impl NeatAgent {
         Self {
             network,
             score_modifier: 0,
+            output: [0.0; Self::OUTPUT_LAYER_SIZE],
         }
     }
     const GAME_COUNT: usize = 100;
