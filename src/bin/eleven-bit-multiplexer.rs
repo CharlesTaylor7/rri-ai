@@ -36,9 +36,9 @@ fn main() {
     };
     config.parameters.population = 100;
     config.parameters.mutation = MutationWeights {
-        add_node: 0.5.into(),
-        add_connection: 0.5.into(),
-        adjust_weight: 0.0.into(),
+        add_node: 0.5,
+        add_connection: 0.5,
+        adjust_weight: 0.0,
     };
     let mut population = Population::new(config);
     log::info!("Gen 0");
@@ -55,6 +55,7 @@ fn main() {
             );
         }
         let network = Network::new(&population.champion.genome, &population.config).unwrap();
+        std::fs::create_dir_all("graphviz").unwrap();
         network
             .dump_graphviz(format!("graphviz/champion-{}.dot", gen))
             .unwrap();

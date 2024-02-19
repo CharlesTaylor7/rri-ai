@@ -80,7 +80,7 @@ impl MutationWeights {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Mutation {
     AdjustWeight,
     AddNode,
@@ -187,6 +187,8 @@ impl Population {
             );
             self.reproduce(&mut genomes[0..parents], new_pop_size);
         }
+
+        self.mutate_population();
     }
 
     fn reproduce(&mut self, parents: &mut [ScoredGenome], target_size: usize) {
@@ -266,7 +268,7 @@ impl Population {
 
         for genome in self.population[0..count].iter_mut() {
             let genome = Rc::make_mut(genome);
-            match self.config.parameters.mutation.sample() {
+            match dbg!(self.config.parameters.mutation.sample()) {
                 Mutation::AdjustWeight => {
                     if let Some(gene) = genome.genes.choose_mut(&mut rand::thread_rng()) {
                         let gene = Rc::make_mut(gene);
