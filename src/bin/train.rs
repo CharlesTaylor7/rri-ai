@@ -6,10 +6,11 @@ use railroad_inc::{
 
 fn main() {
     logger::init();
-    let config = Config {
+    let mut config = Config {
         domain: NeatAgent::config(),
         parameters: Parameters::default(),
     };
+    config.parameters.population = 4;
     let mut population = Population::new(config);
     population.advance_gen();
     population.advance_gen();

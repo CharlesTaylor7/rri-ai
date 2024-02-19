@@ -154,6 +154,7 @@ impl Population {
                 })
                 .collect::<Vec<ScoredGenome>>();
             genomes.sort_unstable_by_key(|g| g.fitness);
+            log::info!("average_fitness: {}", average_fitness);
             let new_pop_size = (group_fitness[j] / average_fitness).ceil().into_inner() as usize;
             let group_size: R64 = (genomes.len() as f64).into();
             let parents = (group_size * self.config.parameters.reproduction_rate)
@@ -493,6 +494,7 @@ impl Network {
         }
 
         let mut edges = Vec::with_capacity(genome.genes.len());
+        let mut to_process = Vec::with_capacity(genome.genes.len());
         for gene in genome.genes.iter().filter(|edge| edge.enabled) {
             let edge = Rc::new(RefCell::new(Edge {
                 id: gene.id,
@@ -508,16 +510,16 @@ impl Network {
             node.outgoing.push(edge.clone());
 
             edges.push(edge);
+            if nodes[gene.in_node.0].borrow().node_type == NodeType::Input {
+                to_process.push(nodes[gene.in_node.0].clone());
+            }
         }
 
         // The hidden layer nodes need to be re-added but in topological order
         nodes.truncate(config.domain.input_layer_size + config.domain.output_layer_size);
 
         // https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
-        let mut to_process = nodes[0..config.domain.input_layer_size].to_vec();
-        log::info!("Topological sorting");
         while let Some(node) = to_process.pop() {
-            log::info!("Topological sorting");
             log::info!(
                 "node: {:?}, remaining: {:?}",
                 node.borrow().id,
@@ -593,7 +595,7 @@ impl Network {
     }
 }
 
-fn sigmoid(num: R64) -> R64 {
+pub fn sigmoid(num: R64) -> R64 {
     let one: R64 = 1.0.into();
     one / (one + (-num).exp())
 }

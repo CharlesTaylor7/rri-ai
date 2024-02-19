@@ -107,7 +107,10 @@ impl NeatAgent {
         DomainConfig {
             input_layer_size: Self::INPUT_LAYER_SIZE,
             output_layer_size: Self::OUTPUT_LAYER_SIZE,
-            fitness: Box::new(|n| NeatAgent::new(n).fitness()),
+            fitness: Box::new(|n| {
+                let actual = NeatAgent::new(n).fitness();
+                crate::neat::sigmoid(actual)
+            }),
         }
     }
 }
