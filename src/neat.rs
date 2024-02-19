@@ -436,7 +436,7 @@ pub struct Genome {
     pub hidden_nodes: usize,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Gene {
     pub id: GeneId,
     pub in_node: NodeId,
@@ -556,6 +556,7 @@ impl Network {
                 out_node: nodes[gene.out_node.0].clone(),
                 visited: false,
             }));
+            log::info!("gene: {:?}", gene);
             let mut node = RefCell::borrow_mut(&nodes[gene.out_node.0]);
             node.incoming.push(edge.clone());
 
