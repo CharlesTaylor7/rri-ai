@@ -56,7 +56,7 @@ fn main() {
         }
         let network = Network::new(&population.champion.genome, &population.config).unwrap();
         network
-            .dump_graphviz(format!("champion-{}.dot", gen))
+            .dump_graphviz(format!("graphviz/champion-{}.dot", gen))
             .unwrap();
     }
 }
