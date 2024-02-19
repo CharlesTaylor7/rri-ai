@@ -119,6 +119,7 @@ impl Population {
                 genomes: vec![genome.clone()],
             });
         }
+        log::info!("Classified into {} species", groups.len());
         groups
     }
 
@@ -168,7 +169,6 @@ impl Population {
     fn reproduce(&mut self, parents: &mut [ScoredGenome], target_size: usize) {
         let mut remaining = target_size;
         loop {
-            log::info!("Reproduce");
             parents.shuffle(&mut rand::thread_rng());
             for chunk in parents.chunks(2) {
                 if chunk.get(1).is_none() {
@@ -195,7 +195,6 @@ impl Population {
             hidden_nodes: std::cmp::max(a.genome.hidden_nodes, b.genome.hidden_nodes),
         };
         loop {
-            log::info!("Crossover");
             match (a.genome.genes.get(i), b.genome.genes.get(j)) {
                 (Some(gene_a), Some(gene_b)) => {
                     if gene_a.id == gene_b.id {
@@ -343,7 +342,6 @@ impl Speciation {
         let mut i = 0;
         let mut j = 0;
         loop {
-            log::info!("Checking compatibility");
             let gene_a = a.genes.get(i);
             let gene_b = b.genes.get(j);
             match (a.genes.get(i), b.genes.get(j)) {
