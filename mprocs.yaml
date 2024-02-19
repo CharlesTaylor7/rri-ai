@@ -4,3 +4,7 @@ procs:
 
   Tailwind:
     shell: tailwindcss -i styles/tailwind.source.css -o styles/tailwind.output.css --watch
+
+  Flamegraph:
+    shell: CARGO_PROFILE_RELEASE_DEBUG=true cargo flamegraph --root --bin train --release
+    autostart: false

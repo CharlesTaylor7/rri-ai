@@ -55,9 +55,9 @@ impl Parameters {
 
 // rates of mutation
 pub struct MutationWeights {
-    adjust_weight: R64,
-    add_node: R64,
-    add_connection: R64,
+    pub adjust_weight: R64,
+    pub add_node: R64,
+    pub add_connection: R64,
 }
 
 impl MutationWeights {
