@@ -514,15 +514,15 @@ impl Network {
     /// https://graphviz.org/doc/info/lang.html
     pub fn dump_graphviz<P: AsRef<Path>>(&self, p: P) -> Result<()> {
         let mut file = fs::OpenOptions::new().write(true).create(true).open(p)?;
-        write!(&mut file, "digraph {{");
+        write!(&mut file, "digraph {{\n");
         for edge in self.edges.iter() {
             let edge = edge.borrow();
             write!(
                 &mut file,
-                "{:?} -> {:?} [label={:?}]",
-                edge.in_node.borrow().id,
-                edge.out_node.borrow().id,
-                edge.id
+                "{:?} -> {:?} [label='{:?}']\n",
+                edge.in_node.borrow().id.0,
+                edge.out_node.borrow().id.0,
+                edge.weight,
             );
         }
         write!(&mut file, "}}");
