@@ -533,7 +533,7 @@ impl Network {
         begin = end;
         end += config.domain.output_layer_size;
         for i in begin..end {
-            let mut node = RefCell::borrow_mut(&nodes[i]);
+            let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
             node.id = NodeId(i);
             node.node_type = NodeType::Output;
         }
@@ -541,7 +541,7 @@ impl Network {
         begin = end;
         end += genome.hidden_nodes;
         for i in begin..end {
-            let mut node = RefCell::borrow_mut(&nodes[i]);
+            let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
             node.id = NodeId(i);
             node.node_type = NodeType::Hidden;
         }
