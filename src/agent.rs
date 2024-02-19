@@ -18,7 +18,6 @@ impl RRIAgent for NeatAgent {
 
     // errors are penalized; but the game doesn't halt
     fn handle_error(&mut self, error: anyhow::Error) {
-        log::error!("Agent is penalized for: {}", error);
         self.score_modifier -= 10;
     }
 }

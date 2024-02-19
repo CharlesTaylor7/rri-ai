@@ -17,8 +17,9 @@ fn main() {
         adjust_weight: 0.0.into(),
     };
     let mut population = Population::new(config);
-    population.advance_gen();
-    population.advance_gen();
-    population.advance_gen();
-    population.advance_gen();
+    log::info!("Gen 0");
+    for gen in 1..10 {
+        population.advance_gen();
+        log::info!("Gen {}", gen);
+    }
 }
