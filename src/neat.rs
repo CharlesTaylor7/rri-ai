@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use core::num;
 use decorum::R64;
 use num_traits::real::Real;
 use num_traits::sign::Signed;
@@ -9,6 +10,7 @@ use std::borrow::BorrowMut;
 use std::cell::RefCell;
 use std::ops::{Add, Range};
 use std::rc::Rc;
+use std::usize;
 
 pub struct DomainConfig {
     pub input_layer_size: usize,
@@ -328,14 +330,11 @@ impl Speciation {
     fn compatible(&self, a: &Genome, b: &Genome) -> bool {
         // calculate speciation distance
         // counts
-        let mut disjoint = 0;
-        let mut excess = 0;
-        let mut matching = 0;
+        let mut disjoint: usize = 0;
+        let mut excess: usize = 0;
+        let mut matching: usize = 0;
 
         let mut weight_diff: R64 = 0.0.into();
-
-        #[allow(non_snake_case)]
-        let N = std::cmp::max(a.genes.len(), b.genes.len());
 
         // genome indices
         let mut i = 0;
@@ -375,10 +374,15 @@ impl Speciation {
             }
         }
 
-        #[rustfmt::skip]
-        let speciation_distance = 
-            (self.c1 * (excess as f64) + self.c2 * (disjoint as f64)) / (N as f64)
-            + (self.c3 * weight_diff / (matching as f64));
+        let mut speciation_distance: R64 = 0.0.into();
+        let num_genes = std::cmp::max(a.genes.len(), b.genes.len());
+        if num_genes > 0 {
+            (self.c1 * (excess as f64) + self.c2 * (disjoint as f64)) / (num_genes as f64);
+        }
+
+        if matching > 0 {
+            speciation_distance += (self.c3 * weight_diff / (matching as f64));
+        }
 
         speciation_distance < self.ct
     }
