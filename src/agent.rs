@@ -37,27 +37,27 @@ impl NeatAgent {
     const OUTPUT_LAYER_SIZE: usize = 4 * 49 * 34; // 4 dice patterns placed on the grid.
 
     #[inline]
-    pub fn to_input(state: &GameState) -> [R64; Self::INPUT_LAYER_SIZE] {
-        let mut input = [R64::from(0.0); Self::INPUT_LAYER_SIZE];
+    pub fn to_input(state: &GameState) -> [f64; Self::INPUT_LAYER_SIZE] {
+        let mut input = [0.0; Self::INPUT_LAYER_SIZE];
         for action in state.drawn_routes.iter() {
             let tile_offset = 34 * (action.tile.x + action.tile.y * 7) as usize;
-            input[tile_offset + action.pattern.face as usize] = R64::from(1.0);
+            input[tile_offset + action.pattern.face as usize] = 1.0;
         }
         let mut index: usize = 34 * 49;
 
         // regular dice:
         for face in state.dice.regular {
-            input[index + face as usize] = R64::from(1.0);
+            input[index + face as usize] = 1.0;
             index += 6;
         }
 
         // special die
-        input[index + (state.dice.special as usize - 6)] = R64::from(1.0);
+        input[index + (state.dice.special as usize - 6)] = 1.0;
         input
     }
 
     #[inline]
-    pub fn from_output(output: &[R64]) -> Turn {
+    pub fn from_output(output: &[f64]) -> Turn {
         let mut actions = Vec::with_capacity(4);
         // largest value in the grid is the placement,
         // if its larger than 0.5 Otherwise place none.
@@ -67,10 +67,10 @@ impl NeatAgent {
             let pair = output[index..index + action_window]
                 .iter()
                 .enumerate()
-                .max_by_key(|(i, v)| *v)
+                .max_by_key(|(i, v)| R64::from(**v))
                 .expect("Not empty");
 
-            if *pair.1 > R64::from(0.5) {
+            if *pair.1 > 0.5 {
                 let pattern = &DIE_PATTERNS[pair.0 % 34];
                 let tile = pair.0 / 34;
                 let x = (tile / 7) as u8;
@@ -94,14 +94,14 @@ impl NeatAgent {
     const GAME_COUNT: usize = 100;
 
     // average score across many games
-    pub fn fitness(&mut self) -> R64 {
+    pub fn fitness(&mut self) -> f64 {
         let mut score = 0_isize;
         for _ in 0..Self::GAME_COUNT {
             let mut game = GameState::new();
             game.play(self);
             score += game.score();
         }
-        R64::from((score + self.score_modifier) as f64 / Self::GAME_COUNT as f64)
+        (score + self.score_modifier) as f64 / Self::GAME_COUNT as f64
     }
     pub fn config() -> DomainConfig {
         DomainConfig {

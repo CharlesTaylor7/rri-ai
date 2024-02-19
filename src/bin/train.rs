@@ -10,7 +10,7 @@ fn main() {
         domain: NeatAgent::config(),
         parameters: Parameters::default(),
     };
-    config.parameters.population = 4;
+    config.parameters.population = 100;
     config.parameters.mutation = MutationWeights {
         add_node: 0.5.into(),
         add_connection: 0.5.into(),

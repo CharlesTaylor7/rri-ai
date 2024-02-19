@@ -15,7 +15,7 @@ use std::usize;
 pub struct DomainConfig {
     pub input_layer_size: usize,
     pub output_layer_size: usize,
-    pub fitness: Box<dyn Fn(Rc<Network>) -> R64>,
+    pub fitness: Box<dyn Fn(Rc<Network>) -> f64>,
 }
 
 pub struct Config {
@@ -28,9 +28,9 @@ pub struct Parameters {
     pub mutation: MutationWeights,
     pub population: usize,
     // percentage changed in new generation
-    pub mutation_rate: R64,
+    pub mutation_rate: f64,
     // percentage allowed to recombine
-    pub reproduction_rate: R64,
+    pub reproduction_rate: f64,
 }
 impl Parameters {
     pub fn default() -> Self {
@@ -55,14 +55,14 @@ impl Parameters {
 
 // rates of mutation
 pub struct MutationWeights {
-    pub adjust_weight: R64,
-    pub add_node: R64,
-    pub add_connection: R64,
+    pub adjust_weight: f64,
+    pub add_node: f64,
+    pub add_connection: f64,
 }
 
 impl MutationWeights {
     pub fn sample(&self) -> Mutation {
-        let mut value: R64 = rand::thread_rng().gen::<f64>().into();
+        let mut value: f64 = rand::thread_rng().gen::<f64>().into();
         if value < self.adjust_weight {
             return Mutation::AdjustWeight;
         }
@@ -125,23 +125,23 @@ impl Population {
 
     pub fn advance_gen(&mut self) {
         let groups = self.classify_species();
-        let mut total_fitness: R64 = (0.).into();
-        let mut group_fitness: Vec<R64> = vec![(0.).into(); groups.len()];
-        let mut individual_fitness: Vec<Vec<R64>> = Vec::with_capacity(groups.len());
+        let mut total_fitness: f64 = (0.).into();
+        let mut group_fitness: Vec<f64> = vec![(0.).into(); groups.len()];
+        let mut individual_fitness: Vec<Vec<f64>> = Vec::with_capacity(groups.len());
 
         for (j, species) in groups.iter().enumerate() {
             individual_fitness.push(Vec::with_capacity(species.genomes.len()));
             for genome in species.genomes.iter() {
                 let network = Network::new(genome, &self.config).expect("valid network");
-                let fitness: R64 = (self.config.domain.fitness)(Rc::new(network));
-                let adjusted: R64 = fitness / species.genomes.len() as f64;
+                let fitness: f64 = (self.config.domain.fitness)(Rc::new(network));
+                let adjusted: f64 = fitness / species.genomes.len() as f64;
                 individual_fitness[j].push(adjusted);
                 group_fitness[j] += adjusted;
                 total_fitness += adjusted;
             }
         }
 
-        let average_fitness: R64 = total_fitness / self.config.parameters.population as f64;
+        let average_fitness: f64 = total_fitness / self.config.parameters.population as f64;
 
         self.population = Vec::with_capacity(self.config.parameters.population);
         for (j, species) in groups.into_iter().enumerate() {
@@ -154,13 +154,11 @@ impl Population {
                     fitness: individual_fitness[j][i],
                 })
                 .collect::<Vec<ScoredGenome>>();
-            genomes.sort_unstable_by_key(|g| g.fitness);
+            genomes.sort_unstable_by_key(|g| R64::from(g.fitness));
             log::info!("average_fitness: {}", average_fitness);
-            let new_pop_size = (group_fitness[j] / average_fitness).ceil().into_inner() as usize;
-            let group_size: R64 = (genomes.len() as f64).into();
-            let parents = (group_size * self.config.parameters.reproduction_rate)
-                .ceil()
-                .into_inner() as usize;
+            let new_pop_size = (group_fitness[j] / average_fitness).ceil() as usize;
+            let group_size: f64 = (genomes.len() as f64).into();
+            let parents = (group_size * self.config.parameters.reproduction_rate).ceil() as usize;
 
             self.reproduce(&mut genomes[0..parents], new_pop_size);
         }
@@ -238,9 +236,8 @@ impl Population {
     // mutate the whole population.
     fn mutate_population(&mut self) {
         self.population.shuffle(&mut rand::thread_rng());
-        let count = (self.config.parameters.mutation_rate * self.population.len() as f64)
-            .ceil()
-            .into_inner() as usize;
+        let count =
+            (self.config.parameters.mutation_rate * self.population.len() as f64).ceil() as usize;
 
         for genome in self.population[0..count].iter_mut() {
             let genome = Rc::make_mut(genome);
@@ -312,7 +309,7 @@ impl Population {
 }
 
 pub struct ScoredGenome {
-    fitness: R64,
+    fitness: f64,
     genome: Rc<Genome>,
 }
 
@@ -321,11 +318,11 @@ pub struct Species {
 }
 
 pub struct Speciation {
-    c1: R64, // disjoint
-    c2: R64, // excess
-    c3: R64, // weight
+    c1: f64, // disjoint
+    c2: f64, // excess
+    c3: f64, // weight
     // compatibility threshold
-    ct: R64,
+    ct: f64,
 }
 
 impl Speciation {
@@ -336,7 +333,7 @@ impl Speciation {
         let mut excess: usize = 0;
         let mut matching: usize = 0;
 
-        let mut weight_diff: R64 = 0.0.into();
+        let mut weight_diff: f64 = 0.0.into();
 
         // genome indices
         let mut i = 0;
@@ -376,7 +373,7 @@ impl Speciation {
             }
         }
 
-        let mut speciation_distance: R64 = 0.0.into();
+        let mut speciation_distance: f64 = 0.0.into();
         let num_genes = std::cmp::max(a.genes.len(), b.genes.len());
         if num_genes > 0 {
             (self.c1 * (excess as f64) + self.c2 * (disjoint as f64)) / (num_genes as f64);
@@ -416,7 +413,7 @@ pub struct Gene {
     pub id: GeneId,
     pub in_node: NodeId,
     pub out_node: NodeId,
-    pub weight: R64,
+    pub weight: f64,
     pub enabled: bool,
 }
 
@@ -438,7 +435,7 @@ pub struct Network {
 #[derive(Debug)]
 pub struct Edge {
     pub id: GeneId,
-    pub weight: R64,
+    pub weight: f64,
     pub in_node: Ref<Node>,
     pub out_node: Ref<Node>,
     pub visited: bool,
@@ -447,15 +444,15 @@ pub struct Edge {
 #[derive(Default, Debug)]
 pub struct Node {
     pub id: NodeId,
-    pub weight: R64,
-    pub activation: R64,
+    pub weight: f64,
+    pub activation: f64,
     pub node_type: NodeType,
     pub incoming: Vec<Ref<Edge>>,
     pub outgoing: Vec<Ref<Edge>>,
 }
 
 impl Network {
-    pub fn process(&self, input: &[R64]) -> Rc<[R64]> {
+    pub fn process(&self, input: &[f64]) -> Rc<[f64]> {
         self.input(input);
         self.propagate();
         self.output()
@@ -557,7 +554,7 @@ impl Network {
         })
     }
 
-    fn input(&self, x: &[R64]) {
+    fn input(&self, x: &[f64]) {
         for (i, x) in x.iter().enumerate() {
             RefCell::borrow_mut(&self.nodes[i]).activation = *x;
         }
@@ -573,7 +570,7 @@ impl Network {
 
     fn propagate_nodes<'a>(iterator: impl Iterator<Item = &'a Ref<Node>>) {
         for node in iterator {
-            let mut value: R64 = 0_f64.into();
+            let mut value: f64 = 0_f64.into();
             for edge in node.borrow().incoming.iter() {
                 value += edge.borrow().weight * edge.borrow().in_node.borrow().activation;
             }
@@ -583,7 +580,7 @@ impl Network {
         }
     }
 
-    fn output(&self) -> Rc<[R64]> {
+    fn output(&self) -> Rc<[f64]> {
         let begin = self.in_nodes;
         let end = self.in_nodes + self.out_nodes;
         self.nodes[begin..end]
@@ -593,8 +590,8 @@ impl Network {
     }
 }
 
-pub fn sigmoid(num: R64) -> R64 {
-    let one: R64 = 1.0.into();
+pub fn sigmoid(num: f64) -> f64 {
+    let one: f64 = 1.0.into();
     one / (one + (-num).exp())
 }
 
@@ -622,6 +619,6 @@ mod tests {
 
     #[test]
     fn test_sigmoid() {
-        assert_approx_eq!(sigmoid(1.0.into()), R64::from(0.7310585), 1e-7);
+        assert_approx_eq!(sigmoid(1.0), 0.7310585, 1e-7);
     }
 }
