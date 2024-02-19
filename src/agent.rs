@@ -36,7 +36,6 @@ impl NeatAgent {
 
     const OUTPUT_LAYER_SIZE: usize = 4 * 49 * 34; // 4 dice patterns placed on the grid.
 
-    #[inline]
     pub fn to_input(state: &GameState) -> [f64; Self::INPUT_LAYER_SIZE] {
         let mut input = [0.0; Self::INPUT_LAYER_SIZE];
         for action in state.drawn_routes.iter() {
@@ -56,7 +55,6 @@ impl NeatAgent {
         input
     }
 
-    #[inline]
     pub fn from_output(output: &[f64]) -> Turn {
         let mut actions = Vec::with_capacity(4);
         // largest value in the grid is the placement,
