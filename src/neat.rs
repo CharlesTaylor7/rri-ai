@@ -421,7 +421,7 @@ pub struct NodeId(pub usize);
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
 pub struct GeneId(pub usize);
 
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Default, Debug, PartialEq, Eq, Clone, Copy)]
 pub enum NodeType {
     #[default]
     Input,
@@ -480,7 +480,7 @@ pub struct Edge {
     pub visited: bool,
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Node {
     pub id: NodeId,
     pub activation: f64,
@@ -490,7 +490,7 @@ pub struct Node {
     pub outgoing: Vec<Ref<Edge>>,
 }
 
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Default, Debug, PartialEq, Eq, Clone)]
 pub enum Propagation {
     #[default]
     Inert, // already normalized
@@ -525,7 +525,7 @@ impl Network {
         let mut end = config.domain.input_layer_size;
 
         for i in begin..end {
-            let mut node = RefCell::borrow_mut(&nodes[i]);
+            let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
             node.id = NodeId(i);
             node.node_type = NodeType::Input;
         }
@@ -556,7 +556,8 @@ impl Network {
                 out_node: nodes[gene.out_node.0].clone(),
                 visited: false,
             }));
-            log::info!("gene: {:?}", gene);
+            log::info!("in_node: {:?}", nodes[gene.in_node.0]);
+            log::info!("out_node: {:?}", nodes[gene.out_node.0]);
             let mut node = RefCell::borrow_mut(&nodes[gene.out_node.0]);
             node.incoming.push(edge.clone());
 
