@@ -268,7 +268,7 @@ impl Population {
 
         for genome in self.population[0..count].iter_mut() {
             let genome = Rc::make_mut(genome);
-            match dbg!(self.config.parameters.mutation.sample()) {
+            match self.config.parameters.mutation.sample() {
                 Mutation::AdjustWeight => {
                     if let Some(gene) = genome.genes.choose_mut(&mut rand::thread_rng()) {
                         let gene = Rc::make_mut(gene);
@@ -516,6 +516,7 @@ impl Network {
         Ok(())
     }
     pub fn new(genome: &Genome, config: &Config) -> Result<Self> {
+        log::debug!("Genome::new");
         let node_count =
             config.domain.input_layer_size + config.domain.output_layer_size + genome.hidden_nodes;
 
@@ -556,8 +557,6 @@ impl Network {
                 out_node: nodes[gene.out_node.0].clone(),
                 visited: false,
             }));
-            log::info!("in_node: {:?}", nodes[gene.in_node.0]);
-            log::info!("out_node: {:?}", nodes[gene.out_node.0]);
             {
                 let mut node = RefCell::borrow_mut(&nodes[gene.out_node.0]);
                 node.incoming.push(edge.clone());
@@ -573,11 +572,13 @@ impl Network {
 
         // https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
         while let Some(edge) = edges_to_sort.pop() {
-            let mut ref_cell = RefCell::borrow_mut(&edge);
-            if ref_cell.visited {
-                bail!("Neural net contains a cycle")
-            } else {
-                ref_cell.visited = true;
+            {
+                let mut ref_cell = RefCell::borrow_mut(&edge);
+                if ref_cell.visited {
+                    bail!("Neural net contains a cycle")
+                } else {
+                    ref_cell.visited = true;
+                }
             }
             sorted_edges.push(edge.clone());
             let edge = edge.borrow();
@@ -596,6 +597,7 @@ impl Network {
     }
 
     fn input(&self, x: &[f64]) {
+        log::debug!("Genome::input");
         for (i, x) in x.iter().enumerate() {
             let mut ref_cell = RefCell::borrow_mut(&self.nodes[i]);
             ref_cell.activation = *x;
@@ -604,6 +606,7 @@ impl Network {
     }
 
     fn propagate(&self) {
+        log::debug!("Genome::propagate");
         for edge in self.edges.iter() {
             let edge = edge.borrow();
 
@@ -624,6 +627,7 @@ impl Network {
     }
 
     fn output(&self, output: &mut [f64]) {
+        log::debug!("Genome::output");
         let begin = self.in_nodes;
         let end = self.in_nodes + self.out_nodes;
         let mut index = self.in_nodes;
