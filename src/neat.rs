@@ -8,7 +8,10 @@ use rand::Rng;
 use rand_distr::StandardNormal;
 use std::borrow::BorrowMut;
 use std::cell::RefCell;
+use std::fs::{self, File};
+use std::io::Write;
 use std::ops::{Add, Range};
+use std::path::Path;
 use std::rc::Rc;
 use std::{default, usize};
 
@@ -85,11 +88,11 @@ pub enum Mutation {
 }
 
 pub struct Population {
-    config: Config,
-    population: Vec<Rc<Genome>>,
-    node_count: usize,
-    edge_count: usize,
-    champion: ScoredGenome,
+    pub config: Config,
+    pub population: Vec<Rc<Genome>>,
+    pub node_count: usize,
+    pub edge_count: usize,
+    pub champion: ScoredGenome,
 }
 
 #[derive(Default, Clone)]
@@ -156,6 +159,7 @@ impl Population {
                     self.champion = scored.clone();
                 }
 
+                // log::info!("actual: {actual}, adjusted: {adjusted}");
                 total_fitness += adjusted;
                 group_fitness[j] += adjusted;
                 individual_fitness[j].push(scored);
@@ -164,16 +168,23 @@ impl Population {
 
         let average_fitness: f64 = total_fitness / self.config.parameters.population as f64;
 
+        log::info!("average_fitness: {average_fitness}");
+        log::info!("total_fitness: {total_fitness}");
         self.population = Vec::with_capacity(self.config.parameters.population);
         for (j, species) in individual_fitness.into_iter().enumerate() {
             let mut genomes = species;
 
             genomes.sort_unstable_by_key(|g| R64::from(g.fitness.actual));
-            log::info!("average_fitness: {}", average_fitness);
             let new_pop_size = (group_fitness[j] / average_fitness).ceil() as usize;
             let group_size: f64 = (genomes.len() as f64).into();
             let parents = (group_size * self.config.parameters.reproduction_rate).ceil() as usize;
 
+            log::info!(
+                "species: {j}, fitness: {}, pop: {} -> {}",
+                group_fitness[j] * genomes.len() as f64,
+                genomes.len(),
+                new_pop_size
+            );
             self.reproduce(&mut genomes[0..parents], new_pop_size);
         }
     }
@@ -324,12 +335,12 @@ impl Population {
 
 #[derive(Clone)]
 pub struct ScoredGenome {
-    fitness: Fitness,
-    genome: Rc<Genome>,
+    pub fitness: Fitness,
+    pub genome: Rc<Genome>,
 }
 
 pub struct Species {
-    genomes: Vec<Rc<Genome>>,
+    pub genomes: Vec<Rc<Genome>>,
 }
 
 pub struct Speciation {
@@ -485,6 +496,23 @@ pub enum Propagation {
 }
 
 impl Network {
+    /// https://graphviz.org/doc/info/lang.html
+    pub fn dump_graphviz<P: AsRef<Path>>(&self, p: P) -> Result<()> {
+        let mut file = fs::OpenOptions::new().write(true).create(true).open(p)?;
+        write!(&mut file, "digraph {{");
+        for edge in self.edges.iter() {
+            let edge = edge.borrow();
+            write!(
+                &mut file,
+                "{:?} -> {:?} [label={:?}]",
+                edge.in_node.borrow().id,
+                edge.out_node.borrow().id,
+                edge.id
+            );
+        }
+        write!(&mut file, "}}");
+        Ok(())
+    }
     pub fn new(genome: &Genome, config: &Config) -> Result<Self> {
         let node_count =
             config.domain.input_layer_size + config.domain.output_layer_size + genome.hidden_nodes;

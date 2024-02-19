@@ -1,8 +1,5 @@
-/node_modules
-/.next/
-/build
-yarn-error.log
-.env
-*.tsbuildinfo
-/target
-flamegraph.svg
+/build/
+/target/
+/graphviz/
+/flamegraph.svg
+/.env

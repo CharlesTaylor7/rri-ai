@@ -1,6 +1,8 @@
 use railroad_inc::{
     logger,
-    neat::{Config, DomainConfig, MutationWeights, NeuralInterface, Parameters, Population},
+    neat::{
+        Config, DomainConfig, MutationWeights, Network, NeuralInterface, Parameters, Population,
+    },
 };
 use rand::Rng;
 
@@ -17,15 +19,12 @@ fn main() {
                 for _ in 0..100 {
                     let mut test_case: usize = rand::thread_rng().gen_range(0..2048);
                     let expected_address = test_case & 7;
-                    log::info!("{test_case:b}:  {expected_address:b}");
                     let expected_output = (test_case >> (expected_address + 3)) & 1;
-                    log::info!("test_case: {test_case:b}, address: {expected_address:b}, output:{expected_output}");
                     for i in 0..11 {
                         input[i] = (test_case & 1) as f64;
                         test_case >>= 2;
                     }
                     network.run(&input, &mut output);
-                    log::info!("actual output: {}", output[0]);
                     if (output[0] > 0.5) == (expected_output == 1) {
                         score += 1.0;
                     }
@@ -43,8 +42,21 @@ fn main() {
     };
     let mut population = Population::new(config);
     log::info!("Gen 0");
-    for gen in 1..10 {
+    for gen in 1..10_000 {
         population.advance_gen();
+
         log::info!("Gen {}", gen);
+        log::info!("edge_count {}", population.champion.genome.genes.len());
+        if population.champion.fitness.actual > 95.0 {
+            log::info!(
+                "Champion with 95% accuracy. nodes: {}, edges: {} ",
+                population.node_count,
+                population.edge_count
+            );
+        }
+        let network = Network::new(&population.champion.genome, &population.config).unwrap();
+        network
+            .dump_graphviz(format!("champion-{}.dot", gen))
+            .unwrap();
     }
 }
