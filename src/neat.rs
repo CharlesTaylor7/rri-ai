@@ -130,11 +130,11 @@ impl Population {
 
         for (j, species) in groups.iter().enumerate() {
             individual_fitness.push(Vec::with_capacity(species.genomes.len()));
-            for (i, genome) in species.genomes.iter().enumerate() {
+            for genome in species.genomes.iter() {
                 let network = Network::new(genome, &self.config).expect("valid network");
                 let fitness: R64 = (self.config.domain.fitness)(Rc::new(network));
                 let adjusted: R64 = fitness / species.genomes.len() as f64;
-                individual_fitness[j][i] = adjusted;
+                individual_fitness[j].push(adjusted);
                 group_fitness[j] += adjusted;
                 total_fitness += adjusted;
             }
