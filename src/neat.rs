@@ -21,6 +21,12 @@ pub struct DomainConfig {
     pub fitness: Box<dyn Fn(Rc<Network>) -> f64>,
 }
 
+pub struct NodeCounts {
+    pub in_nodes: usize,
+    pub out_nodes: usize,
+    pub total_nodes: usize,
+}
+
 pub struct Config {
     pub domain: DomainConfig,
     pub parameters: Parameters,
@@ -118,6 +124,14 @@ impl Population {
         }
     }
 
+    pub fn node_counts(&self) -> NodeCounts {
+        NodeCounts {
+            in_nodes: self.config.domain.input_layer_size,
+            out_nodes: self.config.domain.output_layer_size,
+            total_nodes: self.node_count,
+        }
+    }
+
     fn classify_species(&self) -> Vec<Species> {
         let mut groups: Vec<Species> = vec![];
         'outer: for genome in self.population.iter() {
@@ -148,7 +162,7 @@ impl Population {
         for (j, species) in groups.iter().enumerate() {
             individual_fitness.push(Vec::with_capacity(species.genomes.len()));
             for genome in species.genomes.iter() {
-                let network = Network::new(genome, &self.config).expect("valid network");
+                let network = Network::new(genome, &self.node_counts()).expect("valid network");
                 let actual = (self.config.domain.fitness)(Rc::new(network));
                 let adjusted = actual / species.genomes.len() as f64;
                 let scored = ScoredGenome {
@@ -266,6 +280,7 @@ impl Population {
         let count =
             (self.config.parameters.mutation_rate * self.population.len() as f64).ceil() as usize;
 
+        let mut node_counts = self.node_counts();
         for genome in self.population[0..count].iter_mut() {
             let genome = Rc::make_mut(genome);
             match self.config.parameters.mutation.sample() {
@@ -308,7 +323,9 @@ impl Population {
                 Mutation::AddGene => {
                     self.edge_count += 1;
 
+                    node_counts.total_nodes = self.node_count;
                     let mut nodes = (0..self.node_count).collect::<Vec<_>>();
+
                     nodes.shuffle(&mut rand::thread_rng());
                     let last = genome.genes.len();
                     genome.genes.push(Rc::new(Gene {
@@ -324,7 +341,7 @@ impl Population {
                         for j in (i + 1)..nodes.len() {
                             let gene = Rc::make_mut(&mut genome.genes[last]);
                             Rc::make_mut(&mut genome.genes[last]).out_node = NodeId(j);
-                            if Network::new(genome, &self.config).is_ok() {
+                            if Network::new(genome, &node_counts).is_ok() {
                                 break 'outer;
                             }
                         }
@@ -453,10 +470,6 @@ pub struct Network {
     out_nodes: usize,
     edges: Vec<Ref<Edge>>,
     nodes: Vec<Ref<Node>>,
-    // ^ a big vector divided into 3 section
-    // the first section is the input layer
-    // the second section is the output layer
-    // the third section is the hidden layers
 }
 
 pub trait NeuralInterface {
@@ -515,15 +528,25 @@ impl Network {
         write!(&mut file, "}}");
         Ok(())
     }
-    pub fn new(genome: &Genome, config: &Config) -> Result<Self> {
+    pub fn new(genome: &Genome, node_counts: &NodeCounts) -> Result<Self> {
         log::debug!("Genome::new");
-        let node_count =
-            config.domain.input_layer_size + config.domain.output_layer_size + genome.hidden_nodes;
+        let nodes = Self::build_nodes(node_counts);
+        let edges = Self::build_edges(genome, &nodes)?;
 
+        Ok(Self {
+            nodes,
+            edges,
+            in_nodes: node_counts.in_nodes,
+            out_nodes: node_counts.out_nodes,
+        })
+    }
+
+    fn build_nodes(node_counts: &NodeCounts) -> Vec<Ref<Node>> {
+        let node_count = node_counts.total_nodes;
         let mut nodes = vec![Rc::new(RefCell::new(Node::default())); node_count];
 
         let mut begin = 0;
-        let mut end = config.domain.input_layer_size;
+        let mut end = node_counts.in_nodes;
 
         for i in begin..end {
             let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
@@ -532,7 +555,7 @@ impl Network {
         }
 
         begin = end;
-        end += config.domain.output_layer_size;
+        end += node_counts.out_nodes;
         for i in begin..end {
             let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
             node.id = NodeId(i);
@@ -540,13 +563,20 @@ impl Network {
         }
 
         begin = end;
-        end += genome.hidden_nodes;
+        end = node_counts.total_nodes;
         for i in begin..end {
             let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
             node.id = NodeId(i);
             node.node_type = NodeType::Hidden;
         }
+        nodes
+    }
 
+    fn build_edges(
+        genome: &Genome,
+        nodes: &[Ref<Node>],
+        //population: &Population,
+    ) -> Result<Vec<Ref<Edge>>> {
         let mut sorted_edges = Vec::with_capacity(genome.genes.len());
         let mut edges_to_sort = Vec::with_capacity(genome.genes.len());
         for gene in genome.genes.iter().filter(|edge| edge.enabled) {
@@ -587,13 +617,7 @@ impl Network {
                 edges_to_sort.extend_from_slice(&next_node.outgoing);
             }
         }
-
-        Ok(Self {
-            nodes,
-            edges: sorted_edges,
-            in_nodes: config.domain.input_layer_size,
-            out_nodes: config.domain.output_layer_size,
-        })
+        Ok(sorted_edges)
     }
 
     fn input(&self, x: &[f64]) {
