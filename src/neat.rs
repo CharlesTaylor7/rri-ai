@@ -313,10 +313,9 @@ impl Population {
         let count =
             (self.config.parameters.mutation_rate * self.genomes.len() as f64).ceil() as usize;
 
-        let mut next_gene_ = GeneId(self.gene_count());
         let mut node_counts = self.node_counts();
-        for genome in self.genomes[0..count].iter_mut() {
-            let genome = Rc::make_mut(genome);
+        for genome_index in 0..count {
+            let genome = Rc::make_mut(&mut self.genomes[genome_index]);
             match self.config.parameters.mutation.sample() {
                 Mutation::AdjustWeight => {
                     if let Some(gene) = genome.genes.choose_mut(&mut rand::thread_rng()) {
@@ -385,7 +384,7 @@ impl Population {
                     let in_node = NodeId(input_index);
                     let out_node = NodeId(output_index);
 
-                    if self.genes.contains(in_node, out_node) {
+                    if in_node == out_node || self.genes.contains(in_node, out_node) {
                         continue;
                     }
                     let gene_id = GeneId(self.genes.count());
@@ -527,59 +526,28 @@ pub struct Network {
     edges: Vec<Ref<Edge>>,
     nodes: Vec<Ref<Node>>,
 }
-
-pub trait NeuralInterface {
-    fn run(&self, input: &[f64], output: &mut [f64]);
-}
-
-impl NeuralInterface for Network {
-    fn run(&self, input: &[f64], output: &mut [f64]) {
-        self.input(input);
-        self.propagate();
-        self.output(output)
-    }
-}
-
-#[derive(Debug)]
-pub struct Edge {
-    pub id: GeneId,
-    pub weight: f64,
-    pub in_node: Ref<Node>,
-    pub out_node: Ref<Node>,
-    pub visited: bool,
-}
-
-#[derive(Default, Debug, Clone)]
-pub struct Node {
-    pub id: NodeId,
-    pub activation: f64,
-    pub step: Propagation,
-    pub node_type: NodeType,
-    pub incoming: Vec<Ref<Edge>>,
-    pub outgoing: Vec<Ref<Edge>>,
-}
-
-#[derive(Default, Debug, PartialEq, Eq, Clone)]
-pub enum Propagation {
-    #[default]
-    Inert, // already normalized
-    Activating, // receiving input from previous layer of nodes
-}
-
 impl Network {
     /// https://graphviz.org/doc/info/lang.html
     pub fn dump_graphviz<P: AsRef<Path>>(&self, p: P) -> Result<()> {
         let mut file = fs::OpenOptions::new().write(true).create(true).open(p)?;
-        write!(&mut file, "digraph {{\n");
+        write!(&mut file, "strict digraph {{\n");
+        for node_index in 0..self.in_nodes {
+            write!(&mut file, "{}[color='blue']\n", node_index)?;
+        }
+
+        for node_index in self.in_nodes..self.in_nodes + self.out_nodes {
+            write!(&mut file, "{}[color='green']\n", node_index)?;
+        }
+
         for edge in self.edges.iter() {
             let edge = edge.borrow();
             write!(
                 &mut file,
-                "{:?} -> {:?} [label='{:?}']\n",
+                "{} -> {} [label='{}']\n",
                 edge.in_node.borrow().id.0,
                 edge.out_node.borrow().id.0,
                 edge.weight,
-            );
+            )?;
         }
         write!(&mut file, "}}");
         Ok(())
@@ -716,6 +684,44 @@ impl Network {
             output[i] = self.nodes[index].borrow().activation;
         }
     }
+}
+
+pub trait NeuralInterface {
+    fn run(&self, input: &[f64], output: &mut [f64]);
+}
+
+impl NeuralInterface for Network {
+    fn run(&self, input: &[f64], output: &mut [f64]) {
+        self.input(input);
+        self.propagate();
+        self.output(output)
+    }
+}
+
+#[derive(Debug)]
+pub struct Edge {
+    pub id: GeneId,
+    pub weight: f64,
+    pub in_node: Ref<Node>,
+    pub out_node: Ref<Node>,
+    pub visited: bool,
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct Node {
+    pub id: NodeId,
+    pub activation: f64,
+    pub step: Propagation,
+    pub node_type: NodeType,
+    pub incoming: Vec<Ref<Edge>>,
+    pub outgoing: Vec<Ref<Edge>>,
+}
+
+#[derive(Default, Debug, PartialEq, Eq, Clone)]
+pub enum Propagation {
+    #[default]
+    Inert, // already normalized
+    Activating, // receiving input from previous layer of nodes
 }
 
 pub fn sigmoid(num: f64) -> f64 {

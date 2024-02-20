@@ -51,7 +51,7 @@ fn main() {
             log::info!(
                 "Champion with 95% accuracy. nodes: {}, edges: {} ",
                 population.node_count,
-                population.gene_count
+                population.gene_count()
             );
         }
         let network = Network::new(&population.champion.genome, &population.node_counts()).unwrap();
