@@ -166,7 +166,7 @@ impl Population {
         for ((node1, node2), gene) in self.genes.iter() {
             write!(
                 &mut file,
-                "{indent: <2}{} -> {} [label=\"{:.2}\"]\n",
+                "{indent: <2}{} -> {} [label=\"{}\"]\n",
                 node1.0, node2.0, gene.0,
             )?;
         }
@@ -586,9 +586,10 @@ impl Network {
             let edge = edge.borrow();
             write!(
                 &mut file,
-                "{indent: <2}{} -> {} [label=\"{:.2}\"]\n",
+                "{indent: <2}{} -> {} [label=\"{}@{:.2}\"]\n",
                 edge.in_node.borrow().id.0,
                 edge.out_node.borrow().id.0,
+                edge.id.0,
                 edge.weight,
             )?;
         }
