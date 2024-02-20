@@ -27,6 +27,11 @@ pub struct NodeCounts {
     pub out_nodes: usize,
     pub total_nodes: usize,
 }
+impl NodeCounts {
+    pub fn hidden_nodes(&self) -> usize {
+        self.total_nodes - self.in_nodes - self.out_nodes
+    }
+}
 
 pub struct Config {
     pub domain: DomainConfig,
@@ -99,26 +104,52 @@ pub struct Fitness {
     pub actual: f64,
     pub adjusted: f64,
 }
+pub struct Genes {
+    map: HashMap<(NodeId, NodeId), GeneId>,
+}
+
+impl Genes {
+    pub fn new() -> Self {
+        Self {
+            map: HashMap::new(),
+        }
+    }
+    pub fn insert(&mut self, in_node: NodeId, out_node: NodeId) {
+        let gene_id = GeneId(self.map.len());
+        self.map.insert((in_node, out_node), gene_id);
+    }
+
+    pub fn contains(&self, a: NodeId, b: NodeId) -> bool {
+        self.map.contains_key(&(a, b)) || self.map.contains_key(&(b, a))
+    }
+
+    pub fn count(&self) -> usize {
+        self.map.len()
+    }
+}
 
 pub struct Population {
     pub config: Config,
     pub champion: ScoredGenome,
-    pub population: Vec<Rc<Genome>>,
-    //pub genes: HashMap<(NodeId, NodeId)>
+    pub genomes: Vec<Rc<Genome>>,
+    pub genes: Genes,
     pub node_count: usize,
-    pub edge_count: usize,
 }
 
 impl Population {
+    pub fn gene_count(&self) -> usize {
+        self.genes.count()
+    }
+
     pub fn new(config: Config) -> Population {
         let node_count = config.domain.input_layer_size + config.domain.output_layer_size;
         let population = vec![Rc::new(Genome::default()); config.parameters.population];
         let champion = population[0].clone();
         Self {
             node_count,
-            edge_count: 0,
-            population,
+            genomes: population,
             config,
+            genes: Genes::new(),
             champion: ScoredGenome {
                 fitness: Fitness::default(),
                 genome: champion,
@@ -136,7 +167,7 @@ impl Population {
 
     fn classify_species(&self) -> Vec<Species> {
         let mut groups: Vec<Species> = vec![];
-        'outer: for genome in self.population.iter() {
+        'outer: for genome in self.genomes.iter() {
             for species in groups.iter_mut() {
                 let rep = species
                     .genomes
@@ -186,7 +217,7 @@ impl Population {
 
         log::info!("average_fitness: {average_fitness}");
         log::info!("total_fitness: {total_fitness}");
-        self.population = Vec::with_capacity(self.config.parameters.population);
+        self.genomes = Vec::with_capacity(self.config.parameters.population);
         for (j, species) in individual_fitness.into_iter().enumerate() {
             let mut genomes = species;
 
@@ -214,10 +245,10 @@ impl Population {
             for chunk in parents.chunks(2) {
                 if chunk.get(1).is_none() {
                     // copy directly
-                    self.population.push(chunk[0].genome.clone());
+                    self.genomes.push(chunk[0].genome.clone());
                 } else {
                     // crossover 2 genomes
-                    self.population
+                    self.genomes
                         .push(Rc::new(self.crossover(&chunk[0], &chunk[1])));
                 }
                 remaining -= 1;
@@ -278,12 +309,13 @@ impl Population {
 
     // mutate the whole population.
     fn mutate_population(&mut self) {
-        self.population.shuffle(&mut rand::thread_rng());
+        self.genomes.shuffle(&mut rand::thread_rng());
         let count =
-            (self.config.parameters.mutation_rate * self.population.len() as f64).ceil() as usize;
+            (self.config.parameters.mutation_rate * self.genomes.len() as f64).ceil() as usize;
 
+        let mut next_gene_ = GeneId(self.gene_count());
         let mut node_counts = self.node_counts();
-        for genome in self.population[0..count].iter_mut() {
+        for genome in self.genomes[0..count].iter_mut() {
             let genome = Rc::make_mut(genome);
             match self.config.parameters.mutation.sample() {
                 Mutation::AdjustWeight => {
@@ -301,52 +333,74 @@ impl Population {
                         let out_node = gene.out_node;
                         let new_node = NodeId(self.node_count);
                         let weight = gene.weight;
+
+                        let gene_id = GeneId(self.genes.count());
                         genome.genes.push(Rc::new(Gene {
                             weight,
                             enabled: true,
-                            id: GeneId(self.edge_count),
+                            id: gene_id,
                             in_node,
                             out_node: new_node,
                         }));
+                        self.genes.insert(in_node, new_node);
 
+                        let gene_id = GeneId(self.genes.count());
                         genome.genes.push(Rc::new(Gene {
                             weight,
                             enabled: true,
-                            id: GeneId(self.edge_count + 1),
+                            id: gene_id,
                             in_node: new_node,
                             out_node,
                         }));
+                        self.genes.insert(new_node, out_node);
+
                         genome.hidden_nodes += 1;
                         self.node_count += 1;
-                        self.edge_count += 2;
                     }
                 }
 
                 Mutation::AddGene => {
-                    self.edge_count += 1;
-
                     node_counts.total_nodes = self.node_count;
-                    let mut nodes = (0..self.node_count).collect::<Vec<_>>();
 
-                    nodes.shuffle(&mut rand::thread_rng());
-                    let last = genome.genes.len();
+                    // randomly select an input or hidden node.
+                    // randomly select an output or hidden node.
+                    // create the network and check for cycles.
+                    // If the connection exists, fallback to tweaking the weight or abort
+                    // If the connection creates a cycle, and its between two hidden nodes, then
+                    // try reversing the direction of the connection.
+                    // Otherwise just skip adding the gene.
+                    //
+                    let h = node_counts.hidden_nodes();
+                    let i = node_counts.in_nodes;
+                    let o = node_counts.out_nodes;
+                    let chosen_input = rand::thread_rng().gen_range(0..h + i);
+                    let input_index = if chosen_input < i {
+                        chosen_input
+                    } else {
+                        chosen_input + node_counts.out_nodes
+                    };
+
+                    let output_index = rand::thread_rng().gen_range(i..node_counts.total_nodes);
+
+                    let in_node = NodeId(input_index);
+                    let out_node = NodeId(output_index);
+
+                    if self.genes.contains(in_node, out_node) {
+                        continue;
+                    }
+                    let gene_id = GeneId(self.genes.count());
                     genome.genes.push(Rc::new(Gene {
-                        weight: 0.5.into(),
+                        weight: 0.5,
                         enabled: true,
-                        id: GeneId(self.edge_count),
-                        in_node: NodeId(0),
-                        out_node: NodeId(1),
+                        id: gene_id,
+                        in_node,
+                        out_node,
                     }));
 
-                    'outer: for i in 0..nodes.len() {
-                        Rc::make_mut(&mut genome.genes[last]).in_node = NodeId(i);
-                        for j in (i + 1)..nodes.len() {
-                            let gene = Rc::make_mut(&mut genome.genes[last]);
-                            Rc::make_mut(&mut genome.genes[last]).out_node = NodeId(j);
-                            if Network::new(genome, &node_counts).is_ok() {
-                                break 'outer;
-                            }
-                        }
+                    if Network::new(genome, &node_counts).is_ok() {
+                        self.genes.insert(in_node, out_node);
+                    } else {
+                        genome.genes.remove(gene_id.0);
                     }
                 }
             }
@@ -434,7 +488,7 @@ impl Speciation {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct NodeId(pub usize);
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
@@ -449,7 +503,7 @@ pub enum NodeType {
 }
 
 /* === Genome description === */
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Genome {
     pub genes: Vec<Rc<Gene>>,
     pub hidden_nodes: usize,
