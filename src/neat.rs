@@ -76,13 +76,13 @@ pub struct MutationWeights {
 impl MutationWeights {
     pub fn new<const SIZE: usize>(arr: [(Mutation, usize); SIZE]) -> Self {
         let size = arr.iter().map(|(_, w)| w).sum();
+
         let mut storage = Vec::with_capacity(size);
         let mut offset = 0;
         for (mutation, weight) in arr {
             for i in 0..weight {
-                storage[i + offset] = mutation;
+                storage.push(mutation);
             }
-            offset += weight;
         }
         Self { storage }
     }
@@ -532,26 +532,33 @@ impl Network {
     /// https://graphviz.org/doc/info/lang.html
     pub fn dump_graphviz<P: AsRef<Path>>(&self, p: P) -> Result<()> {
         let mut file = fs::OpenOptions::new().write(true).create(true).open(p)?;
-        write!(&mut file, "strict digraph {{\n");
+        let mut indent = "";
+        write!(&mut file, "strict digraph {{\n")?;
+        write!(&mut file, "{indent: <2}subgraph {{\n")?;
+        write!(&mut file, "{indent: <4}rank=min;\n{indent: <4}")?;
         for node_index in 0..self.in_nodes {
-            write!(&mut file, "{}[color='blue']\n", node_index)?;
+            write!(&mut file, "{}; ", node_index)?;
         }
+        write!(&mut file, "\n{indent: <2}}}\n")?;
 
+        write!(&mut file, "{indent: <2}subgraph {{\n")?;
+        write!(&mut file, "{indent: <4}rank=max;\n{indent: <4}")?;
         for node_index in self.in_nodes..self.in_nodes + self.out_nodes {
-            write!(&mut file, "{}[color='green']\n", node_index)?;
+            write!(&mut file, "{}; ", node_index)?;
         }
+        write!(&mut file, "\n{indent: <2}}}\n")?;
 
         for edge in self.edges.iter() {
             let edge = edge.borrow();
             write!(
                 &mut file,
-                "{} -> {} [label='{}']\n",
+                "{indent: <2}{} -> {} [label=\"{:.2}\"]\n",
                 edge.in_node.borrow().id.0,
                 edge.out_node.borrow().id.0,
                 edge.weight,
             )?;
         }
-        write!(&mut file, "}}");
+        write!(&mut file, "}}")?;
         Ok(())
     }
     pub fn new(genome: &Genome, node_counts: &NodeCounts) -> Result<Self> {

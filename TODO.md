@@ -19,9 +19,24 @@ The new stack:
     - htmx
     - tailwind + daisyUI
 
-## Bot / NEAt
-- [ ] Disallow multiedges
-- [ ] 
+## Bot / NEAT
+- [x] Disallow multiedges
+- [ ] Stablize population size from growing or shrinking.
+- [ ] print out actual fitness values and statistics, because they are more meaningful.
+- [ ] make weight pertubations smaller.
+- [ ] Make weight adjustments more common than topological changes
+- [ ] Figure out source of orphaned nodes in the hidden layer. Their should be none.
+- [ ] Figure out how to color subgraph
+
+Observations:
+- It's weird the new target population sizes are so uniform.
+- Double check the adjusted fitness and target population calcs
+
+Vis with graphviz:
+```
+dot -Tsvg input.dot > output.svg
+```
+
 
 ## Bot Background 
 This youtube video is a good introduction to Neuro Evolution of Augmenting Topologies (NEAT). I think it may be a good fit for the problem.

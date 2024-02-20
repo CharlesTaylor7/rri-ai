@@ -35,7 +35,7 @@ fn main() {
     config.parameters.population = 100;
     let mut population = Population::new(config);
     log::info!("Gen 0");
-    for gen in 1..10_000 {
+    for gen in 1..10 {
         population.advance_gen();
 
         log::info!("Gen {}", gen);
