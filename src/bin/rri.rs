@@ -11,11 +11,6 @@ fn main() {
         parameters: Parameters::default(),
     };
     config.parameters.population = 100;
-    config.parameters.mutation = MutationWeights {
-        add_node: 0.5.into(),
-        add_connection: 0.5.into(),
-        adjust_weight: 0.0.into(),
-    };
     let mut population = Population::new(config);
     log::info!("Gen 0");
     for gen in 1..10 {

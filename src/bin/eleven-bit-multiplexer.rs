@@ -1,8 +1,6 @@
 use railroad_inc::{
     logger,
-    neat::{
-        Config, DomainConfig, MutationWeights, Network, NeuralInterface, Parameters, Population,
-    },
+    neat::{Config, DomainConfig, Network, NeuralInterface, Parameters, Population},
 };
 use rand::Rng;
 
@@ -35,11 +33,6 @@ fn main() {
         parameters: Parameters::default(),
     };
     config.parameters.population = 100;
-    config.parameters.mutation = MutationWeights {
-        add_node: 0.5,
-        add_connection: 0.5,
-        adjust_weight: 0.0,
-    };
     let mut population = Population::new(config);
     log::info!("Gen 0");
     for gen in 1..10_000 {

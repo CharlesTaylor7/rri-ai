@@ -53,11 +53,11 @@ impl Parameters {
             reproduction_rate: 0.5.into(),
             mutation_rate: 0.3.into(),
             population: 200,
-            mutation: MutationWeights {
-                adjust_weight: 0.7.into(),
-                add_node: 0.2.into(),
-                add_connection: 0.1.into(),
-            },
+            mutation: MutationWeights::new([
+                (Mutation::AdjustWeight, 1),
+                (Mutation::AddGene, 1),
+                (Mutation::AddNode, 1),
+            ]),
             speciation: Speciation {
                 c1: 1.0.into(),
                 c2: 1.0.into(),
@@ -70,25 +70,28 @@ impl Parameters {
 
 // rates of mutation
 pub struct MutationWeights {
-    pub adjust_weight: f64,
-    pub add_node: f64,
-    pub add_connection: f64,
+    storage: Vec<Mutation>,
 }
 
 impl MutationWeights {
+    pub fn new<const SIZE: usize>(arr: [(Mutation, usize); SIZE]) -> Self {
+        let size = arr.iter().map(|(_, w)| w).sum();
+        let mut storage = Vec::with_capacity(size);
+        let mut offset = 0;
+        for (mutation, weight) in arr {
+            for i in 0..weight {
+                storage[i + offset] = mutation;
+            }
+            offset += weight;
+        }
+        Self { storage }
+    }
+
     pub fn sample(&self) -> Mutation {
-        let mut value: f64 = rand::thread_rng().gen::<f64>().into();
-        if value < self.adjust_weight {
-            return Mutation::AdjustWeight;
-        }
-        value -= self.adjust_weight;
-
-        if value < self.add_node {
-            return Mutation::AddNode;
-        }
-        value -= self.add_node;
-
-        return Mutation::AddGene;
+        *self
+            .storage
+            .choose(&mut rand::thread_rng())
+            .expect("distribution should not be empty")
     }
 }
 
@@ -482,7 +485,6 @@ impl Speciation {
         if matching > 0 {
             speciation_distance += (self.c3 * weight_diff / (matching as f64));
         }
-
         speciation_distance < self.ct
     }
 }
