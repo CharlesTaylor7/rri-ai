@@ -117,6 +117,10 @@ impl Genes {
             map: HashMap::new(),
         }
     }
+    pub fn iter(&self) -> impl Iterator<Item = (&(NodeId, NodeId), &GeneId)> {
+        self.map.iter()
+    }
+
     pub fn insert(&mut self, in_node: NodeId, out_node: NodeId) {
         let gene_id = GeneId(self.map.len());
         self.map.insert((in_node, out_node), gene_id);
@@ -140,6 +144,36 @@ pub struct Population {
 }
 
 impl Population {
+    pub fn dump_graphviz<P: AsRef<Path>>(&self, p: P) -> Result<()> {
+        let mut file = fs::OpenOptions::new().write(true).create(true).open(p)?;
+        let mut indent = "";
+        write!(&mut file, "strict digraph {{\n")?;
+        write!(&mut file, "{indent: <2}subgraph {{\n")?;
+        write!(&mut file, "{indent: <4}rank=min;\n{indent: <4}")?;
+        let node_counts = self.node_counts();
+        for node_index in 0..node_counts.in_nodes {
+            write!(&mut file, "{}; ", node_index)?;
+        }
+        write!(&mut file, "\n{indent: <2}}}\n")?;
+
+        write!(&mut file, "{indent: <2}subgraph {{\n")?;
+        write!(&mut file, "{indent: <4}rank=max;\n{indent: <4}")?;
+        for node_index in node_counts.in_nodes..node_counts.in_nodes + node_counts.out_nodes {
+            write!(&mut file, "{}; ", node_index)?;
+        }
+        write!(&mut file, "\n{indent: <2}}}\n")?;
+
+        for ((node1, node2), gene) in self.genes.iter() {
+            write!(
+                &mut file,
+                "{indent: <2}{} -> {} [label=\"{:.2}\"]\n",
+                node1.0, node2.0, gene.0,
+            )?;
+        }
+        write!(&mut file, "}}")?;
+        Ok(())
+    }
+
     pub fn gene_count(&self) -> usize {
         self.genes.count()
     }

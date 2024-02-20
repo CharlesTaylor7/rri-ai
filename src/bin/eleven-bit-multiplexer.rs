@@ -34,12 +34,10 @@ fn main() {
     };
     config.parameters.population = 100;
     let mut population = Population::new(config);
-    log::info!("Gen 0");
-    for gen in 1..10 {
+    for gen in 0..100 {
+        log::info!("Gen {}", gen);
         population.advance_gen();
 
-        log::info!("Gen {}", gen);
-        log::info!("edge_count {}", population.champion.genome.genes.len());
         if population.champion.fitness.actual > 95.0 {
             log::info!(
                 "Champion with 95% accuracy. nodes: {}, edges: {} ",
