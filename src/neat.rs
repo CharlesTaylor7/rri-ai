@@ -51,11 +51,11 @@ pub struct Parameters {
 impl Parameters {
     pub fn default() -> Self {
         Self {
-            reproduction_rate: 0.5.into(),
-            mutation_rate: 0.3.into(),
-            population: 200,
+            reproduction_rate: 0.5,
+            mutation_rate: 0.3,
+            population: 100,
             mutation: MutationWeights::new([
-                (Mutation::AdjustWeight, 1),
+                (Mutation::AdjustWeight, 18),
                 (Mutation::AddGene, 1),
                 (Mutation::AddNode, 1),
             ]),
