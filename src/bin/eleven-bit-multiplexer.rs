@@ -47,10 +47,8 @@ fn main() {
         }
         let network = Network::new(&population.champion.genome, &population.node_counts()).unwrap();
         std::fs::create_dir_all("graphviz").unwrap();
-        network
-            .dump_graphviz(format!("graphviz/champion-{}.dot", gen))
-            .unwrap();
+        network.dump_graphviz(gen).unwrap();
     }
 
-    population.dump_graphviz("graphviz/pop.dot").unwrap();
+    // population.dump_graphviz().unwrap();
 }

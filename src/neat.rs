@@ -13,6 +13,7 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::ops::{Add, Range};
 use std::path::Path;
+use std::process::Command;
 use std::rc::Rc;
 use std::{default, usize};
 
@@ -144,12 +145,12 @@ pub struct Population {
 }
 
 impl Population {
-    pub fn dump_graphviz<P: AsRef<Path>>(&self, p: P) -> Result<()> {
+    pub fn dump_graphviz(&self) -> Result<()> {
         let mut file = fs::OpenOptions::new()
             .truncate(true)
             .write(true)
             .create(true)
-            .open(p)?;
+            .open("graphviz/pop.dot")?;
         let mut indent = "";
         let mut indent = "";
         write!(&mut file, "strict digraph {{\n")?;
@@ -176,6 +177,10 @@ impl Population {
             )?;
         }
         write!(&mut file, "}}")?;
+        drop(file);
+        Command::new("dot")
+            .args(["-Tsvg", "graphviz/pop.dot", "-o", "graphviz/pop.svg"])
+            .output()?;
         Ok(())
     }
 
@@ -564,12 +569,12 @@ pub struct Network {
 }
 impl Network {
     /// https://graphviz.org/doc/info/lang.html
-    pub fn dump_graphviz<P: AsRef<Path>>(&self, p: P) -> Result<()> {
+    pub fn dump_graphviz(&self, gen: usize) -> Result<()> {
         let mut file = fs::OpenOptions::new()
             .truncate(true)
             .write(true)
             .create(true)
-            .open(p)?;
+            .open(format!("graphviz/champion-{}.dot", gen))?;
         let mut indent = "";
         write!(&mut file, "strict digraph {{\n")?;
         write!(&mut file, "{indent: <2}subgraph {{\n")?;
@@ -598,6 +603,14 @@ impl Network {
             )?;
         }
         write!(&mut file, "}}")?;
+        Command::new("dot")
+            .args([
+                "-Tsvg",
+                &format!("graphviz/champion-{}.dot", gen),
+                "-o",
+                &format!("graphviz/champion-{}.svg", gen),
+            ])
+            .output()?;
         Ok(())
     }
     pub fn new(genome: &Genome, node_counts: &NodeCounts) -> Result<Self> {
