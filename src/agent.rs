@@ -1,4 +1,5 @@
-use crate::neat::{Config, DomainConfig, Genome, Network, NeuralInterface};
+use crate::neat::genome::{Config, DomainConfig, Genome};
+use crate::neat::network::{sigmoid, Network, NeuralInterface};
 use crate::routes::DIE_PATTERNS;
 use crate::rri::{DrawAction, GameState, RRIAgent, Tile, Turn};
 use decorum::R64;
@@ -108,7 +109,7 @@ impl NeatAgent {
             output_layer_size: Self::OUTPUT_LAYER_SIZE,
             fitness: Box::new(|n| {
                 let actual = NeatAgent::new(n).fitness();
-                crate::neat::sigmoid(actual)
+                sigmoid(actual)
             }),
         }
     }

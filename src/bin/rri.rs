@@ -1,7 +1,7 @@
 use railroad_inc::{
     agent::NeatAgent,
     logger,
-    neat::{Config, Parameters, Population},
+    neat::genome::{Config, Parameters, Population},
 };
 
 fn main() {

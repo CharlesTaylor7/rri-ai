@@ -1,6 +1,7 @@
 use railroad_inc::{
     logger,
-    neat::{Config, DomainConfig, Network, NeuralInterface, Parameters, Population},
+    neat::genome::{Config, DomainConfig, Parameters, Population},
+    neat::network::{Network, NeuralInterface},
 };
 use rand::Rng;
 use std::borrow::Borrow;
