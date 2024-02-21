@@ -49,6 +49,5 @@ fn main() {
         std::fs::create_dir_all("graphviz").unwrap();
         network.dump_graphviz(gen).unwrap();
     }
-
-    // population.dump_graphviz().unwrap();
+    population.dump_graphviz().unwrap();
 }

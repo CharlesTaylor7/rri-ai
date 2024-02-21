@@ -146,6 +146,9 @@ pub struct Population {
 
 impl Population {
     pub fn dump_graphviz(&self) -> Result<()> {
+        if !cfg!(debug_assertions) {
+            return Ok(());
+        }
         let mut file = fs::OpenOptions::new()
             .truncate(true)
             .write(true)
@@ -570,6 +573,9 @@ pub struct Network {
 impl Network {
     /// https://graphviz.org/doc/info/lang.html
     pub fn dump_graphviz(&self, gen: usize) -> Result<()> {
+        if !cfg!(debug_assertions) {
+            return Ok(());
+        }
         let mut file = fs::OpenOptions::new()
             .truncate(true)
             .write(true)
