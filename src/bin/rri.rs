@@ -1,5 +1,5 @@
 use railroad_inc::{
-    agent::NeatAgent,
+    agent::NeatAgentMethods,
     logger,
     neat::genome::{Config, Parameters, Population},
 };
@@ -7,7 +7,7 @@ use railroad_inc::{
 fn main() {
     logger::init();
     let mut config = Config {
-        domain: NeatAgent::config(),
+        domain: NeatAgentMethods::config(),
         parameters: Parameters::default(),
     };
     config.parameters.population = 100;

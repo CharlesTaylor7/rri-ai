@@ -4,12 +4,10 @@ use railroad_inc::{
     neat::network::{Network, NeuralInterface},
 };
 use rand::Rng;
-use std::borrow::Borrow;
 
-fn fitness(network: &Network) -> f64 {
+fn fitness(network: &mut Network) -> f64 {
     let mut score = 1.0_f64;
     let mut input = [0.0; 11];
-    let mut output = [0.0; 1];
     for _ in 0..100 {
         let mut test_case: usize = rand::thread_rng().gen_range(0..2048);
         let expected_address = test_case & 7;
@@ -18,7 +16,7 @@ fn fitness(network: &Network) -> f64 {
             input[i] = (test_case & 1) as f64;
             test_case >>= 2;
         }
-        network.run(&input, &mut output);
+        let output = network.run(&input);
         if (output[0] > 0.5) == (expected_output == 1) {
             score += 1.0;
         }
@@ -32,7 +30,7 @@ fn main() {
         domain: DomainConfig {
             input_layer_size: 11,
             output_layer_size: 1,
-            fitness: Box::new(|network| fitness(network.borrow() as &Network)),
+            fitness: Box::new(|network| fitness(network)),
         },
         parameters: Parameters::default(),
     };

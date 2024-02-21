@@ -7,9 +7,9 @@ use num_traits::sign::Signed;
 use rand::seq::SliceRandom;
 use rand::Rng;
 use rand_distr::StandardNormal;
-use std::borrow::BorrowMut;
+use std::borrow::{Borrow, BorrowMut};
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::{self, File};
 use std::io::Write;
 use std::ops::{Add, Range};
@@ -18,14 +18,27 @@ use std::process::Command;
 use std::rc::Rc;
 use std::{default, usize};
 
-type Ref<T> = Rc<RefCell<T>>;
+#[derive(Default, Debug, PartialEq, Eq, Clone)]
+pub enum Activation {
+    #[default]
+    Inert, // already normalized
+    Activating, // receiving input from previous layer of nodes
+}
+
+#[derive(Debug)]
+pub struct Edge {
+    pub weight: f64,
+    pub in_node: NodeId,
+    pub out_node: NodeId,
+}
 
 pub struct Network {
-    in_nodes: usize,
-    out_nodes: usize,
-    edges: Vec<Ref<Edge>>,
-    nodes: Vec<Ref<Node>>,
+    node_counts: NodeCounts,
+    node_values: Vec<f64>,
+    node_activations: Vec<Activation>,
+    sorted_edges: Vec<Rc<Gene>>,
 }
+
 impl Network {
     /// https://graphviz.org/doc/info/lang.html
     pub fn dump_graphviz(&self, gen: usize) -> Result<()> {
@@ -41,27 +54,23 @@ impl Network {
         write!(&mut file, "strict digraph {{\n")?;
         write!(&mut file, "{indent: <2}subgraph {{\n")?;
         write!(&mut file, "{indent: <4}rank=min;\n{indent: <4}")?;
-        for node_index in 0..self.in_nodes {
+        for node_index in self.node_counts.input_range() {
             write!(&mut file, "{}; ", node_index)?;
         }
         write!(&mut file, "\n{indent: <2}}}\n")?;
 
         write!(&mut file, "{indent: <2}subgraph {{\n")?;
         write!(&mut file, "{indent: <4}rank=max;\n{indent: <4}")?;
-        for node_index in self.in_nodes..self.in_nodes + self.out_nodes {
+        for node_index in self.node_counts.output_range() {
             write!(&mut file, "{}; ", node_index)?;
         }
         write!(&mut file, "\n{indent: <2}}}\n")?;
 
-        for edge in self.edges.iter() {
-            let edge = edge.borrow();
+        for edge in self.sorted_edges.iter() {
             write!(
                 &mut file,
                 "{indent: <2}{} -> {} [label=\"{}@{:.2}\"]\n",
-                edge.in_node.borrow().id.0,
-                edge.out_node.borrow().id.0,
-                edge.id.0,
-                edge.weight,
+                edge.in_node.0, edge.out_node.0, edge.id.0, edge.weight,
             )?;
         }
         write!(&mut file, "}}")?;
@@ -77,170 +86,85 @@ impl Network {
     }
     pub fn new(genome: &Genome, node_counts: &NodeCounts) -> Result<Self> {
         log::debug!("Genome::new");
-        let nodes = Self::build_nodes(node_counts);
-        let edges = Self::build_edges(genome, &nodes)?;
-
-        Ok(Self {
-            nodes,
-            edges,
-            in_nodes: node_counts.in_nodes,
-            out_nodes: node_counts.out_nodes,
-        })
-    }
-
-    fn build_nodes(node_counts: &NodeCounts) -> Vec<Ref<Node>> {
-        let node_count = node_counts.total_nodes;
-        let mut nodes = vec![Rc::new(RefCell::new(Node::default())); node_count];
-
-        let mut begin = 0;
-        let mut end = node_counts.in_nodes;
-
-        for i in begin..end {
-            let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
-            node.id = NodeId(i);
-            node.node_type = NodeType::Input;
-        }
-
-        begin = end;
-        end += node_counts.out_nodes;
-        for i in begin..end {
-            let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
-            node.id = NodeId(i);
-            node.node_type = NodeType::Output;
-        }
-
-        begin = end;
-        end = node_counts.total_nodes;
-        for i in begin..end {
-            let mut node = RefCell::borrow_mut(Rc::make_mut(&mut nodes[i]));
-            node.id = NodeId(i);
-            node.node_type = NodeType::Hidden;
-        }
-        nodes
-    }
-
-    fn build_edges(genome: &Genome, nodes: &[Ref<Node>]) -> Result<Vec<Ref<Edge>>> {
         let mut sorted_edges = Vec::with_capacity(genome.genes.len());
         let mut edges_to_sort = Vec::with_capacity(genome.genes.len());
+
+        let mut incoming = vec![Vec::new(); node_counts.total_nodes];
+        let mut outgoing = vec![Vec::new(); node_counts.total_nodes];
+        let mut visited: HashSet<GeneId> = HashSet::with_capacity(genome.genes.len());
+
         for gene in genome.genes.iter().filter(|edge| edge.enabled) {
-            let edge = Rc::new(RefCell::new(Edge {
-                id: gene.id,
-                weight: gene.weight,
-                in_node: nodes[gene.in_node.0].clone(),
-                out_node: nodes[gene.out_node.0].clone(),
-                visited: false,
-            }));
-            {
-                let mut node = RefCell::borrow_mut(&nodes[gene.out_node.0]);
-                node.incoming.push(edge.clone());
+            incoming[gene.out_node.0].push(gene.clone());
+            outgoing[gene.in_node.0].push(gene.clone());
 
-                let mut node = RefCell::borrow_mut(&nodes[gene.in_node.0]);
-                node.outgoing.push(edge.clone());
-            }
-
-            if nodes[gene.in_node.0].borrow().node_type == NodeType::Input {
-                edges_to_sort.push(edge);
+            if node_counts.input_range().contains(&gene.in_node.0) {
+                edges_to_sort.push(gene.clone());
             }
         }
 
         // https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
         while let Some(edge) = edges_to_sort.pop() {
-            {
-                let mut ref_cell = RefCell::borrow_mut(&edge);
-                if ref_cell.visited {
-                    bail!("Neural net contains a cycle")
-                } else {
-                    ref_cell.visited = true;
-                }
+            let fresh = visited.insert(edge.id);
+            if !fresh {
+                bail!("Neural net contains a cycle")
             }
             sorted_edges.push(edge.clone());
-            let edge = edge.borrow();
-            let next_node = edge.out_node.borrow();
-            if next_node.incoming.iter().all(|edge| edge.borrow().visited) {
-                edges_to_sort.extend_from_slice(&next_node.outgoing);
+            if incoming[edge.out_node.0]
+                .iter()
+                .all(|edge| visited.contains(&edge.id))
+            {
+                edges_to_sort.extend_from_slice(outgoing[edge.out_node.0].as_slice());
             }
         }
-        Ok(sorted_edges)
+
+        Ok(Self {
+            node_values: vec![0.0; node_counts.total_nodes],
+            node_activations: vec![Activation::Inert; node_counts.total_nodes],
+            node_counts: node_counts.clone(),
+            sorted_edges,
+        })
     }
 
-    fn input(&self, x: &[f64]) {
+    fn input(&mut self, x: &[f64]) {
         log::debug!("Genome::input");
-        for (i, x) in x.iter().enumerate() {
-            let mut ref_cell = RefCell::borrow_mut(&self.nodes[i]);
-            ref_cell.activation = *x;
-            ref_cell.step = Propagation::Inert;
-        }
+        self.node_values[self.node_counts.input_range()].copy_from_slice(x);
     }
 
-    fn propagate(&self) {
+    fn propagate(&mut self) {
         log::debug!("Genome::propagate");
-        for edge in self.edges.iter() {
-            let edge = edge.borrow();
-
-            let mut source = RefCell::borrow_mut(&edge.in_node);
-            if source.step == Propagation::Activating {
-                source.activation = sigmoid(source.activation);
-                source.step = Propagation::Inert;
+        for edge in self.sorted_edges.iter() {
+            let source_index = edge.in_node.0;
+            if self.node_activations[source_index] == Activation::Activating {
+                self.node_values[source_index] = sigmoid(self.node_values[source_index]);
+                self.node_activations[source_index] = Activation::Inert;
             }
 
-            let mut target = RefCell::borrow_mut(&edge.out_node);
-            if target.step == Propagation::Inert {
-                target.activation = 0.0;
-                target.step = Propagation::Activating;
+            let target_index = edge.out_node.0;
+            if self.node_activations[target_index] == Activation::Inert {
+                self.node_values[target_index] = 0.0;
+                self.node_activations[target_index] = Activation::Activating;
             }
 
-            target.activation += edge.weight * source.activation;
+            self.node_values[target_index] += edge.weight * self.node_values[source_index];
         }
     }
 
-    fn output(&self, output: &mut [f64]) {
+    fn output(&self) -> &[f64] {
         log::debug!("Genome::output");
-        let begin = self.in_nodes;
-        let end = self.in_nodes + self.out_nodes;
-        let mut index = self.in_nodes;
-        for i in 0..self.out_nodes {
-            index += i;
-            output[i] = self.nodes[index].borrow().activation;
-        }
+        self.node_values[self.node_counts.output_range()].borrow()
     }
 }
 
 pub trait NeuralInterface {
-    fn run(&self, input: &[f64], output: &mut [f64]);
+    fn run(&mut self, input: &[f64]) -> &[f64];
 }
 
 impl NeuralInterface for Network {
-    fn run(&self, input: &[f64], output: &mut [f64]) {
+    fn run(&mut self, input: &[f64]) -> &[f64] {
         self.input(input);
         self.propagate();
-        self.output(output)
+        self.output()
     }
-}
-
-#[derive(Debug)]
-pub struct Edge {
-    pub id: GeneId,
-    pub weight: f64,
-    pub in_node: Ref<Node>,
-    pub out_node: Ref<Node>,
-    pub visited: bool,
-}
-
-#[derive(Default, Debug, Clone)]
-pub struct Node {
-    pub id: NodeId,
-    pub activation: f64,
-    pub step: Propagation,
-    pub node_type: NodeType,
-    pub incoming: Vec<Ref<Edge>>,
-    pub outgoing: Vec<Ref<Edge>>,
-}
-
-#[derive(Default, Debug, PartialEq, Eq, Clone)]
-pub enum Propagation {
-    #[default]
-    Inert, // already normalized
-    Activating, // receiving input from previous layer of nodes
 }
 
 pub fn sigmoid(num: f64) -> f64 {

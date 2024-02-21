@@ -21,15 +21,29 @@ use std::{default, usize};
 pub struct DomainConfig {
     pub input_layer_size: usize,
     pub output_layer_size: usize,
-    pub fitness: Box<dyn Fn(Rc<Network>) -> f64>,
+    pub fitness: Box<dyn Fn(&mut Network) -> f64>,
 }
 
+#[derive(Clone)]
 pub struct NodeCounts {
     pub in_nodes: usize,
     pub out_nodes: usize,
     pub total_nodes: usize,
 }
+
 impl NodeCounts {
+    pub fn input_range(&self) -> Range<usize> {
+        0..self.in_nodes
+    }
+
+    pub fn output_range(&self) -> Range<usize> {
+        self.in_nodes..self.in_nodes + self.out_nodes
+    }
+
+    pub fn hidden_range(&self) -> Range<usize> {
+        self.in_nodes + self.out_nodes..self.total_nodes
+    }
+
     pub fn hidden_nodes(&self) -> usize {
         self.total_nodes - self.in_nodes - self.out_nodes
     }
@@ -246,8 +260,8 @@ impl Population {
         for (j, species) in groups.iter().enumerate() {
             individual_fitness.push(Vec::with_capacity(species.genomes.len()));
             for genome in species.genomes.iter() {
-                let network = Network::new(genome, &self.node_counts()).expect("valid network");
-                let actual = (self.config.domain.fitness)(Rc::new(network));
+                let mut network = Network::new(genome, &self.node_counts()).expect("valid network");
+                let actual = (self.config.domain.fitness)(&mut network);
                 let adjusted = actual / species.genomes.len() as f64;
                 let scored = ScoredGenome {
                     fitness: Fitness { actual, adjusted },
@@ -535,7 +549,7 @@ impl Speciation {
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct NodeId(pub usize);
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy, Hash)]
 pub struct GeneId(pub usize);
 
 #[derive(Default, Debug, PartialEq, Eq, Clone, Copy)]

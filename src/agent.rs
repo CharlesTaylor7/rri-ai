@@ -5,17 +5,16 @@ use crate::rri::{DrawAction, GameState, RRIAgent, Tile, Turn};
 use decorum::R64;
 use std::rc::Rc;
 
-pub struct NeatAgent {
-    network: Rc<Network>,
-    output: [f64; Self::OUTPUT_LAYER_SIZE],
+pub struct NeatAgent<'a> {
+    network: &'a mut Network,
     score_modifier: isize,
 }
 
-impl RRIAgent for NeatAgent {
+impl<'a> RRIAgent for NeatAgent<'a> {
     fn prompt(&mut self, state: &GameState) -> Turn {
-        let input = Self::to_input(state);
-        self.network.run(&input, &mut self.output);
-        Self::from_output(&self.output)
+        let input = NeatAgentMethods::to_input(state);
+        let output = self.network.run(&input);
+        NeatAgentMethods::from_output(output)
     }
 
     // errors are penalized; but the game doesn't halt
@@ -24,7 +23,30 @@ impl RRIAgent for NeatAgent {
     }
 }
 
-impl NeatAgent {
+impl<'a> NeatAgent<'a> {
+    pub fn new(network: &'a mut Network) -> Self {
+        Self {
+            network,
+            score_modifier: 0,
+        }
+    }
+    const GAME_COUNT: usize = 100;
+
+    // average score across many games
+    pub fn fitness(&mut self) -> f64 {
+        let mut score = 0_isize;
+        for _ in 0..Self::GAME_COUNT {
+            let mut game = GameState::new();
+            game.play(self);
+            score += game.score();
+        }
+        (score + self.score_modifier) as f64 / Self::GAME_COUNT as f64
+    }
+}
+
+pub struct NeatAgentMethods;
+
+impl NeatAgentMethods {
     // 34 patterns
     // 49 tiles
     // 3 regular dice with 6 unique sides
@@ -82,26 +104,6 @@ impl NeatAgent {
             index += action_window;
         }
         Turn { actions }
-    }
-
-    pub fn new(network: Rc<Network>) -> Self {
-        Self {
-            network,
-            score_modifier: 0,
-            output: [0.0; Self::OUTPUT_LAYER_SIZE],
-        }
-    }
-    const GAME_COUNT: usize = 100;
-
-    // average score across many games
-    pub fn fitness(&mut self) -> f64 {
-        let mut score = 0_isize;
-        for _ in 0..Self::GAME_COUNT {
-            let mut game = GameState::new();
-            game.play(self);
-            score += game.score();
-        }
-        (score + self.score_modifier) as f64 / Self::GAME_COUNT as f64
     }
     pub fn config() -> DomainConfig {
         DomainConfig {
