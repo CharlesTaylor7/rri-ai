@@ -7,8 +7,7 @@
 - [ ] DaisyUI-ify so that it looks less jank
 - [ ] About page that links to the company's official store page:
     https://horribleguild.com/product-tag/railroad-ink/
-- [ ] Deploy app. One of these options:
-    - Use vercel, adapt code to use their sql package.
+- [ ] Deploy app. 
     - Dockerize
 
 
@@ -34,7 +33,7 @@ Observations:
 
 Vis with graphviz:
 ```
-dot -Tsvg input.dot > output.svg
+dot -Tsvg input.dot -o output.svg
 ```
 
 

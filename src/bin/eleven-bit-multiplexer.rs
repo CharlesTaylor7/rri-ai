@@ -34,7 +34,7 @@ fn main() {
     };
     config.parameters.population = 100;
     let mut population = Population::new(config);
-    for gen in 0..100 {
+    for gen in 0..20 {
         log::info!("Gen {}", gen);
         population.advance_gen();
 
@@ -51,4 +51,6 @@ fn main() {
             .dump_graphviz(format!("graphviz/champion-{}.dot", gen))
             .unwrap();
     }
+
+    population.dump_graphviz("graphviz/pop.dot").unwrap();
 }

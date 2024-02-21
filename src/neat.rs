@@ -263,12 +263,7 @@ impl Population {
             let group_size: f64 = (genomes.len() as f64).into();
             let parents = (group_size * self.config.parameters.reproduction_rate).ceil() as usize;
 
-            log::info!(
-                "species: {j}, fitness: {}, pop: {} -> {}",
-                group_fitness[j] * genomes.len() as f64,
-                genomes.len(),
-                new_pop_size
-            );
+            log::info!("species: {j}, pop: {} -> {}", genomes.len(), new_pop_size);
             self.reproduce(&mut genomes[0..parents], new_pop_size);
         }
 
