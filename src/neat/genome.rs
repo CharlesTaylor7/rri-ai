@@ -24,7 +24,7 @@ pub struct DomainConfig {
     pub fitness: Box<dyn Fn(&mut Network) -> f64>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NodeCounts {
     pub in_nodes: usize,
     pub out_nodes: usize,

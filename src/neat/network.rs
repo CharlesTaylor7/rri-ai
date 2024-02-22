@@ -26,12 +26,6 @@ pub enum Activation {
 }
 
 #[derive(Debug)]
-pub struct Edge {
-    pub weight: f64,
-    pub in_node: NodeId,
-    pub out_node: NodeId,
-}
-
 pub struct Network {
     node_counts: NodeCounts,
     node_values: Vec<f64>,
@@ -117,8 +111,13 @@ impl Network {
             }
         }
 
+        let mut node_values = vec![0.0; node_counts.total_nodes];
+        for i in node_counts.output_range() {
+            node_values[i] = 0.5;
+        }
+
         Ok(Self {
-            node_values: vec![0.0; node_counts.total_nodes],
+            node_values,
             node_activations: vec![Activation::Inert; node_counts.total_nodes],
             node_counts: node_counts.clone(),
             sorted_edges,
@@ -148,11 +147,15 @@ impl Network {
             self.node_values[target_index] += edge.weight * self.node_values[source_index];
         }
         for i in self.node_counts.output_range() {
-            self.node_values[i] = sigmoid(self.node_values[i]);
+            if self.node_activations[i] == Activation::Activating {
+                self.node_values[i] = sigmoid(self.node_values[i]);
+                self.node_activations[i] = Activation::Inert;
+            }
         }
     }
 
     fn output(&self) -> &[f64] {
+        dbg!(self);
         log::trace!("Genome::output");
         self.node_values[self.node_counts.output_range()].borrow()
     }
@@ -171,8 +174,7 @@ impl NeuralInterface for Network {
 }
 
 pub fn sigmoid(num: f64) -> f64 {
-    let one: f64 = 1.0.into();
-    one / (one + (-num).exp())
+    1.0 / (1.0 + -num.exp())
 }
 
 #[macro_export]
