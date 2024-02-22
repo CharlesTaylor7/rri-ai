@@ -85,7 +85,7 @@ impl Network {
         Ok(())
     }
     pub fn new(genome: &Genome, node_counts: &NodeCounts) -> Result<Self> {
-        log::debug!("Genome::new");
+        log::trace!("Genome::new");
         let mut sorted_edges = Vec::with_capacity(genome.genes.len());
         let mut edges_to_sort = Vec::with_capacity(genome.genes.len());
 
@@ -126,12 +126,12 @@ impl Network {
     }
 
     fn input(&mut self, x: &[f64]) {
-        log::debug!("Genome::input");
+        log::trace!("Genome::input");
         self.node_values[self.node_counts.input_range()].copy_from_slice(x);
     }
 
     fn propagate(&mut self) {
-        log::debug!("Genome::propagate");
+        log::trace!("Genome::propagate");
         for edge in self.sorted_edges.iter() {
             let source_index = edge.in_node.0;
             if self.node_activations[source_index] == Activation::Activating {
@@ -147,10 +147,13 @@ impl Network {
 
             self.node_values[target_index] += edge.weight * self.node_values[source_index];
         }
+        for i in self.node_counts.output_range() {
+            self.node_values[i] = sigmoid(self.node_values[i]);
+        }
     }
 
     fn output(&self) -> &[f64] {
-        log::debug!("Genome::output");
+        log::trace!("Genome::output");
         self.node_values[self.node_counts.output_range()].borrow()
     }
 }

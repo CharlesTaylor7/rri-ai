@@ -35,8 +35,7 @@ fn main() {
         parameters: Parameters::default(),
     };
     let mut population = Population::new(config);
-    for gen in 0..1000 {
-        log::info!("Gen {}", gen);
+    for gen in 0..10_000 {
         population.advance_gen();
 
         if population.champion.fitness.actual > 95.0 {

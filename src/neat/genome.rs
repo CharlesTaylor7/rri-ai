@@ -152,6 +152,7 @@ impl Genes {
 }
 
 pub struct Population {
+    pub generation: usize,
     pub config: Config,
     pub champion: ScoredGenome,
     pub genomes: Vec<Rc<Genome>>,
@@ -211,6 +212,7 @@ impl Population {
         let population = vec![Rc::new(Genome::default()); config.parameters.population];
         let champion = population[0].clone();
         Self {
+            generation: 0,
             node_count,
             genomes: population,
             config,
@@ -247,7 +249,7 @@ impl Population {
                 genomes: vec![genome.clone()],
             });
         }
-        log::info!("Classified into {} species", groups.len());
+        log::debug!("Classified into {} species", groups.len());
         groups
     }
 
@@ -267,11 +269,15 @@ impl Population {
                     fitness: Fitness { actual, adjusted },
                     genome: genome.clone(),
                 };
+
                 if scored.fitness.actual > self.champion.fitness.actual {
+                    log::info!(
+                        "New champion (Gen {}): actual: {actual}, adjusted: {adjusted}",
+                        self.generation
+                    );
                     self.champion = scored.clone();
                 }
 
-                // log::info!("actual: {actual}, adjusted: {adjusted}");
                 total_fitness += adjusted;
                 group_fitness[j] += adjusted;
                 individual_fitness[j].push(scored);
@@ -280,8 +286,6 @@ impl Population {
 
         let average_fitness: f64 = total_fitness / self.config.parameters.population as f64;
 
-        log::info!("average_fitness: {average_fitness}");
-        log::info!("total_fitness: {total_fitness}");
         self.genomes = Vec::with_capacity(self.config.parameters.population);
         for (j, species) in individual_fitness.into_iter().enumerate() {
             let mut genomes = species;
@@ -291,11 +295,12 @@ impl Population {
             let group_size: f64 = (genomes.len() as f64).into();
             let parents = (group_size * self.config.parameters.reproduction_rate).ceil() as usize;
 
-            log::info!("species: {j}, pop: {} -> {}", genomes.len(), new_pop_size);
+            log::debug!("species: {j}, pop: {} -> {}", genomes.len(), new_pop_size);
             self.reproduce(&mut genomes[0..parents], new_pop_size);
         }
 
         self.mutate_population();
+        self.generation += 1;
     }
 
     fn reproduce(&mut self, parents: &mut [ScoredGenome], target_size: usize) {
