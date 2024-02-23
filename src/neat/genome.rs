@@ -6,7 +6,7 @@ use num_traits::real::Real;
 use num_traits::sign::Signed;
 use rand::seq::SliceRandom;
 use rand::Rng;
-use rand_distr::StandardNormal;
+use rand_distr::Normal;
 use std::borrow::BorrowMut;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -385,7 +385,9 @@ impl Population {
                 Mutation::AdjustWeight => {
                     if let Some(gene) = genome.genes.choose_mut(&mut rand::thread_rng()) {
                         let gene = Rc::make_mut(gene);
-                        gene.weight += rand::thread_rng().sample::<f64, _>(StandardNormal);
+
+                        let distribution = Normal::new(0.0, 0.1).unwrap();
+                        gene.weight += rand::thread_rng().sample::<f64, _>(distribution);
                     }
                 }
 
