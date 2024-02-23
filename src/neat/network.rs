@@ -25,12 +25,23 @@ pub enum Activation {
     Activating, // receiving input from previous layer of nodes
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct NodeIndex(pub usize);
+
+#[derive(Debug)]
+pub struct Edge {
+    id: GeneId,
+    weight: f64,
+    in_node: NodeIndex,
+    out_node: NodeIndex,
+}
+
 #[derive(Debug)]
 pub struct Network {
     node_counts: NodeCounts,
     node_values: Vec<f64>,
     node_activations: Vec<Activation>,
-    sorted_edges: Vec<Rc<Gene>>,
+    sorted_edges: Vec<Edge>,
 }
 
 impl Network {
@@ -82,6 +93,18 @@ impl Network {
         log::trace!("Genome::new");
         let mut sorted_edges = Vec::with_capacity(genome.genes.len());
         let mut edges_to_sort = Vec::with_capacity(genome.genes.len());
+        let mut node_indices: HashMap<NodeId, NodeIndex> =
+            HashMap::with_capacity(genome.hidden_nodes.len());
+
+        for i in 0..node_counts.in_nodes + node_counts.out_nodes {
+            node_indices.insert(NodeId(i), NodeIndex(i));
+        }
+        for (i, node_id) in genome.hidden_nodes.iter().enumerate() {
+            node_indices.insert(
+                *node_id,
+                NodeIndex(i + node_counts.in_nodes + node_counts.out_nodes),
+            );
+        }
 
         let mut incoming = vec![Vec::new(); node_counts.total_nodes];
         let mut outgoing = vec![Vec::new(); node_counts.total_nodes];
@@ -112,7 +135,12 @@ impl Network {
             if !fresh {
                 bail!("Neural net contains a cycle")
             }
-            sorted_edges.push(edge.clone());
+            sorted_edges.push(Edge {
+                id: edge.id,
+                weight: edge.weight,
+                in_node: node_indices[&edge.in_node],
+                out_node: node_indices[&edge.out_node],
+            });
             if incoming[edge.out_node.0]
                 .iter()
                 .all(|edge| visited.contains(&edge.id))
