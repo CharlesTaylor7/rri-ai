@@ -248,7 +248,7 @@ impl Population {
 
     pub fn advance_gen(&mut self) {
         let groups = self.classify_species();
-        let mut total_fitness: f64 = (0.0);
+        let mut total_fitness: f64 = 0.0;
         let mut group_fitness: Vec<f64> = vec![0.0; groups.len()];
         let mut individual_fitness: Vec<Vec<ScoredGenome>> = Vec::with_capacity(groups.len());
 
