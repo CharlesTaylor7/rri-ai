@@ -1,22 +1,10 @@
 use super::state::AppState;
 use crate::templates::*;
-use axum::extract::{Form, Path, State};
-use axum::response::{ErrorResponse, Html, Redirect, Response, Result};
-use axum::routing::{get, post};
+use axum::response::IntoResponse;
+use axum::routing::get;
 use axum::Router;
-use axum::{extract::ws::WebSocketUpgrade, response::IntoResponse};
-use axum_extra::extract::{cookie::Cookie, PrivateCookieJar};
-use http::{Request, StatusCode};
-use std::borrow::{Borrow, Cow};
-use std::collections::{HashMap, HashSet};
-use tower::{ServiceBuilder, ServiceExt};
-use tower_http::services::fs;
+use std::borrow::Cow;
 use tower_http::services::ServeDir;
-use uuid::Uuid;
-
-async fn not_found() -> impl IntoResponse {
-    StatusCode::NOT_FOUND
-}
 
 pub fn get_router() -> Router {
     let context = AppState::default();

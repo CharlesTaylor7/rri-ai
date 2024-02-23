@@ -1,22 +1,16 @@
 use super::network::*;
-use anyhow::{bail, Result};
-use core::num;
+use anyhow::Result;
 use decorum::R64;
-use num_traits::real::Real;
-use num_traits::sign::Signed;
 use rand::seq::SliceRandom;
 use rand::Rng;
 use rand_distr::Normal;
-use std::borrow::BorrowMut;
-use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fs::{self, File};
+use std::fs::{self};
 use std::io::Write;
-use std::ops::{Add, Range};
-use std::path::Path;
+use std::ops::Range;
 use std::process::Command;
 use std::rc::Rc;
-use std::{default, usize};
+use std::usize;
 
 pub struct DomainConfig {
     pub input_layer_size: usize,
@@ -94,9 +88,8 @@ impl MutationWeights {
         let size = arr.iter().map(|(_, w)| w).sum();
 
         let mut storage = Vec::with_capacity(size);
-        let mut offset = 0;
         for (mutation, weight) in arr {
-            for i in 0..weight {
+            for _ in 0..weight {
                 storage.push(mutation);
             }
         }
@@ -170,8 +163,7 @@ impl Population {
             .write(true)
             .create(true)
             .open("graphviz/pop.dot")?;
-        let mut indent = "";
-        let mut indent = "";
+        let indent = "";
         write!(&mut file, "strict digraph {{\n")?;
         write!(&mut file, "{indent: <2}subgraph {{\n")?;
         write!(&mut file, "{indent: <4}rank=min;\n{indent: <4}")?;
@@ -362,7 +354,7 @@ impl Population {
                     i += 1;
                 }
 
-                (Some(node_a), Some(node_b)) => {
+                (Some(_node_a), Some(node_b)) => {
                     hidden_nodes.push(*node_b);
                     j += 1;
                 }
@@ -497,7 +489,6 @@ impl Population {
                     //
                     let h = node_counts.hidden_nodes();
                     let i = node_counts.in_nodes;
-                    let o = node_counts.out_nodes;
                     let chosen_input = rand::thread_rng().gen_range(0..h + i);
                     let input_index = if chosen_input < i {
                         chosen_input
@@ -567,8 +558,8 @@ impl Speciation {
         let mut i = 0;
         let mut j = 0;
         loop {
-            let gene_a = a.genes.get(i);
-            let gene_b = b.genes.get(j);
+            let _gene_a = a.genes.get(i);
+            let _gene_b = b.genes.get(j);
             match (a.genes.get(i), b.genes.get(j)) {
                 (Some(gene_a), Some(gene_b)) => {
                     if gene_a.id == gene_b.id {
@@ -586,11 +577,11 @@ impl Speciation {
                     }
                 }
 
-                (Some(gene_a), None) => {
+                (Some(_gene_a), None) => {
                     excess += 1;
                     i += 1;
                 }
-                (None, Some(gene_b)) => {
+                (None, Some(_gene_b)) => {
                     excess += 1;
                     j += 1;
                 }
@@ -604,11 +595,12 @@ impl Speciation {
         let mut speciation_distance: f64 = 0.0.into();
         let num_genes = std::cmp::max(a.genes.len(), b.genes.len());
         if num_genes > 0 {
-            (self.c1 * (excess as f64) + self.c2 * (disjoint as f64)) / (num_genes as f64);
+            speciation_distance +=
+                (self.c1 * (excess as f64) + self.c2 * (disjoint as f64)) / (num_genes as f64);
         }
 
         if matching > 0 {
-            speciation_distance += (self.c3 * weight_diff / (matching as f64));
+            speciation_distance += self.c3 * weight_diff / (matching as f64);
         }
         speciation_distance < self.ct
     }

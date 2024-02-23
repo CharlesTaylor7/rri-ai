@@ -1,11 +1,8 @@
 use anyhow::{bail, Result};
-use num_traits::CheckedSub;
-use rand::seq::SliceRandom;
+
 use rand::Rng;
 use std::borrow::Borrow;
 use std::collections::HashMap;
-use std::rc::Rc;
-use std::sync::Arc;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Piece {

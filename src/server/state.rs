@@ -1,6 +1,5 @@
 use axum::extract::FromRef;
 use axum_extra::extract::cookie;
-use std::sync::{Arc, Mutex};
 
 #[derive(Clone)]
 pub struct AppState {

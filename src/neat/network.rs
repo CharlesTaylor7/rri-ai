@@ -1,22 +1,11 @@
 use super::genome::*;
 use anyhow::{bail, Result};
-use core::num;
-use decorum::R64;
-use num_traits::real::Real;
-use num_traits::sign::Signed;
-use rand::seq::SliceRandom;
-use rand::Rng;
-use rand_distr::StandardNormal;
-use std::borrow::{Borrow, BorrowMut};
-use std::cell::RefCell;
+use std::borrow::Borrow;
 use std::collections::{HashMap, HashSet};
-use std::fs::{self, File};
+use std::fs::{self};
 use std::io::Write;
-use std::ops::{Add, Range};
-use std::path::Path;
 use std::process::Command;
-use std::rc::Rc;
-use std::{default, usize};
+use std::usize;
 
 #[derive(Default, Debug, PartialEq, Eq, Clone)]
 pub enum Activation {
@@ -55,7 +44,7 @@ impl Network {
             .write(true)
             .create(true)
             .open(format!("graphviz/champion-{}.dot", gen))?;
-        let mut indent = "";
+        let indent = "";
         write!(&mut file, "strict digraph {{\n")?;
         write!(&mut file, "{indent: <2}subgraph {{\n")?;
         write!(&mut file, "{indent: <4}rank=min;\n{indent: <4}")?;

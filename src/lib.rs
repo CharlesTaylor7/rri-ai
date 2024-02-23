@@ -1,4 +1,3 @@
-#![allow(warnings, unused)]
 pub mod agent;
 pub mod logger;
 pub mod neat;

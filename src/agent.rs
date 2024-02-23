@@ -1,9 +1,8 @@
-use crate::neat::genome::{Config, DomainConfig, Genome};
+use crate::neat::genome::DomainConfig;
 use crate::neat::network::{sigmoid, Network, NeuralInterface};
 use crate::routes::DIE_PATTERNS;
 use crate::rri::{DrawAction, GameState, RRIAgent, Tile, Turn};
 use decorum::R64;
-use std::rc::Rc;
 
 pub struct NeatAgent<'a> {
     network: &'a mut Network,
@@ -18,7 +17,7 @@ impl<'a> RRIAgent for NeatAgent<'a> {
     }
 
     // errors are penalized; but the game doesn't halt
-    fn handle_error(&mut self, error: anyhow::Error) {
+    fn handle_error(&mut self, _error: anyhow::Error) {
         self.score_modifier -= 10;
     }
 }
@@ -83,12 +82,12 @@ impl NeatAgentMethods {
         // largest value in the grid is the placement,
         // if its larger than 0.5 Otherwise place none.
         let mut index = 0;
-        let mut action_window = 49 * 34;
+        let action_window = 49 * 34;
         for _ in 0..4 {
             let pair = output[index..index + action_window]
                 .iter()
                 .enumerate()
-                .max_by_key(|(i, v)| R64::from(**v))
+                .max_by_key(|(_i, v)| R64::from(**v))
                 .expect("Not empty");
 
             if *pair.1 > 0.5 {
