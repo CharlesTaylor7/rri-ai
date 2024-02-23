@@ -306,6 +306,7 @@ impl Population {
     fn reproduce(&mut self, parents: &mut [ScoredGenome], target_size: usize) {
         let mut remaining = target_size;
         loop {
+            log::trace!("loop: reproduce");
             parents.shuffle(&mut rand::thread_rng());
             for chunk in parents.chunks(2) {
                 if chunk.get(1).is_none() {
@@ -349,6 +350,7 @@ impl Population {
         let mut i = 0;
         let mut j = 0;
         loop {
+            log::trace!("loop: merge_nodes");
             match (a.genome.hidden_nodes.get(i), b.genome.hidden_nodes.get(j)) {
                 (Some(node_a), Some(node_b)) if node_a == node_b => {
                     hidden_nodes.push(*node_a);
@@ -367,12 +369,16 @@ impl Population {
 
                 (Some(_), None) => {
                     hidden_nodes.extend(&a.genome.hidden_nodes[i..]);
+                    break;
                 }
 
                 (None, Some(_)) => {
                     hidden_nodes.extend(&b.genome.hidden_nodes[i..]);
+                    break;
                 }
-                (None, None) => {}
+                (None, None) => {
+                    break;
+                }
             }
         }
         // TODO: merge
