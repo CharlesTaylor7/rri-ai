@@ -5,6 +5,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs::{self};
 use std::io::Write;
 use std::process::Command;
+use std::rc::Rc;
 use std::usize;
 
 #[derive(Default, Debug, PartialEq, Eq, Clone)]
@@ -30,7 +31,7 @@ pub struct Network {
     node_counts: NodeCounts,
     node_values: Vec<f64>,
     node_activations: Vec<Activation>,
-    sorted_edges: Vec<Edge>,
+    sorted_edges: Vec<Rc<Edge>>,
 }
 
 impl Network {
@@ -78,6 +79,7 @@ impl Network {
             .output()?;
         Ok(())
     }
+
     pub fn new(genome: &Genome) -> Result<Self> {
         log::trace!("Genome::new");
         let node_counts = genome.node_counts();
@@ -100,12 +102,21 @@ impl Network {
         let mut outgoing = vec![Vec::new(); node_counts.total_nodes];
         let mut visited: HashSet<GeneId> = HashSet::with_capacity(genome.genes.len());
 
-        for gene in genome.genes.iter().filter(|edge| edge.enabled) {
-            incoming[gene.out_node.0].push(gene.clone());
-            outgoing[gene.in_node.0].push(gene.clone());
+        let edges = genome.genes.iter().filter(|gene| gene.enabled).map(|gene| {
+            Rc::new(Edge {
+                id: gene.id,
+                weight: gene.weight,
+                in_node: node_indices[&gene.in_node],
+                out_node: node_indices[&gene.out_node],
+            })
+        });
 
-            if node_counts.input_range().contains(&gene.in_node.0) {
-                edges_to_sort.push(gene.clone());
+        for edge in edges {
+            incoming[edge.out_node.0].push(edge.clone());
+            outgoing[edge.in_node.0].push(edge.clone());
+
+            if node_counts.input_range().contains(&edge.in_node.0) {
+                edges_to_sort.push(edge.clone());
             }
         }
 
@@ -125,18 +136,13 @@ impl Network {
             if !fresh {
                 bail!("Neural net contains a cycle")
             }
-            sorted_edges.push(Edge {
-                id: edge.id,
-                weight: edge.weight,
-                in_node: node_indices[&edge.in_node],
-                out_node: node_indices[&edge.out_node],
-            });
             if incoming[edge.out_node.0]
                 .iter()
                 .all(|edge| visited.contains(&edge.id))
             {
                 edges_to_sort.extend_from_slice(outgoing[edge.out_node.0].as_slice());
             }
+            sorted_edges.push(edge);
         }
 
         let mut node_values = vec![0.0; node_counts.total_nodes];
