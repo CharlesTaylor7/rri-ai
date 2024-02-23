@@ -69,10 +69,10 @@ impl Parameters {
                 (Mutation::AddNode, 1),
             ]),
             speciation: Speciation {
-                c1: 1.0.into(),
-                c2: 1.0.into(),
-                c3: 3.0.into(),
-                ct: 4.0.into(),
+                c1: 1.0,
+                c2: 1.0,
+                c3: 3.0,
+                ct: 4.0,
             },
         }
     }
@@ -201,7 +201,8 @@ impl Population {
 
     pub fn new(config: Config) -> Population {
         let node_count = config.domain.input_layer_size + config.domain.output_layer_size;
-        let population = vec![Rc::new(Genome::new(&config.domain)); config.parameters.population];
+        let initial_genome = Rc::new(Genome::new(&config.domain));
+        let population = vec![initial_genome; config.parameters.population];
         let champion = population[0].clone();
         Self {
             generation: 0,
@@ -247,8 +248,8 @@ impl Population {
 
     pub fn advance_gen(&mut self) {
         let groups = self.classify_species();
-        let mut total_fitness: f64 = (0.).into();
-        let mut group_fitness: Vec<f64> = vec![(0.).into(); groups.len()];
+        let mut total_fitness: f64 = (0.0);
+        let mut group_fitness: Vec<f64> = vec![0.0; groups.len()];
         let mut individual_fitness: Vec<Vec<ScoredGenome>> = Vec::with_capacity(groups.len());
 
         for (j, species) in groups.iter().enumerate() {
@@ -284,7 +285,7 @@ impl Population {
 
             genomes.sort_unstable_by_key(|g| R64::from(g.fitness.actual));
             let new_pop_size = (group_fitness[j] / average_fitness).ceil() as usize;
-            let group_size: f64 = (genomes.len() as f64).into();
+            let group_size: f64 = genomes.len() as f64;
             let parents = (group_size * self.config.parameters.reproduction_rate).ceil() as usize;
 
             log::debug!("species: {j}, pop: {} -> {}", genomes.len(), new_pop_size);
@@ -552,7 +553,7 @@ impl Speciation {
         let mut excess: usize = 0;
         let mut matching: usize = 0;
 
-        let mut weight_diff: f64 = 0.0.into();
+        let mut weight_diff: f64 = 0.0;
 
         // genome indices
         let mut i = 0;

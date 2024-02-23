@@ -135,7 +135,7 @@ impl GameState {
     }
     pub fn play_round<Agent: RRIAgent>(&mut self, agent: &mut Agent) {
         self.dice.roll();
-        let turn = agent.prompt(&self);
+        let turn = agent.prompt(self);
 
         for route in turn.actions {
             if let Err(error) = self.apply_route(route) {
@@ -216,10 +216,7 @@ impl GameState {
                 (None, _) => {}
             }
         }
-        if !edits
-            .iter()
-            .any(|e| if let Edit::Delete(_) = e { true } else { false })
-        {
+        if !edits.iter().any(|e| matches!(e, Edit::Delete(_))) {
             bail!("Route doesn't connect to any road or rail in your network.")
         }
 
