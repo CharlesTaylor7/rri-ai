@@ -120,9 +120,9 @@ impl Network {
         }
 
         if cfg!(debug_assertions) {
-            let network_dead_node = (node_counts
+            let network_dead_node = node_counts
                 .hidden_range()
-                .find(|i| !incoming[*i].is_empty() && outgoing[*i].is_empty()));
+                .find(|i| !incoming[*i].is_empty() && outgoing[*i].is_empty());
 
             if let Some(node_id) = network_dead_node {
                 bail!("Dead node: {node_id}");
