@@ -355,7 +355,7 @@ impl Population {
                     i += 1;
                 }
 
-                (Some(_node_a), Some(node_b)) => {
+                (Some(_), Some(node_b)) => {
                     hidden_nodes.push(*node_b);
                     j += 1;
                 }
@@ -366,7 +366,7 @@ impl Population {
                 }
 
                 (None, Some(_)) => {
-                    hidden_nodes.extend(&b.genome.hidden_nodes[i..]);
+                    hidden_nodes.extend(&b.genome.hidden_nodes[j..]);
                     break;
                 }
                 (None, None) => {
@@ -374,7 +374,6 @@ impl Population {
                 }
             }
         }
-        // TODO: merge
 
         hidden_nodes
     }
@@ -430,7 +429,6 @@ impl Population {
         let count =
             (self.config.parameters.mutation_rate * self.genomes.len() as f64).ceil() as usize;
 
-        let mut node_counts = self.node_counts();
         for genome_index in 0..count {
             let genome = Rc::make_mut(&mut self.genomes[genome_index]);
             match self.config.parameters.mutation.sample() {
@@ -478,8 +476,6 @@ impl Population {
                 }
 
                 Mutation::AddGene => {
-                    node_counts.total_nodes = self.node_count;
-
                     // randomly select an input or hidden node.
                     // randomly select an output or hidden node.
                     // create the network and check for cycles.
@@ -488,6 +484,7 @@ impl Population {
                     // try reversing the direction of the connection.
                     // Otherwise just skip adding the gene.
                     //
+                    let node_counts = genome.node_counts();
                     let h = node_counts.hidden_nodes();
                     let i = node_counts.in_nodes;
                     let chosen_input = rand::thread_rng().gen_range(0..h + i);

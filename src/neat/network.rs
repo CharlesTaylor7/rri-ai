@@ -103,6 +103,7 @@ impl Network {
         let mut visited: HashSet<GeneId> = HashSet::with_capacity(genome.genes.len());
 
         let edges = genome.genes.iter().filter(|gene| gene.enabled).map(|gene| {
+            //log::info!("Gene: {:?}, {:?}", gene.in_node, gene.out_node);
             let in_node = node_indices[&gene.in_node];
             let out_node = node_indices[&gene.out_node];
             Rc::new(Edge {
