@@ -45,7 +45,7 @@ fn main() {
                 population.gene_count()
             );
         }
-        let network = Network::new(&population.champion.genome, &population.node_counts()).unwrap();
+        let network = Network::new(&population.champion.genome).unwrap();
         std::fs::create_dir_all("graphviz").unwrap();
         network.dump_graphviz(gen).unwrap();
     }

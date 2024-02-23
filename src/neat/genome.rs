@@ -209,7 +209,7 @@ impl Population {
 
     pub fn new(config: Config) -> Population {
         let node_count = config.domain.input_layer_size + config.domain.output_layer_size;
-        let population = vec![Rc::new(Genome::default()); config.parameters.population];
+        let population = vec![Rc::new(Genome::new(&config.domain)); config.parameters.population];
         let champion = population[0].clone();
         Self {
             generation: 0,
@@ -262,7 +262,7 @@ impl Population {
         for (j, species) in groups.iter().enumerate() {
             individual_fitness.push(Vec::with_capacity(species.genomes.len()));
             for genome in species.genomes.iter() {
-                let mut network = Network::new(genome, &self.node_counts()).expect("valid network");
+                let mut network = Network::new(genome).expect("valid network");
                 let actual = (self.config.domain.fitness)(&mut network);
                 let adjusted = actual / species.genomes.len() as f64;
                 let scored = ScoredGenome {
@@ -328,10 +328,12 @@ impl Population {
         let genome = Genome {
             genes: self.merge_genes(a, b),
             hidden_nodes: self.merge_nodes(a, b),
+            in_nodes: a.genome.in_nodes,
+            out_nodes: a.genome.out_nodes,
         };
 
         if cfg!(debug_assertions) {
-            if let Err(error) = Network::new(&genome, &self.node_counts()) {
+            if let Err(error) = Network::new(&genome) {
                 log::error!("{}", error);
                 log::info!("a: {:?}\nb: {:?}", a.genome, b.genome);
                 panic!();
@@ -514,7 +516,7 @@ impl Population {
                         out_node,
                     }));
 
-                    if let Err(error) = Network::new(genome, &node_counts) {
+                    if let Err(error) = Network::new(genome) {
                         log::info!("in: {in_node:?}, out: {out_node:?}");
                         log::error!("Error during AddGene mutation:\n{}", error);
                         genome.genes.remove(genome.genes.len() - 1);
@@ -621,10 +623,30 @@ pub enum NodeType {
 }
 
 /* === Genome description === */
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Genome {
     pub genes: Vec<Rc<Gene>>,
     pub hidden_nodes: Vec<NodeId>,
+    pub in_nodes: usize,
+    pub out_nodes: usize,
+}
+
+impl Genome {
+    pub fn new(domain: &DomainConfig) -> Genome {
+        Self {
+            in_nodes: domain.input_layer_size,
+            out_nodes: domain.output_layer_size,
+            genes: vec![],
+            hidden_nodes: vec![],
+        }
+    }
+    pub fn node_counts(&self) -> NodeCounts {
+        NodeCounts {
+            in_nodes: self.in_nodes,
+            out_nodes: self.out_nodes,
+            total_nodes: self.in_nodes + self.out_nodes + self.hidden_nodes.len(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

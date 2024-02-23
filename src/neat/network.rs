@@ -89,8 +89,9 @@ impl Network {
             .output()?;
         Ok(())
     }
-    pub fn new(genome: &Genome, node_counts: &NodeCounts) -> Result<Self> {
+    pub fn new(genome: &Genome) -> Result<Self> {
         log::trace!("Genome::new");
+        let node_counts = genome.node_counts();
         let mut sorted_edges = Vec::with_capacity(genome.genes.len());
         let mut edges_to_sort = Vec::with_capacity(genome.genes.len());
         let mut node_indices: HashMap<NodeId, NodeIndex> =
