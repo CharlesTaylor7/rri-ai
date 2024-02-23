@@ -95,14 +95,15 @@ impl Network {
                 edges_to_sort.push(gene.clone());
             }
         }
+
         if cfg!(debug_assertions) {
             let network_dead_node = (node_counts
                 .hidden_range()
                 .find(|i| !incoming[*i].is_empty() && outgoing[*i].is_empty()));
-            debug_assert!(
-                network_dead_node.is_none(),
-                "{network_dead_node:?}, {edges_to_sort:?}"
-            );
+
+            if let Some(node_id) = network_dead_node {
+                bail!("Dead node: {node_id}");
+            }
         }
 
         // https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm

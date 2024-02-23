@@ -118,7 +118,7 @@ pub enum Mutation {
     AddGene,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct Fitness {
     pub actual: f64,
     pub adjusted: f64,
@@ -325,17 +325,68 @@ impl Population {
     }
 
     fn crossover(&self, a: &ScoredGenome, b: &ScoredGenome) -> Genome {
+        let genome = Genome {
+            genes: self.merge_genes(a, b),
+            hidden_nodes: self.merge_nodes(a, b),
+        };
+
+        if cfg!(debug_assertions) {
+            if let Err(error) = Network::new(&genome, &self.node_counts()) {
+                log::error!("{}", error);
+                log::info!("a: {:?}\nb: {:?}", a.genome, b.genome);
+                panic!();
+            }
+        }
+        genome
+    }
+
+    fn merge_nodes(&self, a: &ScoredGenome, b: &ScoredGenome) -> Vec<NodeId> {
+        let mut hidden_nodes =
+            Vec::with_capacity(a.genome.hidden_nodes.len() + b.genome.hidden_nodes.len());
+
         let mut i = 0;
         let mut j = 0;
-        let mut genome = Genome {
-            genes: vec![],
-            hidden_nodes: std::cmp::max(a.genome.hidden_nodes, b.genome.hidden_nodes),
-        };
+        loop {
+            match (a.genome.hidden_nodes.get(i), b.genome.hidden_nodes.get(j)) {
+                (Some(node_a), Some(node_b)) if node_a == node_b => {
+                    hidden_nodes.push(*node_a);
+                    i += 1;
+                    j += 1;
+                }
+                (Some(node_a), Some(node_b)) if node_a < node_b => {
+                    hidden_nodes.push(*node_a);
+                    i += 1;
+                }
+
+                (Some(node_a), Some(node_b)) => {
+                    hidden_nodes.push(*node_b);
+                    j += 1;
+                }
+
+                (Some(_), None) => {
+                    hidden_nodes.extend(&a.genome.hidden_nodes[i..]);
+                }
+
+                (None, Some(_)) => {
+                    hidden_nodes.extend(&b.genome.hidden_nodes[i..]);
+                }
+                (None, None) => {}
+            }
+        }
+        // TODO: merge
+
+        hidden_nodes
+    }
+
+    fn merge_genes(&self, a: &ScoredGenome, b: &ScoredGenome) -> Vec<Rc<Gene>> {
+        let mut i = 0;
+        let mut j = 0;
+        let mut genes = Vec::with_capacity(a.genome.genes.len() + b.genome.genes.len());
         loop {
             match (a.genome.genes.get(i), b.genome.genes.get(j)) {
                 (Some(gene_a), Some(gene_b)) => {
                     if gene_a.id == gene_b.id {
-                        genome.genes.push(
+                        genes.push(
                             if a.fitness.actual > b.fitness.actual {
                                 gene_a
                             } else {
@@ -347,20 +398,20 @@ impl Population {
                         j += 1;
                     } else {
                         if gene_a.id < gene_b.id {
-                            genome.genes.push(gene_a.clone());
+                            genes.push(gene_a.clone());
                             i += 1;
                         } else {
-                            genome.genes.push(gene_b.clone());
+                            genes.push(gene_b.clone());
                             j += 1;
                         }
                     }
                 }
                 (Some(gene_a), None) => {
-                    genome.genes.push(gene_a.clone());
+                    genes.push(gene_a.clone());
                     i += 1;
                 }
                 (None, Some(gene_b)) => {
-                    genome.genes.push(gene_b.clone());
+                    genes.push(gene_b.clone());
                     j += 1;
                 }
                 (None, None) => {
@@ -369,7 +420,7 @@ impl Population {
             }
         }
 
-        genome
+        genes
     }
 
     // mutate the whole population.
@@ -420,7 +471,7 @@ impl Population {
                         }));
                         self.genes.insert(new_node, out_node);
 
-                        genome.hidden_nodes += 1;
+                        genome.hidden_nodes.push(new_node);
                         self.node_count += 1;
                     }
                 }
@@ -463,10 +514,12 @@ impl Population {
                         out_node,
                     }));
 
-                    if Network::new(genome, &node_counts).is_ok() {
-                        self.genes.insert(in_node, out_node);
+                    if let Err(error) = Network::new(genome, &node_counts) {
+                        log::info!("in: {in_node:?}, out: {out_node:?}");
+                        log::error!("Error during AddGene mutation:\n{}", error);
+                        genome.genes.remove(genome.genes.len() - 1);
                     } else {
-                        genome.genes.remove(gene_id.0);
+                        self.genes.insert(in_node, out_node);
                     }
                 }
             }
@@ -474,7 +527,7 @@ impl Population {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ScoredGenome {
     pub fitness: Fitness,
     pub genome: Rc<Genome>,
@@ -553,7 +606,7 @@ impl Speciation {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct NodeId(pub usize);
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy, Hash)]
@@ -571,7 +624,7 @@ pub enum NodeType {
 #[derive(Clone, Debug, Default)]
 pub struct Genome {
     pub genes: Vec<Rc<Gene>>,
-    pub hidden_nodes: usize,
+    pub hidden_nodes: Vec<NodeId>,
 }
 
 #[derive(Clone, Debug)]
