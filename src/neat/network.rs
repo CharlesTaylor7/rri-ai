@@ -99,14 +99,19 @@ impl Network {
         }
 
         let edges = genome.genes.iter().filter(|gene| gene.enabled).map(|gene| {
-            //log::info!("Gene: {:?}, {:?}", gene.in_node, gene.out_node);
-            let in_node = node_indices[&gene.in_node];
-            let out_node = node_indices[&gene.out_node];
+            let in_node = node_indices.get(&gene.in_node);
+            let out_node = node_indices.get(&gene.out_node);
+            if in_node.is_none() || out_node.is_none() {
+                log::info!("Gene: {:?}, {:?}", gene.in_node, gene.out_node);
+                log::info!("Hidden Nodes: {:?}", genome.hidden_nodes);
+                panic!("Genes are inconsistent with hidden nodes");
+            }
+
             Rc::new(Edge {
                 id: gene.id,
                 weight: gene.weight,
-                in_node,
-                out_node,
+                in_node: *in_node.unwrap(),
+                out_node: *out_node.unwrap(),
             })
         });
 
