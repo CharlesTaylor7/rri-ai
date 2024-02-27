@@ -98,10 +98,6 @@ impl Network {
             );
         }
 
-        let mut incoming = vec![Vec::new(); node_counts.total_nodes];
-        let mut outgoing = vec![Vec::new(); node_counts.total_nodes];
-        let mut visited: HashSet<GeneId> = HashSet::with_capacity(genome.genes.len());
-
         let edges = genome.genes.iter().filter(|gene| gene.enabled).map(|gene| {
             //log::info!("Gene: {:?}, {:?}", gene.in_node, gene.out_node);
             let in_node = node_indices[&gene.in_node];
@@ -114,6 +110,8 @@ impl Network {
             })
         });
 
+        let mut incoming = vec![Vec::new(); node_counts.total_nodes];
+        let mut outgoing = vec![Vec::new(); node_counts.total_nodes];
         for edge in edges {
             incoming[edge.out_node.0].push(edge.clone());
             outgoing[edge.in_node.0].push(edge.clone());
@@ -133,6 +131,7 @@ impl Network {
             }
         }
 
+        let mut visited: HashSet<GeneId> = HashSet::with_capacity(genome.genes.len());
         // https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
         while let Some(edge) = edges_to_sort.pop() {
             let fresh = visited.insert(edge.id);
