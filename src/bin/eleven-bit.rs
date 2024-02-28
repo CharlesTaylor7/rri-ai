@@ -26,13 +26,15 @@ fn fitness(network: &mut Network) -> f64 {
 
 fn main() {
     logger::init();
+    let mut parameters = Parameters::default();
+    parameters.population = 10;
     let config = Config {
+        parameters,
         domain: DomainConfig {
             input_layer_size: 11,
             output_layer_size: 1,
             fitness: Box::new(fitness),
         },
-        parameters: Parameters::default(),
     };
     let mut population = Population::new(config);
     for gen in 0..10_000 {
