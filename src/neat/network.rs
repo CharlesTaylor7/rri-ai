@@ -40,6 +40,7 @@ impl Network {
         if !cfg!(debug_assertions) {
             return Ok(());
         }
+
         let mut file = fs::OpenOptions::new()
             .truncate(true)
             .write(true)
